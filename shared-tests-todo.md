@@ -23,7 +23,7 @@ This document tracks the testing progress for all files in the `shared/` folder.
 - [ ] `github-api.ts` - GitHub API utilities
 - [x] `hashing.ts` - Hashing utilities
 - [x] `id-generation.ts` - ID generation utilities
-- [ ] `json-fetch.ts` - JSON fetch utilities
+- [x] `json-fetch.ts` - JSON fetch utilities
 - [x] `json-schema.ts` - JSON schema utilities
 - [ ] `misc.ts` - Miscellaneous utilities
 - [ ] `pack-exec.ts` - Pack execution utilities
@@ -50,14 +50,15 @@ This document tracks the testing progress for all files in the `shared/` folder.
 - [x] `cf-evaluated-links.ts` - CloudFormation evaluated links
 - [x] `cf-registry-types.ts` - CloudFormation registry types
 - [x] `console-links.ts` - Console links utilities
-- [ ] `fs-paths.ts` - File system paths
+- [x] `domain-names.ts` - Domain name utilities
+- [x] `fs-paths.ts` - File system paths
 - [x] `helper-lambdas-resource-names.ts` - Helper lambdas resource names
-- [ ] `logical-names.ts` - Logical names
+- [x] `logical-names.ts` - Logical names
 - [x] `metadata-names.ts` - Metadata names
-- [ ] `project-fs-paths.ts` - Project file system paths
-- [ ] `resource-names.ts` - Resource names
+- [x] `project-fs-paths.ts` - Project file system paths
+- [ ] `resource-names.ts` - Resource names (Note: actual file is aws-resource-names.ts)
 - [x] `resource-referencable-params.ts` - Resource referencable parameters
-- [ ] `resource-uris.ts` - Resource URIs
+- [x] `resource-uris.ts` - Resource URIs
 - [x] `ssm-secret-parameters.ts` - SSM secret parameters
 - [x] `stack-output-names.ts` - Stack output names
 - [x] `stacktape-cloudfront-headers.ts` - Stacktape CloudFront headers
@@ -134,12 +135,12 @@ This document tracks the testing progress for all files in the `shared/` folder.
 ## Summary
 
 - **Total Files**: 79
-- **Completed**: 26
-- **Remaining**: 53
+- **Completed**: 32
+- **Remaining**: 47
 
 ## Test Statistics
-- **Total Tests**: 495
-- **Total Assertions**: 1079
+- **Total Tests**: 718
+- **Total Assertions**: 1397
 - **All tests passing** ✅
 
 ## Recently Completed (Batch 1 - 11 files)
@@ -173,3 +174,11 @@ This document tracks the testing progress for all files in the `shared/` folder.
 - `naming/cf-evaluated-links.ts` - CloudFormation evaluated AWS console links (40 tests)
 - `naming/cf-registry-types.ts` - CloudFormation registry naming (20 tests)
 - `naming/console-links.ts` - AWS console direct links (42 tests)
+
+## Recently Completed (Batch 4 - 6 files)
+- `naming/resource-uris.ts` - Resource URIs for AWS services (24 tests)
+- `naming/domain-names.ts` - Domain name prefix generation (15 tests)
+- `naming/project-fs-paths.ts` - Project-level file system paths (57 tests)
+- `naming/fs-paths.ts` - Runtime file system paths (41 tests)
+- `naming/logical-names.ts` - CloudFormation logical names (69 tests)
+- `utils/json-fetch.ts` - JSON fetch wrapper (14 tests)
