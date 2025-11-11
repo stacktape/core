@@ -1,0 +1,138 @@
+# Shared Folder Testing Todo List
+
+This document tracks the testing progress for all files in the `shared/` folder.
+
+## Status Legend
+- [ ] Not started
+- [x] Completed
+
+---
+
+## Utils (`shared/utils/`)
+
+- [ ] `aws-regions.ts` - AWS regions utilities
+- [ ] `bin-executable.ts` - Binary executable utilities
+- [ ] `constants.ts` - Constants definitions
+- [ ] `dates.ts` - Date utilities
+- [ ] `dependency-installer.ts` - Dependency installer utilities
+- [ ] `docker.ts` - Docker utilities
+- [ ] `dockerfiles.ts` - Dockerfile utilities
+- [ ] `download-file.ts` - File download utilities
+- [ ] `exec.ts` - Execution utilities
+- [ ] `fs-utils.ts` - File system utilities
+- [ ] `github-api.ts` - GitHub API utilities
+- [ ] `hashing.ts` - Hashing utilities
+- [ ] `id-generation.ts` - ID generation utilities
+- [ ] `json-fetch.ts` - JSON fetch utilities
+- [ ] `json-schema.ts` - JSON schema utilities
+- [ ] `misc.ts` - Miscellaneous utilities
+- [ ] `pack-exec.ts` - Pack execution utilities
+- [ ] `prettier.ts` - Prettier utilities
+- [ ] `runtimes.ts` - Runtime utilities
+- [ ] `roles.ts` - Role utilities
+- [ ] `session-manager-exec.ts` - Session manager execution utilities
+- [x] `short-hash.ts` - Short hash utilities
+- [ ] `stacktape-fees.ts` - Stacktape fees utilities
+- [ ] `streams.ts` - Stream utilities
+- [ ] `subscription-plans.ts` - Subscription plans utilities
+- [ ] `telemetry.ts` - Telemetry utilities
+- [ ] `test-utils.ts` - Test utilities
+- [ ] `user-prompt.ts` - User prompt utilities
+- [ ] `validation.ts` - Validation utilities
+- [ ] `yaml.ts` - YAML utilities
+- [ ] `zip.ts` - ZIP utilities
+
+---
+
+## Naming (`shared/naming/`)
+
+- [ ] `arns.ts` - ARN naming utilities
+- [ ] `cf-evaluated-links.ts` - CloudFormation evaluated links
+- [ ] `cf-registry-types.ts` - CloudFormation registry types
+- [ ] `console-links.ts` - Console links utilities
+- [ ] `fs-paths.ts` - File system paths
+- [ ] `helper-lambdas-resource-names.ts` - Helper lambdas resource names
+- [ ] `logical-names.ts` - Logical names
+- [ ] `metadata-names.ts` - Metadata names
+- [ ] `project-fs-paths.ts` - Project file system paths
+- [ ] `resource-names.ts` - Resource names
+- [ ] `resource-referencable-params.ts` - Resource referencable parameters
+- [ ] `resource-uris.ts` - Resource URIs
+- [ ] `ssm-secret-parameters.ts` - SSM secret parameters
+- [ ] `stack-output-names.ts` - Stack output names
+- [ ] `stacktape-cloudfront-headers.ts` - Stacktape CloudFront headers
+- [ ] `tag-names.ts` - Tag names
+- [ ] `utils.ts` - Naming utilities
+
+---
+
+## Packaging (`shared/packaging/`)
+
+### Core Packaging Files
+- [ ] `_shared.ts` - Shared packaging utilities
+- [ ] `custom-artifact.ts` - Custom artifact packaging
+- [ ] `custom-dockerfile.ts` - Custom Dockerfile packaging
+- [ ] `external-buildpack.ts` - External buildpack
+- [ ] `stacktape-es-image-buildpack.ts` - ES image buildpack
+- [ ] `stacktape-es-lambda-buildpack.ts` - ES lambda buildpack
+- [ ] `stacktape-go-image-buildpack.ts` - Go image buildpack
+- [ ] `stacktape-go-lambda-buildpack.ts` - Go lambda buildpack
+- [ ] `stacktape-java-image-buildpack.ts` - Java image buildpack
+- [ ] `stacktape-java-lambda-buildpack.ts` - Java lambda buildpack
+- [ ] `stacktape-py-image-buildpack.ts` - Python image buildpack
+- [ ] `stacktape-py-lambda-buildpack.ts` - Python lambda buildpack
+
+### ES Bundler (`shared/packaging/bundlers/es/`)
+- [ ] `config.ts` - ES bundler config
+- [ ] `copy-docker-installed-modules.ts` - Copy Docker installed modules
+- [ ] `copy-host-modules.ts` - Copy host modules
+- [ ] `index.ts` - ES bundler main
+- [ ] `utils.ts` - ES bundler utilities
+- [ ] `esbuild-decorators/index.ts` - ESBuild decorators
+- [ ] `esbuild-decorators/strip-it.ts` - ESBuild decorators strip
+
+### Go Bundler (`shared/packaging/bundlers/go/`)
+- [ ] `index.ts` - Go bundler main
+- [ ] `utils.ts` - Go bundler utilities
+
+### Java Bundler (`shared/packaging/bundlers/java/`)
+- [ ] `index.ts` - Java bundler main
+- [ ] `utils.ts` - Java bundler utilities
+
+### Python Bundler (`shared/packaging/bundlers/py/`)
+- [ ] `index.ts` - Python bundler main
+- [ ] `utils.ts` - Python bundler utilities
+
+---
+
+## AWS (`shared/aws/`)
+
+- [ ] `buckets.ts` - S3 buckets utilities
+- [ ] `cloudformation.ts` - CloudFormation utilities
+- [ ] `codebuild-deploy.ts` - CodeBuild deploy utilities
+
+### S3 Sync (`shared/aws/s3-sync/`)
+- [ ] `index.ts` - S3 sync main
+- [ ] `multipart-etag.ts` - Multipart ETag utilities
+
+### SDK Manager (`shared/aws/sdk-manager/`)
+- [ ] `index.ts` - SDK manager main
+- [ ] `utils.ts` - SDK manager utilities
+
+### Log Collector (`shared/aws/log-collector/`)
+- [ ] `index.ts` - Log collector main
+
+---
+
+## TRPC (`shared/trpc/`)
+
+- [ ] `api-key-protected.ts` - API key protected utilities
+- [ ] `aws-identity-protected.ts` - AWS identity protected utilities
+
+---
+
+## Summary
+
+- **Total Files**: 79
+- **Completed**: 1
+- **Remaining**: 78
