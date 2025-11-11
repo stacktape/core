@@ -91,7 +91,7 @@ export const release = async () => {
 
   logSuccess(`Version ${version} released successfully!
   NPM package: https://www.npmjs.com/package/stacktape/v/${version}
-  Github release: https://github.com/stacktape/stacktape/releases/tag/${version}`);
+  Github release: https://github.com/stacktape/core/releases/tag/${version}`);
 };
 
 if (import.meta.main) {

@@ -25,6 +25,7 @@ on:
 
 permissions:
   contents: write
+  id-token: write  # Required for npm trusted publishing with OIDC
 
 jobs:
   determine-version:
@@ -153,21 +154,14 @@ jobs:
           mkdir -p __binary-dist
           find __binary-dist-raw -type f -exec mv {} __binary-dist/ \;
 
+      - name: Set GitHub token
+        run: |
+          echo "RELEASE_GITHUB_TOKEN=${{ github.token }}" >> $GITHUB_ENV
+
       - name: Install Stacktape CLI
         run: |
           curl -L https://installs.stacktape.com/linux.sh | sh
           echo "$HOME/.stacktape/bin" >> $GITHUB_PATH
-
-      - name: Fetch secrets using Stacktape
-        env:
-          STACKTAPE_API_KEY: ${{ secrets.STACKTAPE_API_KEY }}
-        run: |
-          GITHUB_TOKEN=$(stacktape secret:get --region eu-west-1 --secretName github-token | grep "value:" | awk -F"'" '{print $2}')
-          NPM_TOKEN=$(stacktape secret:get --region eu-west-1 --secretName npm-token | grep "value:" | awk -F"'" '{print $2}')
-          echo "::add-mask::$GITHUB_TOKEN"
-          echo "::add-mask::$NPM_TOKEN"
-          echo "RELEASE_GITHUB_TOKEN=$GITHUB_TOKEN" >> $GITHUB_ENV
-          echo "NPM_TOKEN=$NPM_TOKEN" >> $GITHUB_ENV
 
       - name: Generate starter projects metadata
         if: ${{ needs.determine-version.outputs.is_prerelease == 'false' }}
@@ -187,9 +181,8 @@ jobs:
             --version ${{ needs.determine-version.outputs.version }} \
             --prerelease ${{ needs.determine-version.outputs.is_prerelease }}
 
-      - name: Publish to npm
+      - name: Publish to npm using OIDC
         run: |
-          echo "//registry.npmjs.org/:_authToken=$NPM_TOKEN" > ~/.npmrc
           TAG_ARG=""
           if [ "${{ needs.determine-version.outputs.is_prerelease }}" = "true" ]; then
             PRERELEASE_TAG=$(echo "${{ needs.determine-version.outputs.version }}" | grep -oP '(alpha|beta|rc)' || echo "")
@@ -198,7 +191,7 @@ jobs:
             fi
           fi
           cd __release-npm
-          bun publish --access public $TAG_ARG
+          npm publish --provenance --access public $TAG_ARG
 
       - name: Publish install scripts
         env:

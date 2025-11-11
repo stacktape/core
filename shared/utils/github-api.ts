@@ -60,7 +60,7 @@ export const octokit = new ThrottledOctokit({
   }
 });
 
-const defaultParams = { owner: 'stacktape', repo: 'stacktape' } as const;
+const defaultParams = { owner: 'stacktape', repo: 'core' } as const;
 
 /**
  * Get all issues for Stacktape repository with proper pagination
