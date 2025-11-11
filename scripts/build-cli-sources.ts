@@ -1,0 +1,539 @@
+/// <reference types="bun-types" />
+import { arch } from 'node:os';
+import { basename, dirname, join } from 'node:path';
+import {
+  BIN_DIST_FOLDER_PATH,
+  BRIDGE_FILES_FOLDER_NAME,
+  BRIDGE_FILES_SOURCE_FOLDER_PATH,
+  CLI_DIST_PATH,
+  COMPLETIONS_SCRIPTS_PATH,
+  CONFIG_SCHEMA_PATH,
+  DIST_FOLDER_PATH,
+  HELPER_LAMBDAS_FOLDER_NAME,
+  SCRIPTS_ASSETS_PATH
+} from '@shared/naming/project-fs-paths';
+import { buildEsCode } from '@shared/packaging/bundlers/es';
+import { getPlatform } from '@shared/utils/bin-executable';
+import {
+  NIXPACKS_BINARY_FILE_NAMES,
+  PACK_BINARY_FILE_NAMES,
+  SESSION_MANAGER_PLUGIN_BINARY_FILE_NAMES
+} from '@shared/utils/constants';
+import { downloadFile } from '@shared/utils/download-file';
+import { exec } from '@shared/utils/exec';
+import { logInfo, logSuccess } from '@shared/utils/logging';
+import { localBuildTsConfigPath } from '@shared/utils/misc';
+import { archiveItem, extractTgzArchive } from '@shared/utils/zip';
+import { chmod, copy, ensureDir, pathExists, readdir, readFile, readJsonSync, remove, writeJson } from 'fs-extra';
+import {
+  createBashCompletionScript,
+  createPowershellCompletionScript,
+  createZshCompletionScript
+} from './generate-completions';
+import { generateStarterProjectsMetadata } from './generate-starter-projects-metadata';
+import { packageHelperLambdas } from './package-helper-lambdas';
+import { getCliArgs, getVersion } from './release/utils/args';
+
+// import { generateAllStarterProjects } from './generate-starter-project';
+
+export const ALL_SUPPORTED_PLATFORMS: SupportedPlatform[] = [
+  'win',
+  'linux',
+  'macos',
+  'macos-arm',
+  'alpine',
+  'linux-arm'
+];
+
+const BINARY_FOLDER_NAMES: { [_platform in SupportedPlatform]: string } = {
+  win: 'windows',
+  macos: 'macos',
+  linux: 'linux',
+  'macos-arm': 'macos-arm',
+  alpine: 'alpine',
+  'linux-arm': 'linux-arm'
+};
+
+const ESBUILD_BINARY_PACKAGE_NAMES: { [_platform in SupportedPlatform]: string } = {
+  win: '@esbuild/win32-x64',
+  macos: '@esbuild/darwin-x64',
+  linux: '@esbuild/linux-x64',
+  'macos-arm': '@esbuild/darwin-arm64',
+  alpine: '@esbuild/linux-x64',
+  'linux-arm': '@esbuild/linux-arm64'
+};
+const ESBUILD_BINARY_FILE_LOCATIONS: { [_platform in SupportedPlatform]: string[] } = {
+  win: ['esbuild.exe'],
+  macos: ['bin', 'esbuild'],
+  linux: ['bin', 'esbuild'],
+  'macos-arm': ['bin', 'esbuild'],
+  alpine: ['bin', 'esbuild'],
+  'linux-arm': ['bin', 'esbuild']
+};
+
+// File patterns that should have executable permissions in archives
+export const EXECUTABLE_FILE_PATTERNS = [
+  'stacktape',
+  'stacktape.exe',
+  '*/pack',
+  '*/pack.exe',
+  '*/nixpacks',
+  '*/nixpacks.exe',
+  '*/smp',
+  '*/smp.exe',
+  '*/exec',
+  '*/exec.exe'
+];
+
+const copyBridgeFiles = async ({ distFolderPath }: { distFolderPath?: string }) => {
+  logInfo('Copying bridge files...');
+  await copy(BRIDGE_FILES_SOURCE_FOLDER_PATH, join(distFolderPath, BRIDGE_FILES_FOLDER_NAME));
+  logSuccess('Bridge files copied successfully.');
+};
+
+const buildEsbuildRegister = async ({ distFolderPath }: { distFolderPath?: string }) => {
+  logInfo('Copying esbuild-register...');
+  // const sourceFolderPath = join(process.cwd(), 'scripts', 'assets', 'esbuild-register.js');
+  const esbuildRegisterDistFolderPath = join(distFolderPath, 'esbuild', 'esbuild-register.js');
+  await buildEsCode({
+    rawCode: 'require("esbuild-register/dist/node").register();',
+    distPath: esbuildRegisterDistFolderPath,
+    externals: [],
+    sourceMaps: 'disabled',
+    sourceMapBannerType: 'disabled',
+    tsConfigPath: localBuildTsConfigPath,
+    keepNames: false,
+    minify: true,
+    nodeTarget: '18',
+    cwd: process.cwd()
+  });
+  // await retryableCopy(sourceFolderPath, esbuildRegisterDistFolderPath);
+  logSuccess('esbuild-register copied successfully.');
+};
+
+const canCrossCompile = (targetPlatform: SupportedPlatform): { canCompile: boolean; warning?: string } => {
+  const currentPlatform = getPlatform();
+  const currentArch = arch();
+
+  // Same platform - always works
+  if (currentPlatform === targetPlatform) {
+    return { canCompile: true };
+  }
+
+  // Cross-compilation limitations based on Bun's capabilities
+  // macOS can cross-compile between x64 and ARM
+  if (currentPlatform === 'macos' && targetPlatform === 'macos-arm') {
+    return { canCompile: true };
+  }
+  if (currentPlatform === 'macos-arm' && targetPlatform === 'macos') {
+    return { canCompile: true };
+  }
+
+  // Linux can cross-compile between x64 and ARM on the same OS
+  if (currentPlatform === 'linux' && (targetPlatform === 'linux-arm' || targetPlatform === 'alpine')) {
+    return { canCompile: true, warning: 'Cross-compiling Linux ARM from x64 may not work reliably' };
+  }
+  if (currentPlatform === 'linux-arm' && (targetPlatform === 'linux' || targetPlatform === 'alpine')) {
+    return { canCompile: true, warning: 'Cross-compiling Linux x64 from ARM may not work reliably' };
+  }
+
+  // Cross-OS compilation (e.g., macOS -> Windows, Linux -> Windows) is NOT supported
+  return {
+    canCompile: false,
+    warning: `Cross-compilation from ${currentPlatform} (${currentArch}) to ${targetPlatform} is not supported by Bun. Build will likely fail.`
+  };
+};
+
+export const buildBinaryFile = async ({
+  distFolderPath,
+  debug,
+  platform,
+  sourceFolderPath,
+  version
+}: {
+  sourceFolderPath?: string;
+  distFolderPath?: string;
+  debug?: boolean;
+  platform: SupportedPlatform;
+  version?: string;
+}) => {
+  const binFolderName = BINARY_FOLDER_NAMES[platform];
+  const outputFolderPath = join(distFolderPath, binFolderName);
+
+  // Check cross-compilation compatibility
+  const { canCompile, warning } = canCrossCompile(platform);
+  if (warning) {
+    logInfo(`⚠️  ${warning}`);
+  }
+  // if (!canCompile) {
+  //   throw new Error(
+  //     `Cannot cross-compile for platform ${platform}. Please build on the target platform or use a CI/CD pipeline with multiple runners.`
+  //   );
+  // }
+
+  logInfo(`Building binary for platform ${platform} using Bun... ${debug ? '[DEBUG mode]' : ''}`);
+
+  // Ensure output directory exists
+  await ensureDir(outputFolderPath);
+
+  // Map platform to Bun compile target
+  const compileTarget = (() => {
+    switch (platform) {
+      case 'macos':
+        return 'bun-darwin-x64';
+      case 'macos-arm':
+        return 'bun-darwin-arm64';
+      case 'linux':
+        return 'bun-linux-x64';
+      case 'linux-arm':
+        return 'bun-linux-arm64';
+      case 'win':
+        return 'bun-windows-x64';
+      case 'alpine':
+        return 'bun-linux-x64-baseline';
+      default:
+        return 'bun';
+    }
+  })();
+
+  const entrypoint = join(sourceFolderPath, 'src', 'api', 'cli', 'index.ts');
+  const outputFileName = platform === 'win' ? 'stacktape.exe' : 'stacktape';
+  const outputPath = join(outputFolderPath, outputFileName);
+
+  const buildArgs = [
+    'build',
+    '--compile',
+    `--target=${compileTarget}`,
+    entrypoint,
+    `--outfile=${outputPath}`,
+    '--sourcemap=inline',
+    `--define=STACKTAPE_VERSION="${version || 'dev'}"`
+  ];
+
+  if (!debug) {
+    buildArgs.push('--minify');
+    // buildArgs.push('--bytecode');
+  }
+
+  try {
+    await exec('bun', buildArgs, {
+      cwd: sourceFolderPath,
+      disableStdout: true
+    });
+  } catch (error) {
+    throw new Error(
+      `Failed to build binary for platform ${platform}: ${error instanceof Error ? error.message : String(error)}`
+    );
+  }
+
+  if (platform !== 'win') {
+    await chmod(outputPath, '755');
+  }
+
+  logSuccess(`Binary for platform ${platform} generated successfully.`);
+
+  return outputFolderPath;
+};
+
+export const copyPackBinary = async ({
+  distFolderPath,
+  platform
+}: {
+  distFolderPath?: string;
+  platform: SupportedPlatform;
+}) => {
+  const binFileName = PACK_BINARY_FILE_NAMES[platform];
+  const sourcePath = join(SCRIPTS_ASSETS_PATH, 'pack', binFileName);
+  const distPath = join(
+    distFolderPath,
+    BINARY_FOLDER_NAMES[platform],
+    'pack',
+    platform !== 'win' ? 'pack' : 'pack.exe'
+  );
+  await copy(sourcePath, distPath);
+  if (platform !== 'win') {
+    return chmod(distPath, '755');
+  }
+};
+
+export const copyNixpacksBinary = async ({
+  distFolderPath,
+  platform
+}: {
+  distFolderPath?: string;
+  platform: SupportedPlatform;
+}) => {
+  const binFileName = NIXPACKS_BINARY_FILE_NAMES[platform];
+  const sourcePath = join(SCRIPTS_ASSETS_PATH, 'nixpacks', binFileName);
+  const distPath = join(
+    distFolderPath,
+    BINARY_FOLDER_NAMES[platform],
+    'nixpacks',
+    platform !== 'win' ? 'nixpacks' : 'nixpacks.exe'
+  );
+  await copy(sourcePath, distPath);
+  if (platform !== 'win') {
+    return chmod(distPath, '755');
+  }
+};
+
+export const copySessionsManagerPluginBinary = async ({
+  distFolderPath,
+  platform
+}: {
+  distFolderPath?: string;
+  platform: SupportedPlatform;
+}) => {
+  const binFileName = SESSION_MANAGER_PLUGIN_BINARY_FILE_NAMES[platform];
+  const sourcePath = join(SCRIPTS_ASSETS_PATH, 'session-manager-plugin', binFileName);
+  const distPath = join(
+    distFolderPath,
+    BINARY_FOLDER_NAMES[platform],
+    'session-manager-plugin',
+    platform === 'win' ? 'smp.exe' : 'smp'
+  );
+  await copy(sourcePath, distPath);
+  if (platform !== 'win') {
+    return chmod(distPath, '755');
+  }
+};
+
+export const copyEsbuildBinary = async ({
+  distFolderPath,
+  platform
+}: {
+  distFolderPath?: string;
+  platform: SupportedPlatform;
+}) => {
+  const { dependencies } = readJsonSync(join(process.cwd(), 'package.json'));
+  const version = dependencies.esbuild.replace('^', '').replace('~', '');
+  const esbuildPackageName = ESBUILD_BINARY_PACKAGE_NAMES[platform];
+  const esbuildSubPackageName = esbuildPackageName.replace('@esbuild/', '');
+  const downloadUrl = `https://registry.yarnpkg.com/${esbuildPackageName}/-/${esbuildSubPackageName}-${version}.tgz`;
+  const downloadDir = join(distFolderPath, 'downloaded');
+  await downloadFile({ url: downloadUrl, downloadTo: downloadDir });
+  const downloadedFilePath = join(downloadDir, `${esbuildSubPackageName}-${version}.tgz`);
+  const extractedPath = await extractTgzArchive({
+    sourcePath: downloadedFilePath,
+    distDirPath: downloadDir
+  });
+  const esbuildBinFileLocations = ESBUILD_BINARY_FILE_LOCATIONS[platform];
+  const binaryDist = join(distFolderPath, BINARY_FOLDER_NAMES[platform]);
+  const esbuildExecutableSourcePath = join(extractedPath, ...esbuildBinFileLocations);
+  const esbuildExecutableDistPath = join(
+    binaryDist,
+    'esbuild',
+    esbuildBinFileLocations[esbuildBinFileLocations.length - 1].replace('esbuild', 'exec')
+  );
+  await copy(esbuildExecutableSourcePath, esbuildExecutableDistPath);
+  await Promise.all([remove(extractedPath), remove(downloadedFilePath)]);
+};
+
+export const generateAutocompletionsScripts = async ({
+  distFolderPath
+  // platform
+}: {
+  distFolderPath?: string;
+  // platform: SupportedPlatform;
+}) => {
+  const completionScriptPath = await readdir(COMPLETIONS_SCRIPTS_PATH);
+  await ensureDir(join(distFolderPath, 'completions'));
+
+  await Promise.all(
+    completionScriptPath.map(async (entry) => {
+      const scriptContent = await readFile(join(COMPLETIONS_SCRIPTS_PATH, entry), {
+        encoding: 'utf8'
+      });
+
+      switch (entry) {
+        case 'zsh.sh':
+          await createZshCompletionScript({
+            scriptTemplate: scriptContent,
+            path: join(distFolderPath, 'completions', entry)
+          });
+          break;
+        case 'bash.sh':
+          await createBashCompletionScript({
+            scriptTemplate: scriptContent,
+            path: join(distFolderPath, 'completions', entry)
+          });
+          break;
+        case 'powershell.ps1':
+          await createPowershellCompletionScript({
+            scriptTemplate: scriptContent,
+            path: join(distFolderPath, 'completions', entry)
+          });
+          break;
+        default:
+          logInfo(`Skipping '${entry}' - unknown completion script`);
+          return;
+      }
+      logSuccess(`Completion script '${entry}' prepared successfully.`);
+    })
+  );
+};
+
+export const copyConfigSchema = async ({ distFolderPath }: { distFolderPath?: string }) => {
+  logInfo('Copying config schema...');
+  await copy(CONFIG_SCHEMA_PATH, join(distFolderPath, basename(CONFIG_SCHEMA_PATH)));
+  logSuccess('Config schema copied successfully.');
+};
+
+export const copyHelperLambdas = async ({ distFolderPath }: { distFolderPath?: string }) => {
+  logInfo('Copying helper lambdas...');
+  const sourcePath = join(DIST_FOLDER_PATH, 'helper-lambdas');
+  const destPath = join(distFolderPath, 'helper-lambdas');
+  await copy(sourcePath, destPath);
+  logSuccess('Helper lambdas copied successfully.');
+};
+
+export const createReleaseDataFile = async ({
+  distFolderPath,
+  version
+}: {
+  distFolderPath?: string;
+  version?: string;
+}) => {
+  logInfo('Creating release data file...');
+  await writeJson(join(distFolderPath, 'release-data.json'), { version: version || 'dev' });
+  logSuccess('Release data file created successfully.');
+};
+
+export const copyLegalComments = async ({ distFolderPath }: { distFolderPath?: string }) => {
+  logInfo('Copying config schema...');
+  await copy(join(dirname(CLI_DIST_PATH), `${basename(CLI_DIST_PATH)}.LEGAL.txt`), join(distFolderPath, 'LEGAL.txt'));
+  logSuccess('Config schema copied successfully.');
+};
+
+export const getPlatformsToBuildFor = ({
+  presetPlatforms
+}: {
+  presetPlatforms?: (SupportedPlatform | 'current-arch' | 'all' | 'current')[];
+}): SupportedPlatform[] => {
+  const platforms = presetPlatforms;
+  if (platforms[0] === 'current-arch') {
+    const currentCpuArchitecture = arch();
+    if (currentCpuArchitecture === 'x64') {
+      return ALL_SUPPORTED_PLATFORMS.filter((platform) => !platform.includes('arm'));
+    }
+    return ALL_SUPPORTED_PLATFORMS.filter((platform) => platform.includes('arm'));
+  }
+  if (platforms[0] === 'all') {
+    return ALL_SUPPORTED_PLATFORMS;
+  }
+  if (platforms[0] === 'current') {
+    return [getPlatform()];
+  }
+  return Array.isArray(platforms) ? (platforms as SupportedPlatform[]) : [platforms as SupportedPlatform];
+};
+
+export const buildCliSources = async ({
+  distFolderPath,
+  version: suppliedVersion,
+  debug,
+  keepUnarchived,
+  presetPlatforms,
+  skipArchiving
+}: {
+  distFolderPath: string;
+  version?: string;
+  presetPlatforms?: (SupportedPlatform | 'current-arch' | 'all' | 'current')[];
+  debug?: boolean;
+  keepUnarchived?: boolean;
+  skipArchiving?: boolean;
+}) => {
+  const version = suppliedVersion || (await getVersion());
+  const { debug: debugFromArgs, skipArchiving: skipArchivingFromArgs } = getCliArgs();
+  await remove(distFolderPath);
+  await Promise.all([packageHelperLambdas({ isDev: false, distFolderPath }), copyBridgeFiles({ distFolderPath })]);
+
+  const starterProjectsMetadataFilePath = await generateStarterProjectsMetadata();
+  const platformPaths: Record<SupportedPlatform, string> = {} as Record<SupportedPlatform, string>;
+
+  const { platforms, keepUnarchived: keepUnarchivedFromArgs } = getCliArgs();
+  const platformsToBuildFor = getPlatformsToBuildFor({ presetPlatforms: presetPlatforms || platforms });
+  logInfo(`Building binaries for platforms: ${platformsToBuildFor.join(', ')}...`);
+
+  for (const platform of platformsToBuildFor) {
+    try {
+      const platformDistFolderPath = await buildBinaryFile({
+        sourceFolderPath: process.cwd(),
+        distFolderPath,
+        platform,
+        debug: debug || debugFromArgs || false,
+        version
+      });
+
+      await copyPackBinary({ distFolderPath, platform });
+      await copyNixpacksBinary({ distFolderPath, platform });
+      await copySessionsManagerPluginBinary({ distFolderPath, platform });
+      await copyEsbuildBinary({ distFolderPath, platform });
+      await buildEsbuildRegister({ distFolderPath: platformDistFolderPath });
+      await copyConfigSchema({ distFolderPath: platformDistFolderPath });
+      await copyHelperLambdas({ distFolderPath: platformDistFolderPath });
+      await createReleaseDataFile({ distFolderPath: platformDistFolderPath, version });
+      await copy(starterProjectsMetadataFilePath, join(platformDistFolderPath, 'starter-projects.json'));
+
+      platformPaths[platform] = platformDistFolderPath;
+      if (!skipArchiving && !skipArchivingFromArgs) {
+        await archiveItem({
+          absoluteSourcePath: platformDistFolderPath,
+          format: platform === 'win' ? 'zip' : 'tgz',
+          executablePatterns: EXECUTABLE_FILE_PATTERNS
+        });
+      }
+
+      if (!keepUnarchived && !keepUnarchivedFromArgs && !skipArchiving && !skipArchivingFromArgs) {
+        await remove(platformDistFolderPath);
+      }
+    } catch (error) {
+      throw new Error(
+        `Failed to build platform ${platform}: ${error instanceof Error ? error.message : String(error)}\n${error instanceof Error ? error.stack : ''}`
+      );
+    }
+  }
+
+  logInfo('Cleaning up temporary files...');
+  await Promise.all([
+    remove(join(distFolderPath, 'downloaded')),
+    remove(DIST_FOLDER_PATH),
+    remove(join(distFolderPath, HELPER_LAMBDAS_FOLDER_NAME)),
+    remove(join(distFolderPath, BRIDGE_FILES_FOLDER_NAME))
+  ]);
+  logSuccess('Temporary files cleaned up successfully.');
+
+  logSuccess(`Binaries for platforms ${platformsToBuildFor.join(', ')} built successfully to ${BIN_DIST_FOLDER_PATH}`);
+  return platformPaths;
+};
+
+export const archiveCliBinaries = async ({
+  distFolderPath,
+  platforms
+}: {
+  distFolderPath: string;
+  platforms: SupportedPlatform[];
+}) => {
+  logInfo(`Archiving binaries for ${platforms.length} platform(s)...`);
+
+  for (const platform of platforms) {
+    const binFolderName = BINARY_FOLDER_NAMES[platform];
+    const platformDistFolderPath = join(distFolderPath, binFolderName);
+
+    if (await pathExists(platformDistFolderPath)) {
+      await archiveItem({
+        absoluteSourcePath: platformDistFolderPath,
+        format: platform === 'win' ? 'zip' : 'tgz',
+        executablePatterns: EXECUTABLE_FILE_PATTERNS
+      });
+      logSuccess(`Archived binary for platform: ${platform}`);
+    } else {
+      logInfo(`Platform directory not found, skipping: ${platform}`);
+    }
+  }
+
+  logSuccess('All binaries archived successfully');
+};
+
+if (import.meta.main) {
+  buildCliSources({ distFolderPath: BIN_DIST_FOLDER_PATH });
+}

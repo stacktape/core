@@ -1,0 +1,167 @@
+export const FILES_TO_INCLUDE_IN_DIGEST = [
+  'pnpm-lock.yaml',
+  'yarn.lock',
+  'package-lock.json',
+  'node_modules/.prisma/client/index.js',
+  'tsconfig.json'
+];
+
+export const IGNORED_MISSING_DEPENDENCIES = ['.prisma'];
+
+export const SPECIAL_TREATMENT_PACKAGES = ['@prisma/client', 'chrome-aws-lambda', 'next'] as const;
+
+export const DEPENDENCIES_TO_EXCLUDE_FROM_BUNDLE = ['next'];
+
+export const IGNORED_OPTIONAL_PEER_DEPS_FROM_INSTALL_IN_DOCKER = ['supports-color', 'debug'];
+
+export const DEPENDENCIES_WITH_BINARIES = [
+  'pg-native',
+  'chrome-aws-lambda',
+  'puppeteer',
+  'sqlite3',
+  'bcrypt',
+  'node-sass',
+  'serialport',
+  'phantomjs',
+  'hiredis',
+  'canvas',
+  'websocket',
+  'phantomjs-prebuilt',
+  'deasync',
+  'leveldown',
+  'fibers',
+  'nodegit',
+  'zmq',
+  'iconv',
+  'electron-prebuilt',
+  'libxmljs',
+  'radium',
+  'ffi',
+  'microtime',
+  '@tensorflow/tfjs-node'
+];
+
+export const IGNORED_MODULES = [
+  '@prisma/cli',
+  '@prisma/bar',
+  '@prisma/engines',
+  '@prisma/engine-versions',
+  'pnpapi',
+  'fsevents'
+];
+
+// @todo use these to filter files from node_modules
+export const IGNORED_EXTENSIONS = [
+  'exe',
+  'md',
+  'ts',
+  'tsx',
+  'jsx',
+  'tsx',
+  'jst',
+  'coffee',
+  'jpg',
+  'png',
+  'markdown',
+  'rb',
+  'test.js',
+  'spec.js',
+  'e2e.js'
+];
+
+export const IGNORED_FILES = [
+  // @note prisma-related
+  // @imptodo add windows version
+  'query-engine-darwin',
+  'makefile',
+  'gulpfile.js',
+  'gruntfile.js',
+  '.tern-project',
+  '.gitattributes',
+  '.gitignore',
+  '.npmignore',
+  '.editorconfig',
+  '.eslintrc',
+  '.eslintignore',
+  '.jshintrc',
+  '.flowconfig',
+  '.documentup.json',
+  '.yarn-metadata.json',
+  '.travis.yml',
+  'authors',
+  'contributors',
+  'contributing',
+  'changes',
+  'changelog',
+  '.yarn-integrity',
+  'jsdoc.json',
+  '.nvmrc',
+  '.zuul.yml',
+  '.doclets.yml',
+  '.dockerignore',
+  '.dir-locals.el',
+  '.nyc_output',
+  'Makefile',
+  'Gulpfile.js',
+  'Gruntfile.js',
+  'appveyor.yml',
+  'circle.yml',
+  'codeship-services.yml',
+  'codeship-steps.yml',
+  'wercker.yml',
+  '.tern-project',
+  '.gitattributes',
+  '.editorconfig',
+  '.eslintrc',
+  '.jshintrc',
+  '.flowconfig',
+  '.documentup.json',
+  '.yarn-metadata.json',
+  '.travis.yml',
+  '.github',
+  'usage.txt',
+  '.nycrc',
+  'USAGE.txt',
+  'bower.json',
+  '.lintstagedrc.yml',
+  '.prettierrc',
+  '.huskyrc',
+  'prettier.config.js',
+  'babel.config.js',
+  'AUTHORS',
+  'yarn.lock',
+  '.babelrc.js',
+  '.babelrc',
+  '.prettierignore',
+  '.eslintignore',
+  'tslint.json',
+  'webpack.config.js',
+  'rollup.config.js',
+  'tsconfig.json',
+  '.eslintrc.json',
+  '.eslintrc.js',
+  '.eslintrc.yml',
+  '.vscode',
+  'help.txt',
+  'Cakefile',
+  'CODEOWN'
+];
+
+export const IGNORED_FOLDERS = [
+  '__tests__',
+  'test',
+  'powered-test',
+  '@types',
+  'tests',
+  'powered-test',
+  'docs',
+  'doc',
+  'website',
+  'images',
+  'assets',
+  'example',
+  'demo',
+  'examples',
+  'coverage',
+  '.nyc_output'
+];
