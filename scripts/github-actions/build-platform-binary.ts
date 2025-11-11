@@ -1,5 +1,10 @@
 import { join } from 'node:path';
-import { BIN_DIST_FOLDER_PATH, BRIDGE_FILES_FOLDER_NAME, DIST_FOLDER_PATH, HELPER_LAMBDAS_FOLDER_NAME } from '@shared/naming/project-fs-paths';
+import {
+  BIN_DIST_FOLDER_PATH,
+  BRIDGE_FILES_FOLDER_NAME,
+  DIST_FOLDER_PATH,
+  HELPER_LAMBDAS_FOLDER_NAME
+} from '@shared/naming/project-fs-paths';
 import { logInfo, logSuccess } from '@shared/utils/logging';
 import { archiveItem } from '@shared/utils/zip';
 import { copy, remove } from 'fs-extra';
@@ -19,7 +24,7 @@ import {
 import { generateStarterProjectsMetadata } from '../generate-starter-projects-metadata';
 import { packageHelperLambdas } from '../package-helper-lambdas';
 
-const BINARY_FOLDER_NAMES: { [_platform in SupportedPlatform]: string } = {
+const _BINARY_FOLDER_NAMES: { [_platform in SupportedPlatform]: string } = {
   win: 'windows',
   macos: 'macos',
   linux: 'linux',
@@ -44,7 +49,7 @@ const main = async () => {
 
   // Prepare shared resources
   await Promise.all([
-    packageHelperLambdas({ isDev: false, distFolderPath }),
+    packageHelperLambdas({ isDev: false, distFolderPath })
     // Note: copyBridgeFiles is not needed per-platform
   ]);
 

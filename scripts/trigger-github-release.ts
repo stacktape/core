@@ -1,9 +1,9 @@
 import { exec as execAsync } from 'node:child_process';
+import { join } from 'node:path';
 import { promisify } from 'node:util';
 import { octokit } from '@shared/utils/github-api';
 import { logInfo, logSuccess } from '@shared/utils/logging';
 import { readJsonSync } from 'fs-extra';
-import { join } from 'node:path';
 import yargsParser from 'yargs-parser';
 
 const exec = promisify(execAsync);
@@ -28,12 +28,9 @@ const main = async () => {
   const prerelease = Boolean(argv.prerelease || argv.pre);
 
   if (!version && increment === 'none') {
-    console.error('Error: You must specify either --version or one of --major, --minor, --patch');
-    console.error('');
-    console.error('Usage:');
-    console.error('  bun run release:gh --version 2.23.0');
-    console.error('  bun run release:gh --minor');
-    console.error('  bun run release:gh --patch --prerelease');
+    console.error(
+      'Error: You must specify either --version or one of --major, --minor, --patch\n\nUsage:\n  bun run release:gh --version 2.23.0\n  bun run release:gh --minor\n  bun run release:gh --patch --prerelease'
+    );
     process.exit(1);
   }
 
@@ -68,20 +65,18 @@ const main = async () => {
     });
 
     if (response.status === 204) {
-      logSuccess('Release workflow triggered successfully!');
-      logInfo('');
-      logInfo('View workflow runs at: https://github.com/stacktape/core/actions/workflows/release.yml');
+      logSuccess(
+        'Release workflow triggered successfully!\n\nView workflow runs at: https://github.com/stacktape/core/actions/workflows/release.yml'
+      );
     } else {
       throw new Error(`Unexpected response status: ${response.status}`);
     }
   } catch (error: any) {
     console.error('Failed to trigger release workflow:', error.message);
     if (error.status === 404) {
-      console.error('');
-      console.error('Possible causes:');
-      console.error('  - The release.yml workflow file does not exist');
-      console.error('  - The current branch does not have the workflow file');
-      console.error('  - GitHub token does not have sufficient permissions');
+      console.error(
+        '\nPossible causes:\n  - The release.yml workflow file does not exist\n  - The current branch does not have the workflow file\n  - GitHub token does not have sufficient permissions'
+      );
     }
     process.exit(1);
   }
