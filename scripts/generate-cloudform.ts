@@ -91,7 +91,7 @@ function determineTypeScriptType(property: TypeProperties, propertyName: string,
   if (property[typeSuffix]) {
     return innerTypeName(`.${property[typeSuffix]}`);
   }
-  // @ts-ignore
+  // @ts-expect-error - Documentation is optional
   if (property.Documentation && Object.keys(property).length === 1) {
     return 'string';
   }

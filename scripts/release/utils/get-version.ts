@@ -12,8 +12,5 @@ const main = async () => {
 };
 
 if (import.meta.main) {
-  main().catch((error) => {
-    console.error('Error getting version:', error);
-    process.exit(1);
-  });
+  main();
 }

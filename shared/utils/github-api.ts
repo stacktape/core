@@ -26,6 +26,8 @@ const getGitHubToken = (): string => {
 // Get token for exports (for backward compatibility with github-file-manipulation.ts)
 export const GITHUB_AUTH_TOKEN = getGitHubToken();
 
+console.log('GITHUB_AUTH_TOKEN', GITHUB_AUTH_TOKEN);
+
 // Create enhanced Octokit with retry and throttling plugins
 const ThrottledOctokit = Octokit.plugin(retry, throttling);
 

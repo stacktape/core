@@ -111,39 +111,6 @@ const buildEsbuildRegister = async ({ distFolderPath }: { distFolderPath?: strin
   logSuccess('esbuild-register copied successfully.');
 };
 
-const canCrossCompile = (targetPlatform: SupportedPlatform): { canCompile: boolean; warning?: string } => {
-  const currentPlatform = getPlatform();
-  const currentArch = arch();
-
-  // Same platform - always works
-  if (currentPlatform === targetPlatform) {
-    return { canCompile: true };
-  }
-
-  // Cross-compilation limitations based on Bun's capabilities
-  // macOS can cross-compile between x64 and ARM
-  if (currentPlatform === 'macos' && targetPlatform === 'macos-arm') {
-    return { canCompile: true };
-  }
-  if (currentPlatform === 'macos-arm' && targetPlatform === 'macos') {
-    return { canCompile: true };
-  }
-
-  // Linux can cross-compile between x64 and ARM on the same OS
-  if (currentPlatform === 'linux' && (targetPlatform === 'linux-arm' || targetPlatform === 'alpine')) {
-    return { canCompile: true, warning: 'Cross-compiling Linux ARM from x64 may not work reliably' };
-  }
-  if (currentPlatform === 'linux-arm' && (targetPlatform === 'linux' || targetPlatform === 'alpine')) {
-    return { canCompile: true, warning: 'Cross-compiling Linux x64 from ARM may not work reliably' };
-  }
-
-  // Cross-OS compilation (e.g., macOS -> Windows, Linux -> Windows) is NOT supported
-  return {
-    canCompile: false,
-    warning: `Cross-compilation from ${currentPlatform} (${currentArch}) to ${targetPlatform} is not supported by Bun. Build will likely fail.`
-  };
-};
-
 export const buildBinaryFile = async ({
   distFolderPath,
   debug,
@@ -159,17 +126,6 @@ export const buildBinaryFile = async ({
 }) => {
   const binFolderName = BINARY_FOLDER_NAMES[platform];
   const outputFolderPath = join(distFolderPath, binFolderName);
-
-  // Check cross-compilation compatibility
-  const { canCompile, warning } = canCrossCompile(platform);
-  if (warning) {
-    logInfo(`⚠️  ${warning}`);
-  }
-  // if (!canCompile) {
-  //   throw new Error(
-  //     `Cannot cross-compile for platform ${platform}. Please build on the target platform or use a CI/CD pipeline with multiple runners.`
-  //   );
-  // }
 
   logInfo(`Building binary for platform ${platform} using Bun... ${debug ? '[DEBUG mode]' : ''}`);
 

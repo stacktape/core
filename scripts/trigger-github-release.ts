@@ -1,3 +1,8 @@
+/* eslint-disable import/first */
+import { config as loadDotenv } from 'dotenv';
+
+loadDotenv();
+
 import { exec as execAsync } from 'node:child_process';
 import { join } from 'node:path';
 import { promisify } from 'node:util';
@@ -74,9 +79,10 @@ const main = async () => {
   } catch (error: any) {
     console.error('Failed to trigger release workflow:', error.message);
     if (error.status === 404) {
-      console.error(
-        '\nPossible causes:\n  - The release.yml workflow file does not exist\n  - The current branch does not have the workflow file\n  - GitHub token does not have sufficient permissions'
-      );
+      console.error(`Possible causes:
+- The release.yml workflow file does not exist
+- The current branch does not have the workflow file
+- GitHub token does not have sufficient permissions`);
     }
     process.exit(1);
   }
