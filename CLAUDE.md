@@ -2,9 +2,15 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## Ignored files
+
+When working with this directory (even when using your internal RipGrep tool), ignore all files defined in .gitignore.
+Also ignore starter-projects. You don't need to do anything with those.
+
 ## What is Stacktape?
 
-Stacktape is a PaaS 2.0 platform that simplifies AWS deployment. It enables developers to deploy containers, Lambdas, databases, and 30+ AWS services without extensive DevOps knowledge while maintaining full control and AWS flexibility.
+Stacktape is a PaaS 2.0 platform that simplifies AWS deployment. It enables developers to deploy containers, Lambdas,
+databases, and 30+ AWS services without extensive DevOps knowledge while maintaining full control and AWS flexibility.
 
 ## Code Rules
 
@@ -13,7 +19,8 @@ Stacktape is a PaaS 2.0 platform that simplifies AWS deployment. It enables deve
 - To import packages, always use import only part of the package, e.g. `import { myFunc } from 'package-name'`
 - Prefer using inline types to type functions, e.g. `const myFunc = ({ property }:{ property: string }) => { ... }`
 - To write helper functions, prefer arrow functions, e.g. `const myFunc = () => {}`
-- Only use classes when necessary. Prefer writing procedural/functional code. E.g. just write 3 arrow functions, instead of a class with 3 methods.
+- Only use classes when necessary. Prefer writing procedural/functional code. E.g. just write 3 arrow functions, instead
+  of a class with 3 methods.
 - Prefer typescript types over interfaces.
 - Use ESLint config from eslint.config.ts (based on @antfu/eslint-config with prettier integration)
 - Unused variables should be prefixed with `_` (e.g., `const _unusedVar = ...`)
@@ -88,7 +95,7 @@ Utilities & Shared (src/utils/ + shared/)
 - `naming/` - Naming conventions for stacks, resources, paths
 - `packaging/` - Bundlers for ES/Go/Python/Java
 - `utils/` - Docker, Git, hashing, file operations, dependency installers
-- `config-gen/` - AI-powered configuration generation
+- `trpc/` - Communication with Stacktape API
 
 **helper-lambdas/** - Lambda functions deployed to every stack:
 
@@ -148,35 +155,8 @@ await initializeAllStackServices({
 **Configuration Directives**: Dynamic config values:
 
 - `$Secret('name')` - Reference secrets
-- `$Param('name')` - Stack parameters
-- `$EnvVar('NAME')` - Environment variables
-- `$OutputReference(...)` - Cross-stack references
-
-### Build & Compilation Process
-
-**Schema Generation** (`bun gen:schema`):
-
-1. Fetches AWS CloudFormation resource specs
-2. Generates TypeScript types for 300+ resource types
-3. Creates JSON schemas for validation
-4. Generates Ajv validation code
-
-**CloudFormation Generation** (`bun gen:cloudform`):
-
-1. Downloads CloudFormation resource specs
-2. Generates `@generated/cloudform/` TypeScript definitions
-
-**CLI Binary Compilation** (`bun build:cli:bin`):
-
-1. Compiles TypeScript using esbuild
-2. Bundles dependencies and helper-lambdas
-3. Creates standalone binaries using @yao-pkg/pkg
-
-**SDK/NPM Builds** (`bun build:npm`, `bun build:npm:sdk`):
-
-1. Transpiles TypeScript to JavaScript
-2. Generates type definitions (.d.ts)
-3. Exports ESM and CommonJS modules
+- `$ResourceParam('name')` - References resource parameters defined in the stack
+- `$CfStackOutput(...)` - Cross-stack references
 
 ### Generated Files & Artifacts
 
@@ -200,40 +180,3 @@ await initializeAllStackServices({
 4. **Diff** - Compare with deployed template, check hot-swap
 5. **Execute** - Hot-swap (fast) or full CloudFormation deployment
 6. **Post-Deploy** - Run scripts, send notifications, cleanup
-
-### Stub Implementations
-
-Some features that required external service integration have been stubbed:
-
-**StacktapeTrpcApiManager** (`src/app/stacktape-trpc-api-manager/`):
-
-- Provides no-op implementations for API client methods
-- Methods like `recordStackOperation`, `canDeploy`, `deleteUndeployedStage` are stubbed
-- Allows core functionality to run without external API dependencies
-
-**Default Domain Custom Resources** (`helper-lambdas/stacktapeServiceLambda/custom-resources/resolvers/`):
-
-- `default-domain.ts` - Stub that logs warning about disabled feature
-- `default-domain-cert.ts` - Certificate management without automatic DNS validation
-- Users must manually validate certificates via DNS
-
-## Key Technologies
-
-- Runtime: Node.js 22+, TypeScript 5.9+, Bun
-- AWS SDK: @aws-sdk/\* v3.188+ (modular)
-- CloudFormation: AWS CDK CloudFormation diff
-- Bundling: esbuild, Docker
-- CLI: yargs-parser, prompts, kleur (colors)
-- Validation: Zod, AJV
-- Observability: Sentry, Mixpanel
-- Package Manager: @yao-pkg/pkg (for binaries)
-
-## Important Notes
-
-- All scripts use `bun` to run and check `import.meta.main` to determine if they're the entry point
-- Helper lambdas are compiled separately and packaged into deployment artifacts
-- The codebase supports dual distribution: CLI binary + Node.js SDK
-- Event-driven architecture tracks all operations for audit trails
-- Hot-swap optimization enables sub-second deployments without full CF updates
-- Type-safe config system with IDE autocomplete via TypeScript classes
-- Some features requiring external services have stub implementations (TRPC API, default domains)

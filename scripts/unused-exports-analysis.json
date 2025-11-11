@@ -1,0 +1,218 @@
+[
+  {
+    "file": "shared/naming/project-fs-paths.ts",
+    "unusedExports": [
+      "DIST_FOLDER_NAME",
+      "PUBLISH_FOLDER_NAME",
+      "SOURCE_MAPS_FOLDER_NAME",
+      "SOURCE_CODE_DIST_FOLDER_NAME",
+      "SOURCE_FOLDER_NAME",
+      "JSON_SCHEMAS_FOLDER_NAME",
+      "SOURCE_MAP_INSTALL_FILENAME",
+      "BINARY_DIST_FOLDER_NAME",
+      "CLI_RELEASE_FOLDER_NAME",
+      "SDK_RELEASE_FOLDER_NAME",
+      "PLATFORM_PACKAGES_FOLDER_NAME",
+      "SDK_BUILD_DIST_FOLDER_PATH",
+      "PLATFORM_PACKAGES_FOLDER_PATH",
+      "PUBLISH_FOLDER_PATH",
+      "SOURCE_MAPS_FOLDER_PATH",
+      "NPM_PACKAGE_JSON_SOURCE_PATH",
+      "BRIDGE_FILES_DEST_FOLDER_PATH",
+      "CONFIG_SCHEMA_DEST_FOLDER_PATH",
+      "SDK_DIST_PATH",
+      "USER_PROJECTS_PATH",
+      "SDK_TYPINGS_PATH",
+      "CLI_ENTRYFILE_SOURCE_PATH",
+      "RELEASE_NOTES_TEMPLATE_PATH",
+      "GENERATED_RELEASE_NOTES_PATH",
+      "RELATIVE_HELPER_LAMBDAS_DIST_FOLDER_PATH",
+      "SRC_INDEX_SOURCE_PATH"
+    ],
+    "totalExports": 62
+  },
+  {
+    "file": "shared/utils/misc.ts",
+    "unusedExports": [
+      "getCliArg",
+      "safeJsonParse",
+      "isNumeric",
+      "compareObjectByKeyAlphabetically",
+      "streamToBuffer",
+      "isMoreThanOneDefined",
+      "removeDuplicates",
+      "isOlderThanSeconds",
+      "getLastSplitPart",
+      "Pend",
+      "getLocalBuildExternals",
+      "applyAll",
+      "findNthIndex",
+      "measureTime",
+      "getInstanceMethodNames",
+      "deletePropertiesWithValues",
+      "lowerCaseFirstCharacter",
+      "getAllNumbersFromString",
+      "notEmpty"
+    ],
+    "totalExports": 65
+  },
+  {
+    "file": "shared/packaging/bundlers/es/utils.ts",
+    "unusedExports": [
+      "PackageJsonDepsInfo",
+      "getInfoFromPackageJson",
+      "hasBinary",
+      "getEsPackageManager",
+      "PACKAGE_LOCKS",
+      "resolvePrisma",
+      "getModuleNameFromArgs",
+      "getAllJsDependenciesFromMultipleFiles",
+      "copyNodeModules",
+      "getLambdaRuntimeFromNodeTarget",
+      "determineIfAlias",
+      "getModuleNameFromPath",
+      "copyToDeploymentPackage",
+      "getExternalDeps",
+      "getModuleFromImporter",
+      "getFailedImportsFromEsbuildError",
+      "resolveDifferentSourceMapLocation"
+    ],
+    "totalExports": 18
+  },
+  {
+    "file": "shared/aws/pricing-info.ts",
+    "unusedExports": [
+      "AwsServiceCsvOfferCode",
+      "ResourcePricingInformation",
+      "productsInfo",
+      "productNameBuilders",
+      "SERVICES_WITH_STATIC_PRICES",
+      "getProductsPricingInfoFromDynamoTable",
+      "getPricingInformationForResource",
+      "loadProductPricesIntoDynamoTable",
+      "getCumulatedPriceInfoForStack"
+    ],
+    "totalExports": 13
+  },
+  {
+    "file": "shared/utils/fs-utils.ts",
+    "unusedExports": [
+      "getFilePathWithoutExtension",
+      "getJavaPackageName",
+      "adjustIniFileContent",
+      "getDirectoryContent",
+      "retryableCopy",
+      "copyUsingTempDir",
+      "getAllFilesWithExtension",
+      "isPathInside",
+      "arrayToCsv"
+    ],
+    "totalExports": 32
+  },
+  {
+    "file": "shared/utils/github-api.ts",
+    "unusedExports": [
+      "GitHubApiError",
+      "GITHUB_AUTH_TOKEN",
+      "getAllStacktapeIssues",
+      "createIssue",
+      "deleteRepository",
+      "deleteRelease",
+      "uploadReleaseAsset"
+    ],
+    "totalExports": 12
+  },
+  {
+    "file": "shared/naming/utils.ts",
+    "unusedExports": [
+      "getJobNameForSingleContainerWorkload",
+      "getJobNameForMultiContainerWorkload",
+      "getBaseAwsConsoleLink",
+      "getBaseCfSubstitutedAwsConsoleLink",
+      "buildResourceName",
+      "getLogGroupBaseName"
+    ],
+    "totalExports": 32
+  },
+  {
+    "file": "shared/utils/dockerfiles.ts",
+    "unusedExports": [
+      "buildEsBinInstallerDockerfile",
+      "buildPythonArtifactDockerfile",
+      "buildJavaArtifactDockerfile",
+      "buildGoArtifactDockerfile"
+    ],
+    "totalExports": 8
+  },
+  {
+    "file": "shared/aws/sdk-manager/utils.ts",
+    "unusedExports": [
+      "automaticUploadFilterPresets",
+      "defaultGetErrorFunction",
+      "transformToCliArgs"
+    ],
+    "totalExports": 6
+  },
+  {
+    "file": "shared/utils/docker.ts",
+    "unusedExports": [
+      "handleDockerError",
+      "execDocker",
+      "buildDockerImageUsingDockerode"
+    ],
+    "totalExports": 15
+  },
+  {
+    "file": "shared/utils/telemetry.ts",
+    "unusedExports": [
+      "identifyUserInMixpanel",
+      "deleteUserIdentityFromMixpanel",
+      "mergeUserIdentityInMixpanel"
+    ],
+    "totalExports": 5
+  },
+  {
+    "file": "shared/aws/codebuild.ts",
+    "unusedExports": [
+      "startCodebuildDelete",
+      "getCodebuildLogGroupNameFromBuildInfo"
+    ],
+    "totalExports": 5
+  },
+  {
+    "file": "shared/utils/exec.ts",
+    "unusedExports": [
+      "cancellableExec",
+      "nodeExec"
+    ],
+    "totalExports": 4
+  },
+  {
+    "file": "shared/aws/cloudformation.ts",
+    "unusedExports": [
+      "respondToCloudformation"
+    ],
+    "totalExports": 4
+  },
+  {
+    "file": "shared/naming/aws-resource-names.ts",
+    "unusedExports": [
+      "codebuildDeploymentBucketResourceName"
+    ],
+    "totalExports": 2
+  },
+  {
+    "file": "shared/utils/bin-executable.ts",
+    "unusedExports": [
+      "getDevModeBinPath"
+    ],
+    "totalExports": 5
+  },
+  {
+    "file": "shared/utils/constants.ts",
+    "unusedExports": [
+      "STACKTAPE_APP_COM_HOSTED_ZONE_ID"
+    ],
+    "totalExports": 18
+  }
+]

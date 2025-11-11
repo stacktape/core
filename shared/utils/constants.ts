@@ -49,10 +49,6 @@ export const SESSION_MANAGER_PLUGIN_BINARY_FILE_NAMES: { [platform in SupportedP
 
 export const COMMENT_FOR_STACKTAPE_ZONE = 'STACKTAPE';
 
-// export const USER_APPS_DEFAULT_DOMAIN_SUFFIX = '.stacktape-app.com';
-
-export const STACKTAPE_APP_COM_HOSTED_ZONE_ID = 'Z04215881CRP1YWPXYIM6';
-
 export const EDGE_LAMBDA_ENV_ASSET_REPLACER_PLACEHOLDER = '"{{_STP_INJ_ENV_}}"';
 
 export const CF_ESCAPED_DYNAMIC_REFERENCE_START = '#stp-sec#';

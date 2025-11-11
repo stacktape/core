@@ -105,12 +105,3 @@ export const getInstallationScript = () => {
   };
   return installationScripts[getPlatform()];
 };
-
-export const getDevModeBinPath = () => {
-  const binPath = {
-    win32: 'windows/stacktape.exe',
-    darwin: 'macos/stacktape',
-    linux: 'linux/stacktape'
-  }[process.platform];
-  return join(process.cwd(), '__binary-dist', binPath);
-};

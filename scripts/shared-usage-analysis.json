@@ -1,0 +1,594 @@
+{
+  "unusedFiles": [
+    "shared/aws/identity.ts",
+    "shared/aws/s3-sync/index.ts",
+    "shared/aws/s3-sync/multipart-etag.ts",
+    "shared/aws/stack-info.ts",
+    "shared/naming/arns.spec.ts",
+    "shared/naming/cf-evaluated-links.spec.ts",
+    "shared/naming/cf-registry-types.spec.ts",
+    "shared/naming/console-links.spec.ts",
+    "shared/naming/domain-names.spec.ts",
+    "shared/naming/fs-paths.spec.ts",
+    "shared/naming/helper-lambdas-resource-names.spec.ts",
+    "shared/naming/logical-names.spec.ts",
+    "shared/naming/metadata-names.spec.ts",
+    "shared/naming/project-fs-paths.spec.ts",
+    "shared/naming/resource-referencable-params.spec.ts",
+    "shared/naming/resource-uris.spec.ts",
+    "shared/naming/ssm-secret-parameters.spec.ts",
+    "shared/naming/stack-output-names.spec.ts",
+    "shared/naming/stacktape-cloudfront-headers.spec.ts",
+    "shared/naming/tag-names.spec.ts",
+    "shared/naming/utils.spec.ts",
+    "shared/packaging/_shared.ts",
+    "shared/packaging/bundlers/es/config.ts",
+    "shared/packaging/bundlers/es/copy-docker-installed-modules.ts",
+    "shared/packaging/bundlers/es/copy-host-modules.ts",
+    "shared/packaging/bundlers/es/esbuild-decorators/index.ts",
+    "shared/packaging/bundlers/es/esbuild-decorators/strip-it.ts",
+    "shared/packaging/bundlers/go/index.ts",
+    "shared/packaging/bundlers/go/utils.ts",
+    "shared/packaging/bundlers/java/index.ts",
+    "shared/packaging/bundlers/java/utils.ts",
+    "shared/packaging/bundlers/py/index.ts",
+    "shared/packaging/bundlers/py/utils.ts",
+    "shared/trpc/api-key-protected.ts",
+    "shared/trpc/aws-identity-protected.ts",
+    "shared/utils/aws-regions.spec.ts",
+    "shared/utils/aws-regions.ts",
+    "shared/utils/bin-executable.spec.ts",
+    "shared/utils/constants.spec.ts",
+    "shared/utils/dates.spec.ts",
+    "shared/utils/dates.ts",
+    "shared/utils/es-install-scripts.ts",
+    "shared/utils/extract-paths-from-config.ts",
+    "shared/utils/filter-files.ts",
+    "shared/utils/force-delete.ts",
+    "shared/utils/hashing.spec.ts",
+    "shared/utils/id-generation.spec.ts",
+    "shared/utils/id-generation.ts",
+    "shared/utils/json-fetch.spec.ts",
+    "shared/utils/json-schema.spec.ts",
+    "shared/utils/roles.spec.ts",
+    "shared/utils/schema-parsing.ts",
+    "shared/utils/short-hash.spec.ts",
+    "shared/utils/stacktape-fees.spec.ts",
+    "shared/utils/stacktape-fees.ts",
+    "shared/utils/streams.spec.ts",
+    "shared/utils/streams.ts",
+    "shared/utils/subscription-plans.spec.ts",
+    "shared/utils/subscription-plans.ts",
+    "shared/utils/test-utils.ts",
+    "shared/utils/validation.spec.ts",
+    "shared/utils/yaml.spec.ts"
+  ],
+  "usedFiles": [
+    "shared/aws/buckets.ts",
+    "shared/aws/cloudformation.ts",
+    "shared/aws/codebuild.ts",
+    "shared/aws/ecs-deployment-monitoring.ts",
+    "shared/aws/fargate.ts",
+    "shared/aws/log-collector/index.ts",
+    "shared/aws/pricing-info.ts",
+    "shared/aws/rds.ts",
+    "shared/aws/sdk-manager/index.ts",
+    "shared/aws/sdk-manager/utils.ts",
+    "shared/naming/arns.ts",
+    "shared/naming/aws-resource-names.ts",
+    "shared/naming/cf-evaluated-links.ts",
+    "shared/naming/cf-registry-types.ts",
+    "shared/naming/console-links.ts",
+    "shared/naming/domain-names.ts",
+    "shared/naming/fs-paths.ts",
+    "shared/naming/helper-lambdas-resource-names.ts",
+    "shared/naming/logical-names.ts",
+    "shared/naming/metadata-names.ts",
+    "shared/naming/project-fs-paths.ts",
+    "shared/naming/resource-referencable-params.ts",
+    "shared/naming/resource-uris.ts",
+    "shared/naming/ssm-secret-parameters.ts",
+    "shared/naming/stack-output-names.ts",
+    "shared/naming/stacktape-cloudfront-headers.ts",
+    "shared/naming/tag-names.ts",
+    "shared/naming/utils.ts",
+    "shared/packaging/bundlers/es/index.ts",
+    "shared/packaging/bundlers/es/utils.ts",
+    "shared/packaging/custom-artifact.ts",
+    "shared/packaging/custom-dockerfile.ts",
+    "shared/packaging/external-buildpack.ts",
+    "shared/packaging/nextjs-web.ts",
+    "shared/packaging/nixpacks.ts",
+    "shared/packaging/stacktape-es-image-buildpack.ts",
+    "shared/packaging/stacktape-es-lambda-buildpack.ts",
+    "shared/packaging/stacktape-go-image-buildpack.ts",
+    "shared/packaging/stacktape-go-lambda-buildpack.ts",
+    "shared/packaging/stacktape-java-image-buildpack.ts",
+    "shared/packaging/stacktape-java-lambda-buildpack.ts",
+    "shared/packaging/stacktape-py-image-buildpack.ts",
+    "shared/packaging/stacktape-py-lambda-buildpack.ts",
+    "shared/utils/bin-executable.ts",
+    "shared/utils/constants.ts",
+    "shared/utils/dependency-installer.ts",
+    "shared/utils/docker.ts",
+    "shared/utils/dockerfiles.ts",
+    "shared/utils/download-file.ts",
+    "shared/utils/exec.ts",
+    "shared/utils/fs-utils.ts",
+    "shared/utils/github-api.ts",
+    "shared/utils/github-file-manipulation.ts",
+    "shared/utils/hashing.ts",
+    "shared/utils/json-fetch.ts",
+    "shared/utils/json-schema.ts",
+    "shared/utils/misc.ts",
+    "shared/utils/monorepo.ts",
+    "shared/utils/nixpack-exec.ts",
+    "shared/utils/pack-exec.ts",
+    "shared/utils/ports.ts",
+    "shared/utils/prettier.ts",
+    "shared/utils/rds-engines.ts",
+    "shared/utils/roles.ts",
+    "shared/utils/runtimes.ts",
+    "shared/utils/session-manager-exec.ts",
+    "shared/utils/short-hash.ts",
+    "shared/utils/stack-info-map.ts",
+    "shared/utils/stacktape-config.ts",
+    "shared/utils/telemetry.ts",
+    "shared/utils/unzip.ts",
+    "shared/utils/user-prompt.ts",
+    "shared/utils/validation.ts",
+    "shared/utils/yaml.ts",
+    "shared/utils/zip.ts"
+  ],
+  "namespaceImports": [],
+  "usedExports": {
+    "shared/utils/bin-executable": [
+      "getInstallationScript",
+      "isStacktapeInstalledOnSystem",
+      "checkExecutableInPath",
+      "getPlatform"
+    ],
+    "shared/utils/fs-utils": [
+      "isFileAccessible",
+      "getIniFileContent",
+      "getRelativePath",
+      "isDirAccessible",
+      "transformToUnixPath",
+      "getPathRelativeTo",
+      "deleteDirectoryContent",
+      "getAllFilesInDir",
+      "dynamicRequireLibraryFromUserNodeModules",
+      "getFileExtension",
+      "getContainingFolderName",
+      "getFileNameWithoutExtension",
+      "dirExists",
+      "dynamicRequire",
+      "getBaseName",
+      "getFileContent",
+      "getFileHash",
+      "getFileSize",
+      "getFolderSize",
+      "getFolder",
+      "getFirstExistingPath",
+      "getHashFromMultipleFiles",
+      "getMatchingFilesByGlob"
+    ],
+    "shared/naming/logical-names": [
+      "cfLogicalNames"
+    ],
+    "shared/utils/misc": [
+      "propertyFromObjectOrNull",
+      "getFirstAndLastItem",
+      "groupBy",
+      "orderPropertiesOfObjectAccordingToKeys",
+      "wait",
+      "serialize",
+      "isJson",
+      "sortObjectKeys",
+      "lowerCaseFirstCharacterOfEveryWord",
+      "settleAllBeforeThrowing",
+      "filterDuplicates",
+      "getError",
+      "transformToCidr",
+      "capitalizeFirstLetter",
+      "processAllNodes",
+      "isValidJson",
+      "definedValueOr",
+      "hasProperties",
+      "isNonNullObject",
+      "replaceAll",
+      "traverseToMaximalExtent",
+      "processAllNodesSync",
+      "removePropertiesFromObject",
+      "getUniqueDuplicates",
+      "isAlphanumeric",
+      "splitStringIntoLines",
+      "lowerCaseFirstCharacterOfObjectKeys",
+      "processConcurrently",
+      "areStringArraysContentsEqual",
+      "isPromise",
+      "whitespacePrefixMultilineText",
+      "getTimeSinceProcessStart",
+      "isSmallAlphanumericDashCase",
+      "localBuildTsConfigPath",
+      "hasDuplicates",
+      "getHomeDir",
+      "getByteSize",
+      "getRandomNumberFromInterval",
+      "raiseError",
+      "chunkArray",
+      "streamToString",
+      "stringMatchesGlob",
+      "chunkString",
+      "removeColoringFromString",
+      "builtinModules",
+      "getTsconfigAliases"
+    ],
+    "shared/naming/utils": [
+      "getRoleArnFromSessionArn",
+      "obfuscatedNamesStateHolder",
+      "getJobName",
+      "getLocalInvokeContainerName",
+      "getStacktapeStackInfoFromTemplateDescription",
+      "isStacktapeStackDescription",
+      "getSimpleServiceDefaultContainerName",
+      "getArrayLikeDescriptiveName",
+      "portMappingsPortName",
+      "getUserPoolDomainPrefix",
+      "getCustomAlarmDescription",
+      "getAlarmDescription",
+      "injectedParameterEnvVarName",
+      "getStackOutputName",
+      "getStpNameForResource",
+      "getStpNameForAlarm",
+      "buildLambdaS3Key",
+      "getBaseS3EndpointForRegion",
+      "getCfTemplateS3Key",
+      "getCloudformationTemplateUrl",
+      "getEcrImageTag",
+      "getEcrImageUrl",
+      "getEcrRepositoryUrl",
+      "getStpTemplateS3Key",
+      "getExportedStackOutputName",
+      "getStackCfTemplateDescription",
+      "getStackName"
+    ],
+    "shared/utils/hashing": [
+      "getGloballyUniqueStackHash",
+      "getDirectoryChecksum",
+      "mergeHashes"
+    ],
+    "shared/utils/user-prompt": [
+      "userPrompt"
+    ],
+    "shared/naming/fs-paths": [
+      "fsPaths"
+    ],
+    "shared/utils/telemetry": [
+      "upsertUserToMixpanel",
+      "trackEventToMixpanel"
+    ],
+    "../../../shared/trpc/api-key-protected": [
+      "ApiKeyProtectedClient"
+    ],
+    "shared/utils/stack-info-map": [
+      "getCloudformationChildResources",
+      "traverseResourcesInMap"
+    ],
+    "shared/aws/codebuild": [
+      "getCodebuildLogStreamNameFromBuildInfo",
+      "preparePipelineResources",
+      "startCodebuildDeployment"
+    ],
+    "shared/utils/yaml": [
+      "stringifyToYaml",
+      "parseYaml"
+    ],
+    "shared/naming/tag-names": [
+      "tagNames"
+    ],
+    "shared/utils/docker": [
+      "dockerRun",
+      "inspectDockerContainer",
+      "listDockerContainers",
+      "stopDockerContainer",
+      "dockerLogin",
+      "pushDockerImage",
+      "tagDockerImage",
+      "getDockerBuildxSupportedPlatforms",
+      "installDockerPlatforms",
+      "isDockerRunning",
+      "buildDockerImage",
+      "getDockerImageDetails"
+    ],
+    "shared/naming/console-links": [
+      "consoleLinks"
+    ],
+    "shared/utils/stacktape-config": [
+      "getTypescriptConfig"
+    ],
+    "shared/naming/project-fs-paths": [
+      "STARTER_PROJECTS_METADATA_DIST_PATH",
+      "BIN_DIST_FOLDER_PATH",
+      "BRIDGE_FILES_FOLDER_NAME",
+      "BRIDGE_FILES_SOURCE_FOLDER_PATH",
+      "CLI_DIST_PATH",
+      "COMPLETIONS_SCRIPTS_PATH",
+      "CONFIG_SCHEMA_PATH",
+      "DIST_FOLDER_PATH",
+      "HELPER_LAMBDAS_FOLDER_NAME",
+      "SCRIPTS_ASSETS_PATH",
+      "NPM_RELEASE_FOLDER_PATH",
+      "SOURCE_FOLDER_PATH",
+      "SDK_SCHEMA_PATH",
+      "SDK_SOURCE_PATH",
+      "AJV_VALIDATION_CODE_PATH",
+      "GENERATED_FILES_FOLDER_PATH",
+      "CLI_SOURCE_PATH",
+      "CLOUDFORM_FOLDER_PATH",
+      "CLOUDFORM_ROOT_HELPER_FOLDER_PATH",
+      "DB_ENGINE_VERSIONS_FOLDER",
+      "PACK_GENERATED_FOLDER_PATH",
+      "RESOURCES_DESCRIPTION_DIST_PATH",
+      "CLI_SCHEMA_PATH",
+      "JSON_SCHEMAS_FOLDER_PATH",
+      "GENERATED_STARTER_PROJECTS_DIR_PATH",
+      "STARTER_PROJECTS_SOURCE_PATH",
+      "AWS_PRICE_INFO_GENERATED_FOLDER_PATH",
+      "CLI_BUILD_DIST_FOLDER_PATH",
+      "HELPER_LAMBDAS_DIST_FOLDER_PATH",
+      "HELPER_LAMBDAS_SOURCE_FOLDER_PATH",
+      "CLI_RELEASE_FOLDER_PATH",
+      "INSTALL_SCRIPTS_PATH",
+      "PUBLISH_GITHUB_REPO_DIR_PATH",
+      "PUBLISH_STARTER_PROJECTS_DIR_PATH",
+      "GITHUB_REPO_README_PATH",
+      "SOURCE_MAP_INSTALL_DIST_PATH"
+    ],
+    "shared/utils/download-file": [
+      "downloadFile"
+    ],
+    "shared/utils/unzip": [
+      "unzip"
+    ],
+    "../../../shared/utils/telemetry": [
+      "identifyUserInMixpanel"
+    ],
+    "shared/naming/arns": [
+      "arns"
+    ],
+    "shared/aws/ecs-deployment-monitoring": [
+      "EcsServiceDeploymentStatusPoller",
+      "isEcsServiceCreateOrUpdateCloudformationEvent"
+    ],
+    "shared/naming/aws-resource-names": [
+      "awsResourceNames"
+    ],
+    "shared/utils/constants": [
+      "NOT_YET_KNOWN_IDENTIFIER",
+      "PARENT_IDENTIFIER_CUSTOM_CF",
+      "PARENT_IDENTIFIER_SHARED_GLOBAL",
+      "STACKTAPE_SERVICE_CUSTOM_RESOURCE_LAMBDA_IDENTIFIER",
+      "REGIONS_WITH_REGIONAL_CDN_EDGE_LOCATION",
+      "MONGODB_PROVIDER_DEFAULT_CREDENTIALS_ID",
+      "THIRD_PARTY_PROVIDER_CREDENTIALS_REGION",
+      "EDGE_LAMBDA_ENV_ASSET_REPLACER_PLACEHOLDER",
+      "UPSTASH_PROVIDER_DEFAULT_CREDENTIALS_ID",
+      "UNKNOWN_CLOUDFORMATION_PRIVATE_TYPE_VERSION_IDENTIFIER",
+      "COMMENT_FOR_STACKTAPE_ZONE",
+      "CF_ESCAPED_DYNAMIC_REFERENCE_END",
+      "CF_ESCAPED_DYNAMIC_REFERENCE_START",
+      "NIXPACKS_BINARY_FILE_NAMES",
+      "PACK_BINARY_FILE_NAMES",
+      "SESSION_MANAGER_PLUGIN_BINARY_FILE_NAMES",
+      "STACKTAPE_CF_TEMPLATE_DESCRIPTION_PREFIX"
+    ],
+    "shared/aws/sdk-manager/utils": [
+      "redirectPlugin",
+      "retryPlugin",
+      "isBucketNativelySupportedHeader"
+    ],
+    "shared/utils/dependency-installer": [
+      "dependencyInstaller"
+    ],
+    "shared/aws/cloudformation": [
+      "STACK_IS_READY_FOR_MODIFYING_OPERATION_STATUS",
+      "STACK_IS_READY_FOR_ROLLBACK_OPERATION_STATUS",
+      "STACK_OPERATION_IN_PROGRESS_STATUS"
+    ],
+    "shared/naming/metadata-names": [
+      "stackMetadataNames"
+    ],
+    "shared/naming/ssm-secret-parameters": [
+      "buildSSMParameterNameForReferencableParam",
+      "getSsmParameterNameForThirdPartyCredentials",
+      "getLegacySsmParameterStoreStackPrefix",
+      "getSsmParameterStoreStackPrefix",
+      "getSsmParameterNameForDomainInfo",
+      "parseDomainNameFromSmmParamName",
+      "getStacktapeApiKeySsmParameterName"
+    ],
+    "shared/naming/cf-evaluated-links": [
+      "cfEvaluatedLinks"
+    ],
+    "shared/aws/rds": [
+      "normalizeEngineType"
+    ],
+    "shared/utils/rds-engines": [
+      "isAuroraEngine"
+    ],
+    "shared/utils/roles": [
+      "getAssumeRolePolicyDocumentForFunctionRole"
+    ],
+    "shared/naming/resource-referencable-params": [
+      "resourceReferencableParams"
+    ],
+    "shared/naming/stacktape-cloudfront-headers": [
+      "stacktapeCloudfrontHeaders"
+    ],
+    "shared/utils/short-hash": [
+      "shortHash"
+    ],
+    "shared/naming/resource-uris": [
+      "resourceURIs"
+    ],
+    "shared/naming/cf-registry-types": [
+      "cfRegistryNames"
+    ],
+    "shared/naming/stack-output-names": [
+      "outputNames"
+    ],
+    "shared/aws/buckets": [
+      "isTransferAccelerationEnabledInRegion"
+    ],
+    "shared/naming/helper-lambdas-resource-names": [
+      "helperLambdaAwsResourceNames"
+    ],
+    "shared/utils/runtimes": [
+      "getDefaultRuntimeForExtension"
+    ],
+    "shared/aws/fargate": [
+      "ALLOWED_MEMORY_VALUES_FOR_CPU"
+    ],
+    "shared/naming/domain-names": [
+      "getPrefixForUserAppResourceDefaultDomainName"
+    ],
+    "shared/utils/json-fetch": [
+      "jsonFetch"
+    ],
+    "shared/packaging/custom-artifact": [
+      "buildUsingCustomArtifact"
+    ],
+    "shared/packaging/custom-dockerfile": [
+      "buildUsingCustomDockerfile"
+    ],
+    "shared/packaging/external-buildpack": [
+      "buildUsingExternalBuildpack"
+    ],
+    "shared/packaging/nextjs-web": [
+      "createNextjsWebArtifacts"
+    ],
+    "shared/packaging/nixpacks": [
+      "buildUsingNixpacks"
+    ],
+    "shared/packaging/stacktape-es-image-buildpack": [
+      "buildUsingStacktapeEsImageBuildpack"
+    ],
+    "shared/packaging/stacktape-es-lambda-buildpack": [
+      "buildUsingStacktapeEsLambdaBuildpack"
+    ],
+    "shared/packaging/stacktape-go-image-buildpack": [
+      "buildUsingStacktapeGoImageBuildpack"
+    ],
+    "shared/packaging/stacktape-go-lambda-buildpack": [
+      "buildUsingStacktapeGoLambdaBuildpack"
+    ],
+    "shared/packaging/stacktape-java-image-buildpack": [
+      "buildUsingStacktapeJavaImageBuildpack"
+    ],
+    "shared/packaging/stacktape-java-lambda-buildpack": [
+      "buildUsingStacktapeJavaLambdaBuildpack"
+    ],
+    "shared/packaging/stacktape-py-image-buildpack": [
+      "buildUsingStacktapePyImageBuildpack"
+    ],
+    "shared/packaging/stacktape-py-lambda-buildpack": [
+      "buildUsingStacktapePyLambdaBuildpack"
+    ],
+    "shared/utils/validation": [
+      "isEmailValid",
+      "validateEnvVariableValue"
+    ],
+    "../../shared/utils/fs-utils": [
+      "adjustIniFileContent",
+      "getIniFileContent"
+    ],
+    "shared/aws/sdk-manager": [
+      "AwsSdkManager"
+    ],
+    "shared/utils/exec": [
+      "executeGit",
+      "exec"
+    ],
+    "shared/aws/log-collector": [
+      "LogCollectorStream"
+    ],
+    "shared/utils/ports": [
+      "isPortInUse"
+    ],
+    "shared/utils/session-manager-exec": [
+      "sessionManagerPath"
+    ],
+    "shared/utils/logging": [
+      "logInfo",
+      "logSuccess",
+      "logErrorMessage"
+    ],
+    "shared/utils/zip": [
+      "extractTgzArchive",
+      "archiveItem"
+    ],
+    "shared/packaging/bundlers/es": [
+      "buildEsCode"
+    ],
+    "shared/utils/prettier": [
+      "prettifyFile",
+      "prettify"
+    ],
+    "../shared/naming/project-fs-paths": [
+      "NPM_PACKAGE_JSON_SOURCE_PATH",
+      "NPM_RELEASE_FOLDER_PATH"
+    ],
+    "../shared/utils/logging.js": [
+      "logInfo",
+      "logSuccess"
+    ],
+    "shared/utils/json-schema": [
+      "getTypeDetailsFromNode",
+      "resolveRef"
+    ],
+    "shared/utils/logging.js": [
+      "logInfo",
+      "logSuccess",
+      "logError",
+      "logWarn"
+    ],
+    "../shared/utils/schema-parsing": [
+      "getStacktapeResourceDefinitions"
+    ],
+    "shared/aws/pricing-info": [
+      "PricingInfo",
+      "RegionalPricingInfo",
+      "calculateFlatMonthlyCost",
+      "downloadSimplePricingInfo"
+    ],
+    "shared/utils/github-api": [
+      "createRepository",
+      "getRepository",
+      "createRelease",
+      "getReleaseByTag",
+      "octokit"
+    ],
+    "shared/utils/github-file-manipulation": [
+      "uploadReleaseAsset"
+    ],
+    "shared/packaging/bundlers/es/utils": [
+      "getLockFileData"
+    ],
+    "shared/utils/pack-exec": [
+      "execPack"
+    ],
+    "shared/utils/nixpack-exec": [
+      "execNixpacks"
+    ],
+    "shared/utils/dockerfiles": [
+      "buildEsDockerfile",
+      "buildGoDockerfile",
+      "buildJavaDockerfile",
+      "buildPythonDockerfile"
+    ],
+    "shared/utils/monorepo": [
+      "findProjectRoot"
+    ]
+  }
+}
