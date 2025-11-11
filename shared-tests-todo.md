@@ -11,7 +11,7 @@ This document tracks the testing progress for all files in the `shared/` folder.
 ## Utils (`shared/utils/`)
 
 - [x] `aws-regions.ts` - AWS regions utilities
-- [ ] `bin-executable.ts` - Binary executable utilities
+- [x] `bin-executable.ts` - Binary executable utilities
 - [x] `constants.ts` - Constants definitions
 - [x] `dates.ts` - Date utilities
 - [ ] `dependency-installer.ts` - Dependency installer utilities
@@ -24,7 +24,7 @@ This document tracks the testing progress for all files in the `shared/` folder.
 - [x] `hashing.ts` - Hashing utilities
 - [x] `id-generation.ts` - ID generation utilities
 - [ ] `json-fetch.ts` - JSON fetch utilities
-- [ ] `json-schema.ts` - JSON schema utilities
+- [x] `json-schema.ts` - JSON schema utilities
 - [ ] `misc.ts` - Miscellaneous utilities
 - [ ] `pack-exec.ts` - Pack execution utilities
 - [ ] `prettier.ts` - Prettier utilities
@@ -32,14 +32,14 @@ This document tracks the testing progress for all files in the `shared/` folder.
 - [x] `roles.ts` - Role utilities
 - [ ] `session-manager-exec.ts` - Session manager execution utilities
 - [x] `short-hash.ts` - Short hash utilities
-- [ ] `stacktape-fees.ts` - Stacktape fees utilities
+- [x] `stacktape-fees.ts` - Stacktape fees utilities
 - [x] `streams.ts` - Stream utilities
-- [ ] `subscription-plans.ts` - Subscription plans utilities
+- [x] `subscription-plans.ts` - Subscription plans utilities
 - [ ] `telemetry.ts` - Telemetry utilities
 - [ ] `test-utils.ts` - Test utilities
 - [ ] `user-prompt.ts` - User prompt utilities
 - [x] `validation.ts` - Validation utilities
-- [ ] `yaml.ts` - YAML utilities
+- [x] `yaml.ts` - YAML utilities
 - [ ] `zip.ts` - ZIP utilities
 
 ---
@@ -134,10 +134,15 @@ This document tracks the testing progress for all files in the `shared/` folder.
 ## Summary
 
 - **Total Files**: 79
-- **Completed**: 11 (short-hash + 10 new files)
-- **Remaining**: 68
+- **Completed**: 16
+- **Remaining**: 63
 
-## Recently Completed
+## Test Statistics
+- **Total Tests**: 343
+- **Total Assertions**: 712
+- **All tests passing** ✅
+
+## Recently Completed (Batch 1 - 11 files)
 - `short-hash.ts` - Short hash utilities (17 tests)
 - `dates.ts` - Date utilities (30 tests)
 - `id-generation.ts` - ID generation utilities (13 tests)
@@ -149,3 +154,10 @@ This document tracks the testing progress for all files in the `shared/` folder.
 - `streams.ts` - Stream utilities (22 tests)
 - `naming/tag-names.ts` - Tag names (24 tests)
 - `naming/utils.ts` - Naming utilities - partial (38 tests)
+
+## Recently Completed (Batch 2 - 5 files)
+- `yaml.ts` - YAML parsing and stringification (19 tests)
+- `subscription-plans.ts` - Organization member limits (11 tests)
+- `stacktape-fees.ts` - Fee calculation with tiered pricing (30 tests)
+- `json-schema.ts` - Schema resolution and type extraction (20 tests)
+- `bin-executable.ts` - Platform detection and installation scripts (26 tests)
