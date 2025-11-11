@@ -10,10 +10,10 @@ This document tracks the testing progress for all files in the `shared/` folder.
 
 ## Utils (`shared/utils/`)
 
-- [ ] `aws-regions.ts` - AWS regions utilities
+- [x] `aws-regions.ts` - AWS regions utilities
 - [ ] `bin-executable.ts` - Binary executable utilities
-- [ ] `constants.ts` - Constants definitions
-- [ ] `dates.ts` - Date utilities
+- [x] `constants.ts` - Constants definitions
+- [x] `dates.ts` - Date utilities
 - [ ] `dependency-installer.ts` - Dependency installer utilities
 - [ ] `docker.ts` - Docker utilities
 - [ ] `dockerfiles.ts` - Dockerfile utilities
@@ -21,24 +21,24 @@ This document tracks the testing progress for all files in the `shared/` folder.
 - [ ] `exec.ts` - Execution utilities
 - [ ] `fs-utils.ts` - File system utilities
 - [ ] `github-api.ts` - GitHub API utilities
-- [ ] `hashing.ts` - Hashing utilities
-- [ ] `id-generation.ts` - ID generation utilities
+- [x] `hashing.ts` - Hashing utilities
+- [x] `id-generation.ts` - ID generation utilities
 - [ ] `json-fetch.ts` - JSON fetch utilities
 - [ ] `json-schema.ts` - JSON schema utilities
 - [ ] `misc.ts` - Miscellaneous utilities
 - [ ] `pack-exec.ts` - Pack execution utilities
 - [ ] `prettier.ts` - Prettier utilities
 - [ ] `runtimes.ts` - Runtime utilities
-- [ ] `roles.ts` - Role utilities
+- [x] `roles.ts` - Role utilities
 - [ ] `session-manager-exec.ts` - Session manager execution utilities
 - [x] `short-hash.ts` - Short hash utilities
 - [ ] `stacktape-fees.ts` - Stacktape fees utilities
-- [ ] `streams.ts` - Stream utilities
+- [x] `streams.ts` - Stream utilities
 - [ ] `subscription-plans.ts` - Subscription plans utilities
 - [ ] `telemetry.ts` - Telemetry utilities
 - [ ] `test-utils.ts` - Test utilities
 - [ ] `user-prompt.ts` - User prompt utilities
-- [ ] `validation.ts` - Validation utilities
+- [x] `validation.ts` - Validation utilities
 - [ ] `yaml.ts` - YAML utilities
 - [ ] `zip.ts` - ZIP utilities
 
@@ -61,8 +61,8 @@ This document tracks the testing progress for all files in the `shared/` folder.
 - [ ] `ssm-secret-parameters.ts` - SSM secret parameters
 - [ ] `stack-output-names.ts` - Stack output names
 - [ ] `stacktape-cloudfront-headers.ts` - Stacktape CloudFront headers
-- [ ] `tag-names.ts` - Tag names
-- [ ] `utils.ts` - Naming utilities
+- [x] `tag-names.ts` - Tag names
+- [x] `utils.ts` - Naming utilities (partial - simple functions)
 
 ---
 
@@ -134,5 +134,18 @@ This document tracks the testing progress for all files in the `shared/` folder.
 ## Summary
 
 - **Total Files**: 79
-- **Completed**: 1
-- **Remaining**: 78
+- **Completed**: 11 (short-hash + 10 new files)
+- **Remaining**: 68
+
+## Recently Completed
+- `short-hash.ts` - Short hash utilities (17 tests)
+- `dates.ts` - Date utilities (30 tests)
+- `id-generation.ts` - ID generation utilities (13 tests)
+- `constants.ts` - Constants definitions (27 tests)
+- `aws-regions.ts` - AWS regions utilities (16 tests)
+- `validation.ts` - Validation utilities (21 tests)
+- `hashing.ts` - Hashing utilities (18 tests)
+- `roles.ts` - Role utilities (11 tests)
+- `streams.ts` - Stream utilities (22 tests)
+- `naming/tag-names.ts` - Tag names (24 tests)
+- `naming/utils.ts` - Naming utilities - partial (38 tests)
