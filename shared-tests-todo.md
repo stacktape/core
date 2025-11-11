@@ -23,7 +23,7 @@ This document tracks the testing progress for all files in the `shared/` folder.
 - [ ] `github-api.ts` - GitHub API utilities
 - [x] `hashing.ts` - Hashing utilities
 - [x] `id-generation.ts` - ID generation utilities
-- [ ] `json-fetch.ts` - JSON fetch utilities
+- [x] `json-fetch.ts` - JSON fetch utilities
 - [x] `json-schema.ts` - JSON schema utilities
 - [ ] `misc.ts` - Miscellaneous utilities
 - [ ] `pack-exec.ts` - Pack execution utilities
@@ -46,21 +46,22 @@ This document tracks the testing progress for all files in the `shared/` folder.
 
 ## Naming (`shared/naming/`)
 
-- [ ] `arns.ts` - ARN naming utilities
-- [ ] `cf-evaluated-links.ts` - CloudFormation evaluated links
-- [ ] `cf-registry-types.ts` - CloudFormation registry types
-- [ ] `console-links.ts` - Console links utilities
-- [ ] `fs-paths.ts` - File system paths
-- [ ] `helper-lambdas-resource-names.ts` - Helper lambdas resource names
-- [ ] `logical-names.ts` - Logical names
-- [ ] `metadata-names.ts` - Metadata names
-- [ ] `project-fs-paths.ts` - Project file system paths
-- [ ] `resource-names.ts` - Resource names
-- [ ] `resource-referencable-params.ts` - Resource referencable parameters
-- [ ] `resource-uris.ts` - Resource URIs
-- [ ] `ssm-secret-parameters.ts` - SSM secret parameters
-- [ ] `stack-output-names.ts` - Stack output names
-- [ ] `stacktape-cloudfront-headers.ts` - Stacktape CloudFront headers
+- [x] `arns.ts` - ARN naming utilities
+- [x] `cf-evaluated-links.ts` - CloudFormation evaluated links
+- [x] `cf-registry-types.ts` - CloudFormation registry types
+- [x] `console-links.ts` - Console links utilities
+- [x] `domain-names.ts` - Domain name utilities
+- [x] `fs-paths.ts` - File system paths
+- [x] `helper-lambdas-resource-names.ts` - Helper lambdas resource names
+- [x] `logical-names.ts` - Logical names
+- [x] `metadata-names.ts` - Metadata names
+- [x] `project-fs-paths.ts` - Project file system paths
+- [ ] `resource-names.ts` - Resource names (Note: actual file is aws-resource-names.ts)
+- [x] `resource-referencable-params.ts` - Resource referencable parameters
+- [x] `resource-uris.ts` - Resource URIs
+- [x] `ssm-secret-parameters.ts` - SSM secret parameters
+- [x] `stack-output-names.ts` - Stack output names
+- [x] `stacktape-cloudfront-headers.ts` - Stacktape CloudFront headers
 - [x] `tag-names.ts` - Tag names
 - [x] `utils.ts` - Naming utilities (partial - simple functions)
 
@@ -134,12 +135,12 @@ This document tracks the testing progress for all files in the `shared/` folder.
 ## Summary
 
 - **Total Files**: 79
-- **Completed**: 16
-- **Remaining**: 63
+- **Completed**: 32
+- **Remaining**: 47
 
 ## Test Statistics
-- **Total Tests**: 343
-- **Total Assertions**: 712
+- **Total Tests**: 718
+- **Total Assertions**: 1397
 - **All tests passing** ✅
 
 ## Recently Completed (Batch 1 - 11 files)
@@ -161,3 +162,23 @@ This document tracks the testing progress for all files in the `shared/` folder.
 - `stacktape-fees.ts` - Fee calculation with tiered pricing (30 tests)
 - `json-schema.ts` - Schema resolution and type extraction (20 tests)
 - `bin-executable.ts` - Platform detection and installation scripts (26 tests)
+
+## Recently Completed (Batch 3 - 10 files)
+- `naming/arns.ts` - ARN generation for AWS services (17 tests)
+- `naming/metadata-names.ts` - Stack metadata naming (14 tests)
+- `naming/stack-output-names.ts` - CloudFormation output names (12 tests)
+- `naming/stacktape-cloudfront-headers.ts` - Custom CloudFront headers (10 tests)
+- `naming/ssm-secret-parameters.ts` - SSM parameter path construction (37 tests)
+- `naming/helper-lambdas-resource-names.ts` - Edge lambda naming (17 tests)
+- `naming/resource-referencable-params.ts` - Referencable parameters (3 tests)
+- `naming/cf-evaluated-links.ts` - CloudFormation evaluated AWS console links (40 tests)
+- `naming/cf-registry-types.ts` - CloudFormation registry naming (20 tests)
+- `naming/console-links.ts` - AWS console direct links (42 tests)
+
+## Recently Completed (Batch 4 - 6 files)
+- `naming/resource-uris.ts` - Resource URIs for AWS services (24 tests)
+- `naming/domain-names.ts` - Domain name prefix generation (15 tests)
+- `naming/project-fs-paths.ts` - Project-level file system paths (57 tests)
+- `naming/fs-paths.ts` - Runtime file system paths (41 tests)
+- `naming/logical-names.ts` - CloudFormation logical names (69 tests)
+- `utils/json-fetch.ts` - JSON fetch wrapper (14 tests)
