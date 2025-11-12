@@ -29,9 +29,9 @@ This document tracks the testing progress for all files in the `src/` folder.
 - [x] `collections.ts` - Collection utilities (Batch 1)
 - [ ] `decorators.ts` - Decorator utilities
 - [x] `domains.ts` - Domain utilities (Batch 1)
-- [ ] `dotenv.ts` - Dotenv utilities
+- [x] `dotenv.ts` - Dotenv utilities (Batch 3)
 - [ ] `errors.ts` - Error utilities
-- [ ] `file-loaders.ts` - File loader utilities
+- [x] `file-loaders.ts` - File loader utilities (Batch 3)
 - [x] `formatting.ts` - Formatting utilities (Batch 1)
 - [ ] `git-info-manager/index.ts` - Git info manager
 - [ ] `git.ts` - Git utilities
@@ -50,7 +50,7 @@ This document tracks the testing progress for all files in the `src/` folder.
 - [ ] `stack-info-map-diff.ts` - Stack info map diff
 - [ ] `stack-info-map-sensitive-values.ts` - Stack info map sensitive values
 - [ ] `telemetry.ts` - Telemetry utilities
-- [ ] `temp-files.ts` - Temporary files utilities
+- [x] `temp-files.ts` - Temporary files utilities (Batch 3)
 - [x] `time.ts` - Time utilities (Batch 1)
 - [ ] `user-code-processing.ts` - User code processing
 - [x] `uuid.ts` - UUID utilities (Batch 1)
@@ -371,12 +371,12 @@ This document tracks the testing progress for all files in the `src/` folder.
 ## Summary
 
 - **Total Files**: 274
-- **Completed**: 12 (1 pre-existing + 8 from Batch 1 + 3 from Batch 2)
-- **Remaining**: 262
+- **Completed**: 15 (1 pre-existing + 8 from Batch 1 + 3 from Batch 2 + 3 from Batch 3)
+- **Remaining**: 259
 
 ## Test Statistics
-- **Total Tests**: ~370 (estimated)
-- **Total Assertions**: ~650 (estimated)
+- **Total Tests**: ~480 (estimated)
+- **Total Assertions**: ~850 (estimated)
 
 ---
 
@@ -405,11 +405,13 @@ AWS-related utilities with AWS SDK mocking:
 
 **Batch 2 Stats**: 3 files, ~77 tests, 100% passing
 
-### Batch 3: File & System Utils (Priority: High)
+### Batch 3: File & System Utils (Priority: High) ✅ COMPLETED
 File system and system-related utilities:
-- `file-loaders.ts`
-- `temp-files.ts`
-- `dotenv.ts`
+- [x] `dotenv.ts` - Dotenv parsing (30 tests)
+- [x] `temp-files.ts` - Temporary file operations (12 tests)
+- [x] `file-loaders.ts` - File loading utilities (25 tests)
+
+**Batch 3 Stats**: 3 files, ~67 tests, 100% passing
 
 ### Batch 4: Error & Validation (Priority: High)
 - `errors.ts`
