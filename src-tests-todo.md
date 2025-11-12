@@ -233,10 +233,10 @@ This document tracks the testing progress for all files in the `src/` folder.
 - [ ] `index.ts` - Main config manager
 - [ ] `config-resolver.ts` - Config resolver
 - [ ] `built-in-directives.ts` - Built-in directives
-- [ ] `utils/alarms.ts` - Alarms utilities
+- [x] `utils/alarms.ts` - Alarms utilities (Batch 6)
 - [ ] `utils/application-load-balancers.ts` - ALB utilities
 - [ ] `utils/bastion.ts` - Bastion utilities
-- [ ] `utils/buckets.ts` - Buckets utilities
+- [x] `utils/buckets.ts` - Buckets utilities (Batch 6)
 - [ ] `utils/custom-resource-definitions.ts` - Custom resource definitions utilities
 - [ ] `utils/edge-functions.ts` - Edge functions utilities
 - [ ] `utils/efs-filesystems.ts` - EFS filesystems utilities
@@ -250,8 +250,8 @@ This document tracks the testing progress for all files in the `src/` folder.
 - [ ] `utils/nextjs-webs.ts` - Next.js webs utilities
 - [ ] `utils/relational-databases.ts` - Relational databases utilities
 - [x] `utils/resource-references.ts` - Resource references utilities (Batch 5)
-- [ ] `utils/sns-topics.ts` - SNS topics utilities
-- [ ] `utils/sqs-queues.ts` - SQS queues utilities
+- [x] `utils/sns-topics.ts` - SNS topics utilities (Batch 6)
+- [x] `utils/sqs-queues.ts` - SQS queues utilities (Batch 6)
 - [ ] `utils/user-pools.ts` - User pools utilities
 - [x] `utils/validation.ts` - Validation utilities (Batch 5)
 - [ ] `utils/web-app-firewall.ts` - Web app firewall utilities
@@ -371,8 +371,8 @@ This document tracks the testing progress for all files in the `src/` folder.
 ## Summary
 
 - **Total Files**: 274
-- **Completed**: 20 (1 pre-existing + 8 from Batch 1 + 3 from Batch 2 + 3 from Batch 3 + 2 from Batch 4 + 3 from Batch 5)
-- **Remaining**: 254
+- **Completed**: 24 (1 pre-existing + 8 from Batch 1 + 3 from Batch 2 + 3 from Batch 3 + 2 from Batch 4 + 3 from Batch 5 + 4 from Batch 6)
+- **Remaining**: 250
 
 ## Test Statistics
 - **Total Tests**: ~560 (estimated)
@@ -427,12 +427,14 @@ Simple config manager utilities:
 
 **Batch 5 Stats**: 3 files, ~45 tests, 100% passing
 
-### Batch 6: More Config Manager Utils (Priority: Medium)
+### Batch 6: More Config Manager Utils (Priority: Medium) ✅ COMPLETED
 More complex config manager utilities:
-- `config-manager/utils/buckets.ts`
-- `config-manager/utils/sns-topics.ts`
-- `config-manager/utils/sqs-queues.ts`
-- `config-manager/utils/alarms.ts`
+- [x] `config-manager/utils/buckets.ts` - Bucket validation and reference resolution
+- [x] `config-manager/utils/sns-topics.ts` - SNS topic validation and reference resolution
+- [x] `config-manager/utils/sqs-queues.ts` - SQS queue validation and policy statements
+- [x] `config-manager/utils/alarms.ts` - Alarm resolution and eligibility checks
+
+**Batch 6 Stats**: 4 files, ~80 tests, 100% passing
 
 ### Batch 7: Naming & Type Utils (Priority: Medium)
 - `referenceable-types.ts`
