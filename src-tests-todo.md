@@ -242,13 +242,13 @@ This document tracks the testing progress for all files in the `src/` folder.
 - [ ] `utils/efs-filesystems.ts` - EFS filesystems utilities
 - [ ] `utils/event-buses.ts` - Event buses utilities
 - [ ] `utils/http-api-gateways.ts` - HTTP API gateways utilities
-- [ ] `utils/iam.ts` - IAM utilities
+- [x] `utils/iam.ts` - IAM utilities (Batch 14)
 - [ ] `utils/lambdas.ts` - Lambdas utilities
 - [x] `utils/misc.ts` - Miscellaneous utilities (Batch 5)
 - [ ] `utils/multi-container-workloads.ts` - Multi-container workloads utilities
 - [ ] `utils/network-load-balancers.ts` - NLB utilities
 - [ ] `utils/nextjs-webs.ts` - Next.js webs utilities
-- [ ] `utils/relational-databases.ts` - Relational databases utilities
+- [x] `utils/relational-databases.ts` - Relational databases utilities (Batch 14)
 - [x] `utils/resource-references.ts` - Resource references utilities (Batch 5)
 - [x] `utils/sns-topics.ts` - SNS topics utilities (Batch 6)
 - [x] `utils/sqs-queues.ts` - SQS queues utilities (Batch 6)
@@ -371,8 +371,8 @@ This document tracks the testing progress for all files in the `src/` folder.
 ## Summary
 
 - **Total Files**: 274
-- **Completed**: 35 (1 pre-existing + 8 from Batch 1 + 3 from Batch 2 + 3 from Batch 3 + 2 from Batch 4 + 3 from Batch 5 + 4 from Batch 6 + 1 from Batch 7 + 1 from Batch 8 + 1 from Batch 9 + 2 from Batch 10 + 2 from Batch 11 + 2 from Batch 12 + 2 from Batch 13)
-- **Remaining**: 239
+- **Completed**: 37 (1 pre-existing + 8 from Batch 1 + 3 from Batch 2 + 3 from Batch 3 + 2 from Batch 4 + 3 from Batch 5 + 4 from Batch 6 + 1 from Batch 7 + 1 from Batch 8 + 1 from Batch 9 + 2 from Batch 10 + 2 from Batch 11 + 2 from Batch 12 + 2 from Batch 13 + 2 from Batch 14)
+- **Remaining**: 237
 
 ## Test Statistics
 - **Total Tests**: ~560 (estimated)
@@ -473,9 +473,15 @@ More complex config manager utilities:
 - [x] `git.ts` - Git variable extraction functions
 - [x] `cli.ts` - CLI argument parsing and transformation
 
-**Batch 13 Stats**: 2 files, ~35 tests, 100% passing
+**Batch 13 Stats**: 2 files, ~37 tests, 100% passing
 
-### Batch 14+: Remaining Files (Priority: Low to Medium)
+### Batch 14: Config Manager Database & IAM Utils (Priority: Medium) ✅ COMPLETED
+- [x] `config-manager/utils/iam.ts` - IAM statement generation for S3 buckets
+- [x] `config-manager/utils/relational-databases.ts` - Database validation and maintenance window
+
+**Batch 14 Stats**: 2 files, ~40 tests, 100% passing
+
+### Batch 15+: Remaining Files (Priority: Low to Medium)
 Will be organized based on dependencies and complexity.
 
 ---
