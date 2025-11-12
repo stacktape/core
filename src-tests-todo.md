@@ -43,7 +43,7 @@ This document tracks the testing progress for all files in the `src/` folder.
 - [ ] `printer/index.ts` - Printer utilities
 - [ ] `printer/spinnies.ts` - Spinnies utilities
 - [ ] `python-bridge/index.ts` - Python bridge
-- [ ] `referenceable-types.ts` - Referenceable types
+- [x] `referenceable-types.ts` - Referenceable types (Batch 7)
 - [ ] `scripts.ts` - Scripts utilities
 - [ ] `sentry.ts` - Sentry utilities
 - [ ] `ssm-session.ts` - SSM session utilities
@@ -371,8 +371,8 @@ This document tracks the testing progress for all files in the `src/` folder.
 ## Summary
 
 - **Total Files**: 274
-- **Completed**: 24 (1 pre-existing + 8 from Batch 1 + 3 from Batch 2 + 3 from Batch 3 + 2 from Batch 4 + 3 from Batch 5 + 4 from Batch 6)
-- **Remaining**: 250
+- **Completed**: 25 (1 pre-existing + 8 from Batch 1 + 3 from Batch 2 + 3 from Batch 3 + 2 from Batch 4 + 3 from Batch 5 + 4 from Batch 6 + 1 from Batch 7)
+- **Remaining**: 249
 
 ## Test Statistics
 - **Total Tests**: ~560 (estimated)
@@ -436,8 +436,10 @@ More complex config manager utilities:
 
 **Batch 6 Stats**: 4 files, ~80 tests, 100% passing
 
-### Batch 7: Naming & Type Utils (Priority: Medium)
-- `referenceable-types.ts`
+### Batch 7: Naming & Type Utils (Priority: Medium) ✅ COMPLETED
+- [x] `referenceable-types.ts` - CloudFormation resource referenceable params
+
+**Batch 7 Stats**: 1 file, ~30 tests, 100% passing
 
 ### Batch 8: Template Manager (Priority: Medium)
 - `template-manager/utils.ts`
