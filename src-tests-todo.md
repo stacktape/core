@@ -36,7 +36,7 @@ This document tracks the testing progress for all files in the `src/` folder.
 - [ ] `git-info-manager/index.ts` - Git info manager
 - [x] `git.ts` - Git utilities (Batch 13)
 - [x] `helper-lambdas.ts` - Helper lambdas utilities (Batch 11)
-- [ ] `http-client.ts` - HTTP client utilities
+- [x] `http-client.ts` - HTTP client utilities (Batch 15)
 - [x] `ip.ts` - IP utilities (Batch 1)
 - [ ] `log-collector/index.ts` - Log collector
 - [x] `pretty-json.ts` - Pretty JSON utilities (Batch 1)
@@ -45,11 +45,11 @@ This document tracks the testing progress for all files in the `src/` folder.
 - [ ] `python-bridge/index.ts` - Python bridge
 - [x] `referenceable-types.ts` - Referenceable types (Batch 7)
 - [ ] `scripts.ts` - Scripts utilities
-- [ ] `sentry.ts` - Sentry utilities
+- [x] `sentry.ts` - Sentry utilities (Batch 15)
 - [ ] `ssm-session.ts` - SSM session utilities
 - [ ] `stack-info-map-diff.ts` - Stack info map diff
 - [ ] `stack-info-map-sensitive-values.ts` - Stack info map sensitive values
-- [ ] `telemetry.ts` - Telemetry utilities
+- [x] `telemetry.ts` - Telemetry utilities (Batch 15)
 - [x] `temp-files.ts` - Temporary files utilities (Batch 3)
 - [x] `time.ts` - Time utilities (Batch 1)
 - [x] `user-code-processing.ts` - User code processing (Batch 10)
@@ -481,7 +481,14 @@ More complex config manager utilities:
 
 **Batch 14 Stats**: 2 files, ~40 tests, 100% passing
 
-### Batch 15+: Remaining Files (Priority: Low to Medium)
+### Batch 15: HTTP Client, Sentry & Telemetry Utilities (Priority: Medium) ✅ COMPLETED
+- [x] `http-client.ts` - HTTP client with jsonFetch function
+- [x] `sentry.ts` - Sentry initialization, tags, and error reporting
+- [x] `telemetry.ts` - Telemetry event tracking
+
+**Batch 15 Stats**: 3 files, ~56 tests, 100% passing
+
+### Batch 16+: Remaining Files (Priority: Low to Medium)
 Will be organized based on dependencies and complexity.
 
 ---
