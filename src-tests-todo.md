@@ -27,7 +27,7 @@ This document tracks the testing progress for all files in the `src/` folder.
 - [x] `cloudformation.ts` - CloudFormation utilities (Batch 2)
 - [x] `cloudwatch-logs.ts` - CloudWatch logs utilities (Batch 2)
 - [x] `collections.ts` - Collection utilities (Batch 1)
-- [ ] `decorators.ts` - Decorator utilities
+- [x] `decorators.ts` - Decorator utilities (Batch 16)
 - [x] `domains.ts` - Domain utilities (Batch 1)
 - [x] `dotenv.ts` - Dotenv utilities (Batch 3)
 - [x] `errors.ts` - Error utilities (Batch 4)
@@ -44,11 +44,11 @@ This document tracks the testing progress for all files in the `src/` folder.
 - [ ] `printer/spinnies.ts` - Spinnies utilities
 - [ ] `python-bridge/index.ts` - Python bridge
 - [x] `referenceable-types.ts` - Referenceable types (Batch 7)
-- [ ] `scripts.ts` - Scripts utilities
+- [x] `scripts.ts` - Scripts utilities (Batch 16)
 - [x] `sentry.ts` - Sentry utilities (Batch 15)
 - [ ] `ssm-session.ts` - SSM session utilities
 - [ ] `stack-info-map-diff.ts` - Stack info map diff
-- [ ] `stack-info-map-sensitive-values.ts` - Stack info map sensitive values
+- [x] `stack-info-map-sensitive-values.ts` - Stack info map sensitive values (Batch 16)
 - [x] `telemetry.ts` - Telemetry utilities (Batch 15)
 - [x] `temp-files.ts` - Temporary files utilities (Batch 3)
 - [x] `time.ts` - Time utilities (Batch 1)
@@ -488,7 +488,14 @@ More complex config manager utilities:
 
 **Batch 15 Stats**: 3 files, ~56 tests, 100% passing
 
-### Batch 16+: Remaining Files (Priority: Low to Medium)
+### Batch 16: Scripts, Decorators & Sensitive Values (Priority: Medium) ✅ COMPLETED
+- [x] `stack-info-map-sensitive-values.ts` - Sensitive value resolution (SSM/Secrets Manager)
+- [x] `decorators.ts` - Decorator utilities (memoize, skip init, cancelable)
+- [x] `scripts.ts` - Script execution utilities (hooks, environments)
+
+**Batch 16 Stats**: 3 files, ~62 tests, 100% passing
+
+### Batch 17+: Remaining Files (Priority: Low to Medium)
 Will be organized based on dependencies and complexity.
 
 ---
