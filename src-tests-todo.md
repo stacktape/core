@@ -10,8 +10,8 @@ This document tracks the testing progress for all files in the `src/` folder.
 
 ## Config (`src/config/`)
 
-- [ ] `random.ts` - Random configuration
-- [ ] `cli.ts` - CLI configuration
+- [x] `random.ts` - Random configuration (Batch 12)
+- [x] `cli.ts` - CLI configuration (Batch 12)
 - [ ] `error-messages.ts` - Error messages configuration
 
 ---
@@ -371,8 +371,8 @@ This document tracks the testing progress for all files in the `src/` folder.
 ## Summary
 
 - **Total Files**: 274
-- **Completed**: 31 (1 pre-existing + 8 from Batch 1 + 3 from Batch 2 + 3 from Batch 3 + 2 from Batch 4 + 3 from Batch 5 + 4 from Batch 6 + 1 from Batch 7 + 1 from Batch 8 + 1 from Batch 9 + 2 from Batch 10 + 2 from Batch 11)
-- **Remaining**: 243
+- **Completed**: 33 (1 pre-existing + 8 from Batch 1 + 3 from Batch 2 + 3 from Batch 3 + 2 from Batch 4 + 3 from Batch 5 + 4 from Batch 6 + 1 from Batch 7 + 1 from Batch 8 + 1 from Batch 9 + 2 from Batch 10 + 2 from Batch 11 + 2 from Batch 12)
+- **Remaining**: 241
 
 ## Test Statistics
 - **Total Tests**: ~560 (estimated)
@@ -463,7 +463,13 @@ More complex config manager utilities:
 
 **Batch 11 Stats**: 2 files, ~35 tests, 100% passing
 
-### Batch 12+: Remaining Files (Priority: Low to Medium)
+### Batch 12: Config Files (Priority: Medium) ✅ COMPLETED
+- [x] `config/random.ts` - Environment flags, endpoints, bucket names, language extensions
+- [x] `config/cli.ts` - CLI and SDK command lists
+
+**Batch 12 Stats**: 2 files, ~45 tests, 100% passing
+
+### Batch 13+: Remaining Files (Priority: Low to Medium)
 Will be organized based on dependencies and complexity.
 
 ---
