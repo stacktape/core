@@ -52,11 +52,11 @@ This document tracks the testing progress for all files in the `src/` folder.
 - [ ] `telemetry.ts` - Telemetry utilities
 - [x] `temp-files.ts` - Temporary files utilities (Batch 3)
 - [x] `time.ts` - Time utilities (Batch 1)
-- [ ] `user-code-processing.ts` - User code processing
+- [x] `user-code-processing.ts` - User code processing (Batch 10)
 - [x] `uuid.ts` - UUID utilities (Batch 1)
 - [x] `validation-utils.ts` - Validation utilities (Batch 1)
 - [x] `validator.ts` - Validator utilities (Batch 4)
-- [ ] `versioning.ts` - Versioning utilities
+- [x] `versioning.ts` - Versioning utilities (Batch 10)
 
 ---
 
@@ -371,8 +371,8 @@ This document tracks the testing progress for all files in the `src/` folder.
 ## Summary
 
 - **Total Files**: 274
-- **Completed**: 27 (1 pre-existing + 8 from Batch 1 + 3 from Batch 2 + 3 from Batch 3 + 2 from Batch 4 + 3 from Batch 5 + 4 from Batch 6 + 1 from Batch 7 + 1 from Batch 8 + 1 from Batch 9)
-- **Remaining**: 247
+- **Completed**: 29 (1 pre-existing + 8 from Batch 1 + 3 from Batch 2 + 3 from Batch 3 + 2 from Batch 4 + 3 from Batch 5 + 4 from Batch 6 + 1 from Batch 7 + 1 from Batch 8 + 1 from Batch 9 + 2 from Batch 10)
+- **Remaining**: 245
 
 ## Test Statistics
 - **Total Tests**: ~560 (estimated)
@@ -451,8 +451,14 @@ More complex config manager utilities:
 
 **Batch 9 Stats**: 1 file, ~40 tests, 100% passing
 
-### Batch 10+: Remaining Files (Priority: Low to Medium)
-Will be organized after completing initial batches based on dependencies and complexity.
+### Batch 10: Versioning & User Code Utils (Priority: Medium) ✅ COMPLETED
+- [x] `versioning.ts` - Version string manipulation and Stacktape version management
+- [x] `user-code-processing.ts` - User code file path parsing and loading
+
+**Batch 10 Stats**: 2 files, ~55 tests, 100% passing
+
+### Batch 11+: Remaining Files (Priority: Low to Medium)
+Will be organized based on dependencies and complexity.
 
 ---
 
