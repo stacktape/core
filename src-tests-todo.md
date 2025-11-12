@@ -1,0 +1,449 @@
+# Src Folder Testing Todo List
+
+This document tracks the testing progress for all files in the `src/` folder.
+
+## Status Legend
+- [ ] Not started
+- [x] Completed
+
+---
+
+## Config (`src/config/`)
+
+- [ ] `random.ts` - Random configuration
+- [ ] `cli.ts` - CLI configuration
+- [ ] `error-messages.ts` - Error messages configuration
+
+---
+
+## Utils (`src/utils/`)
+
+- [x] `directives.spec.ts` - Directive utilities (ALREADY EXISTS)
+- [ ] `aws-config.ts` - AWS configuration
+- [ ] `aws-sdk-manager/index.ts` - AWS SDK manager
+- [ ] `aws-sdk-manager/utils.ts` - AWS SDK manager utilities
+- [ ] `basic-compose-shim.ts` - Basic compose shim
+- [ ] `cli.ts` - CLI utilities
+- [ ] `cloudformation.ts` - CloudFormation utilities
+- [ ] `cloudwatch-logs.ts` - CloudWatch logs utilities
+- [x] `collections.ts` - Collection utilities (Batch 1)
+- [ ] `decorators.ts` - Decorator utilities
+- [x] `domains.ts` - Domain utilities (Batch 1)
+- [ ] `dotenv.ts` - Dotenv utilities
+- [ ] `errors.ts` - Error utilities
+- [ ] `file-loaders.ts` - File loader utilities
+- [x] `formatting.ts` - Formatting utilities (Batch 1)
+- [ ] `git-info-manager/index.ts` - Git info manager
+- [ ] `git.ts` - Git utilities
+- [ ] `helper-lambdas.ts` - Helper lambdas utilities
+- [ ] `http-client.ts` - HTTP client utilities
+- [x] `ip.ts` - IP utilities (Batch 1)
+- [ ] `log-collector/index.ts` - Log collector
+- [x] `pretty-json.ts` - Pretty JSON utilities (Batch 1)
+- [ ] `printer/index.ts` - Printer utilities
+- [ ] `printer/spinnies.ts` - Spinnies utilities
+- [ ] `python-bridge/index.ts` - Python bridge
+- [ ] `referenceable-types.ts` - Referenceable types
+- [ ] `scripts.ts` - Scripts utilities
+- [ ] `sentry.ts` - Sentry utilities
+- [ ] `ssm-session.ts` - SSM session utilities
+- [ ] `stack-info-map-diff.ts` - Stack info map diff
+- [ ] `stack-info-map-sensitive-values.ts` - Stack info map sensitive values
+- [ ] `telemetry.ts` - Telemetry utilities
+- [ ] `temp-files.ts` - Temporary files utilities
+- [x] `time.ts` - Time utilities (Batch 1)
+- [ ] `user-code-processing.ts` - User code processing
+- [x] `uuid.ts` - UUID utilities (Batch 1)
+- [x] `validation-utils.ts` - Validation utilities (Batch 1)
+- [ ] `validator.ts` - Validator utilities
+- [ ] `versioning.ts` - Versioning utilities
+
+---
+
+## App Layer (`src/app/`)
+
+### Announcements Manager (`src/app/announcements-manager/`)
+- [ ] `index.ts` - Announcements manager
+
+### Application Manager (`src/app/application-manager/`)
+- [ ] `index.ts` - Application manager
+
+### Event Manager (`src/app/event-manager/`)
+- [ ] `event-log.ts` - Event log
+- [ ] `index.ts` - Event manager
+- [ ] `utils.ts` - Event manager utilities
+
+### Global State Manager (`src/app/global-state-manager/`)
+- [ ] `index.ts` - Global state manager
+- [ ] `utils.ts` - Global state manager utilities
+
+### Stacktape TRPC API Manager (`src/app/stacktape-trpc-api-manager/`)
+- [ ] `index.ts` - Stacktape TRPC API manager (stubbed)
+
+---
+
+## Domain Layer (`src/domain/`)
+
+### Budget Manager (`src/domain/budget-manager/`)
+- [ ] `index.ts` - Budget manager
+
+### Calculated Stack Overview Manager (`src/domain/calculated-stack-overview-manager/`)
+- [ ] `index.ts` - Main calculated stack overview manager
+- [ ] `resource-resolvers/aws-cdk-construct/index.ts` - AWS CDK construct resolver
+- [ ] `resource-resolvers/application-load-balancers/index.ts` - ALB resolver
+- [ ] `resource-resolvers/application-load-balancers/utils.ts` - ALB utilities
+- [ ] `resource-resolvers/bastion/index.ts` - Bastion resolver
+- [ ] `resource-resolvers/bastion/utils.ts` - Bastion utilities
+- [ ] `resource-resolvers/batch-jobs/index.ts` - Batch jobs resolver
+- [ ] `resource-resolvers/batch-jobs/utils.ts` - Batch jobs utilities
+- [ ] `resource-resolvers/buckets/index.ts` - Buckets resolver
+- [ ] `resource-resolvers/buckets/utils.ts` - Buckets utilities
+- [ ] `resource-resolvers/budget/index.ts` - Budget resolver
+- [ ] `resource-resolvers/cloudformation-resources/index.ts` - CloudFormation resources resolver
+- [ ] `resource-resolvers/custom-resources/index.ts` - Custom resources resolver
+- [ ] `resource-resolvers/databases/index.ts` - Databases resolver
+- [ ] `resource-resolvers/databases/utils.ts` - Databases utilities
+- [ ] `resource-resolvers/deployment-scripts/index.ts` - Deployment scripts resolver
+- [ ] `resource-resolvers/dynamo-db-tables/index.ts` - DynamoDB tables resolver
+- [ ] `resource-resolvers/dynamo-db-tables/utils.ts` - DynamoDB tables utilities
+- [ ] `resource-resolvers/edge-lambda-functions/index.ts` - Edge Lambda functions resolver
+- [ ] `resource-resolvers/efs-filesystems/index.ts` - EFS filesystems resolver
+- [ ] `resource-resolvers/efs-filesystems/utils.ts` - EFS filesystems utilities
+- [ ] `resource-resolvers/event-buses/index.ts` - Event buses resolver
+- [ ] `resource-resolvers/hosting-buckets/index.ts` - Hosting buckets resolver
+- [ ] `resource-resolvers/http-api-gateways/index.ts` - HTTP API gateways resolver
+- [ ] `resource-resolvers/http-api-gateways/utils.ts` - HTTP API gateways utilities
+- [ ] `resource-resolvers/mongo-db-atlas-clusters/index.ts` - MongoDB Atlas clusters resolver
+- [ ] `resource-resolvers/mongo-db-atlas-clusters/utils.ts` - MongoDB Atlas clusters utilities
+- [ ] `resource-resolvers/network-load-balancers/index.ts` - NLB resolver
+- [ ] `resource-resolvers/network-load-balancers/utils.ts` - NLB utilities
+- [ ] `resource-resolvers/nextjs-web/index.ts` - Next.js web resolver
+- [ ] `resource-resolvers/nextjs-web/utils.ts` - Next.js web utilities
+- [ ] `resource-resolvers/open-search/index.ts` - OpenSearch resolver
+- [ ] `resource-resolvers/open-search/utils.ts` - OpenSearch utilities
+- [ ] `resource-resolvers/outputs/index.ts` - Outputs resolver
+- [ ] `resource-resolvers/private-services/index.ts` - Private services resolver
+- [ ] `resource-resolvers/redis-clusters/index.ts` - Redis clusters resolver
+- [ ] `resource-resolvers/redis-clusters/utils.ts` - Redis clusters utilities
+- [ ] `resource-resolvers/sns-topics/index.ts` - SNS topics resolver
+- [ ] `resource-resolvers/sqs-queues/index.ts` - SQS queues resolver
+- [ ] `resource-resolvers/state-machines/index.ts` - State machines resolver
+- [ ] `resource-resolvers/state-machines/utils.ts` - State machines utilities
+- [ ] `resource-resolvers/upstash-redis/index.ts` - Upstash Redis resolver
+- [ ] `resource-resolvers/upstash-redis/utils.ts` - Upstash Redis utilities
+- [ ] `resource-resolvers/user-pools/index.ts` - User pools resolver
+- [ ] `resource-resolvers/user-pools/utils.ts` - User pools utilities
+- [ ] `resource-resolvers/web-app-firewalls/index.ts` - Web app firewalls resolver
+- [ ] `resource-resolvers/web-services/index.ts` - Web services resolver
+- [ ] `resource-resolvers/worker-services/index.ts` - Worker services resolver
+
+#### Functions (`src/domain/calculated-stack-overview-manager/resource-resolvers/functions/`)
+- [ ] `index.ts` - Functions resolver
+- [ ] `utils.ts` - Functions utilities
+- [ ] `events/application-load-balancer/index.ts` - ALB events
+- [ ] `events/cloudwatch-alarm/index.ts` - CloudWatch alarm events
+- [ ] `events/cloudwatch-log/index.ts` - CloudWatch log events
+- [ ] `events/dynamo/index.ts` - DynamoDB events
+- [ ] `events/event-bus/index.ts` - EventBridge events
+- [ ] `events/http-api-gateway/index.ts` - HTTP API Gateway events
+- [ ] `events/iot/index.ts` - IoT events
+- [ ] `events/kafka-topic/index.ts` - Kafka topic events
+- [ ] `events/kinesis/index.ts` - Kinesis events
+- [ ] `events/s3/index.ts` - S3 events
+- [ ] `events/schedule/index.ts` - Schedule events
+- [ ] `events/sns/index.ts` - SNS events
+- [ ] `events/sqs/index.ts` - SQS events
+- [ ] `events/utils.ts` - Events utilities
+
+#### Multi-Container Workloads (`src/domain/calculated-stack-overview-manager/resource-resolvers/multi-container-workloads/`)
+- [ ] `index.ts` - Multi-container workloads resolver
+- [ ] `utils.ts` - Multi-container workloads utilities
+- [ ] `events/application-load-balancer/index.ts` - ALB events
+- [ ] `events/http-api-gateway/index.ts` - HTTP API Gateway events
+- [ ] `events/network-load-balancer/index.ts` - NLB events
+- [ ] `events/service-connect/index.ts` - Service Connect events
+
+#### Background Resources (`src/domain/calculated-stack-overview-manager/resource-resolvers/background-resources/`)
+- [ ] `accept-vpc-peerings-custom-resource.ts` - Accept VPC peerings
+- [ ] `code-deploy.ts` - CodeDeploy
+- [ ] `default-domain-cert-custom-resource.ts` - Default domain cert
+- [ ] `deployment-bucket/index.ts` - Deployment bucket
+- [ ] `deployment-bucket/utils.ts` - Deployment bucket utilities
+- [ ] `deployment-image-repository/index.ts` - Deployment image repository
+- [ ] `deployment-image-repository/utils.ts` - Deployment image repository utilities
+- [ ] `s3-events-custom-resource.ts` - S3 events
+- [ ] `sensitive-data-custom-resource.ts` - Sensitive data
+- [ ] `service-discovery.ts` - Service discovery
+- [ ] `shared-edge-lambdas-custom-resource.ts` - Shared edge lambdas
+- [ ] `stacktape-service-lambda.ts` - Stacktape service lambda
+- [ ] `vpc.ts` - VPC
+
+#### Resolver Utils (`src/domain/calculated-stack-overview-manager/resource-resolvers/_utils/`)
+- [ ] `cdn.ts` - CDN utilities
+- [ ] `connect-to-helper.ts` - Connect to helper utilities
+- [ ] `custom-resource.ts` - Custom resource utilities
+- [ ] `edge-lambdas.ts` - Edge lambdas utilities
+- [ ] `efs.ts` - EFS utilities
+- [ ] `env-vars.ts` - Environment variables utilities
+- [ ] `firewall-helpers.ts` - Firewall helpers
+- [ ] `http-api-events.ts` - HTTP API events utilities
+- [ ] `image-urls.ts` - Image URLs utilities
+- [ ] `lb-listener-rule-helpers.ts` - Load balancer listener rule helpers
+- [ ] `log-forwarding.ts` - Log forwarding utilities
+- [ ] `regions.ts` - Regions utilities
+- [ ] `role-helpers.ts` - Role helpers
+
+#### Alarms (`src/domain/calculated-stack-overview-manager/resource-resolvers/_utils/alarms/`)
+- [ ] `index.ts` - Main alarms
+- [ ] `utils.ts` - Alarms utilities
+- [ ] `application-load-balancer-alarms/index.ts` - ALB alarms
+- [ ] `application-load-balancer-alarms/custom/index.ts` - ALB custom alarms
+- [ ] `application-load-balancer-alarms/error-rate/index.ts` - ALB error rate alarms
+- [ ] `application-load-balancer-alarms/unhealthy-targets/index.ts` - ALB unhealthy targets alarms
+- [ ] `application-load-balancer-alarms/utils.ts` - ALB alarms utilities
+- [ ] `http-api-gateway-alarms/index.ts` - HTTP API Gateway alarms
+- [ ] `http-api-gateway-alarms/error-rate/index.ts` - HTTP API Gateway error rate alarms
+- [ ] `http-api-gateway-alarms/latency/index.ts` - HTTP API Gateway latency alarms
+- [ ] `lambda-alarms/index.ts` - Lambda alarms
+- [ ] `lambda-alarms/duration/index.ts` - Lambda duration alarms
+- [ ] `lambda-alarms/error-rate/index.ts` - Lambda error rate alarms
+- [ ] `relational-database-alarms/index.ts` - RDS alarms
+- [ ] `relational-database-alarms/connection-count/index.ts` - RDS connection count alarms
+- [ ] `relational-database-alarms/cpu-utilization/index.ts` - RDS CPU utilization alarms
+- [ ] `relational-database-alarms/free-memory/index.ts` - RDS free memory alarms
+- [ ] `relational-database-alarms/free-storage/index.ts` - RDS free storage alarms
+- [ ] `relational-database-alarms/latency/index.ts` - RDS latency alarms
+- [ ] `relational-database-alarms/utils.ts` - RDS alarms utilities
+- [ ] `sqs-queue-alarms/index.ts` - SQS queue alarms
+- [ ] `sqs-queue-alarms/not-empty/index.ts` - SQS queue not empty alarms
+- [ ] `sqs-queue-alarms/received-messages-count/index.ts` - SQS queue received messages count alarms
+- [ ] `sqs-queue-alarms/utils.ts` - SQS queue alarms utilities
+
+### CloudFormation Registry Manager (`src/domain/cloudformation-registry-manager/`)
+- [ ] `index.ts` - CloudFormation registry manager
+
+### CloudFormation Stack Manager (`src/domain/cloudformation-stack-manager/`)
+- [ ] `index.ts` - CloudFormation stack manager
+- [ ] `utils.ts` - CloudFormation stack manager utilities
+
+### CloudFront Manager (`src/domain/cloudfront-manager/`)
+- [ ] `index.ts` - CloudFront manager
+
+### Config Manager (`src/domain/config-manager/`)
+- [ ] `index.ts` - Main config manager
+- [ ] `config-resolver.ts` - Config resolver
+- [ ] `built-in-directives.ts` - Built-in directives
+- [ ] `utils/alarms.ts` - Alarms utilities
+- [ ] `utils/application-load-balancers.ts` - ALB utilities
+- [ ] `utils/bastion.ts` - Bastion utilities
+- [ ] `utils/buckets.ts` - Buckets utilities
+- [ ] `utils/custom-resource-definitions.ts` - Custom resource definitions utilities
+- [ ] `utils/edge-functions.ts` - Edge functions utilities
+- [ ] `utils/efs-filesystems.ts` - EFS filesystems utilities
+- [ ] `utils/event-buses.ts` - Event buses utilities
+- [ ] `utils/http-api-gateways.ts` - HTTP API gateways utilities
+- [ ] `utils/iam.ts` - IAM utilities
+- [ ] `utils/lambdas.ts` - Lambdas utilities
+- [ ] `utils/misc.ts` - Miscellaneous utilities
+- [ ] `utils/multi-container-workloads.ts` - Multi-container workloads utilities
+- [ ] `utils/network-load-balancers.ts` - NLB utilities
+- [ ] `utils/nextjs-webs.ts` - Next.js webs utilities
+- [ ] `utils/relational-databases.ts` - Relational databases utilities
+- [ ] `utils/resource-references.ts` - Resource references utilities
+- [ ] `utils/sns-topics.ts` - SNS topics utilities
+- [ ] `utils/sqs-queues.ts` - SQS queues utilities
+- [ ] `utils/user-pools.ts` - User pools utilities
+- [ ] `utils/validation.ts` - Validation utilities
+- [ ] `utils/web-app-firewall.ts` - Web app firewall utilities
+- [ ] `utils/web-services.ts` - Web services utilities
+
+### Deployed Stack Overview Manager (`src/domain/deployed-stack-overview-manager/`)
+- [ ] `index.ts` - Deployed stack overview manager
+- [ ] `hotswap-utils.ts` - Hotswap utilities
+- [ ] `printing-utils.ts` - Printing utilities
+
+### Deployment Artifact Manager (`src/domain/deployment-artifact-manager/`)
+- [ ] `index.ts` - Deployment artifact manager
+- [ ] `utils.ts` - Deployment artifact manager utilities
+
+### Domain Manager (`src/domain/domain-manager/`)
+- [ ] `index.ts` - Domain manager
+
+### EC2 Manager (`src/domain/ec2-manager/`)
+- [ ] `index.ts` - EC2 manager
+
+### Notification Manager (`src/domain/notification-manager/`)
+- [ ] `index.ts` - Notification manager
+
+### Packaging Manager (`src/domain/packaging-manager/`)
+- [ ] `index.ts` - Packaging manager
+
+### SES Manager (`src/domain/ses-manager/`)
+- [ ] `index.ts` - SES manager
+
+### Template Manager (`src/domain/template-manager/`)
+- [ ] `index.ts` - Template manager
+- [ ] `utils.ts` - Template manager utilities
+
+### Third Party Provider Credentials Manager (`src/domain/third-party-provider-credentials-manager/`)
+- [ ] `index.ts` - Third party provider credentials manager
+
+### VPC Manager (`src/domain/vpc-manager/`)
+- [ ] `index.ts` - VPC manager
+
+---
+
+## Commands (`src/commands/`)
+
+### Command Utils (`src/commands/_utils/`)
+- [ ] `assume-role.ts` - Assume role utilities
+- [ ] `common.ts` - Common command utilities
+- [ ] `cw-deployment.ts` - CloudWatch deployment utilities
+- [ ] `fn-deployment.ts` - Function deployment utilities
+- [ ] `initialization.ts` - Initialization utilities
+- [ ] `logs.ts` - Logs utilities
+
+### Individual Commands
+- [ ] `aws-profile-create/index.ts` - AWS profile create
+- [ ] `aws-profile-delete/index.ts` - AWS profile delete
+- [ ] `aws-profile-list/index.ts` - AWS profile list
+- [ ] `aws-profile-update/index.ts` - AWS profile update
+- [ ] `bastion-session/index.ts` - Bastion session
+- [ ] `bastion-tunnel/index.ts` - Bastion tunnel
+- [ ] `bucket-sync/index.ts` - Bucket sync
+- [ ] `cf-module-update/index.ts` - CloudFormation module update
+- [ ] `codebuild-deploy/index.ts` - CodeBuild deploy
+- [ ] `compile-template/index.ts` - Compile template
+- [ ] `container-session/index.ts` - Container session
+- [ ] `defaults-configure/index.ts` - Defaults configure
+- [ ] `defaults-list/index.ts` - Defaults list
+- [ ] `delete/index.ts` - Delete
+- [ ] `deploy/index.ts` - Deploy
+- [ ] `deployment-script-run/index.ts` - Deployment script run
+- [ ] `dev/index.ts` - Dev
+- [ ] `dev/container/index.ts` - Dev container
+- [ ] `dev/lambda-function/index.ts` - Dev lambda function
+- [ ] `dev/utils.ts` - Dev utilities
+- [ ] `domain-add/index.ts` - Domain add
+- [ ] `help/index.ts` - Help
+- [ ] `init/index.ts` - Init
+- [ ] `init/using-existing-config/index.ts` - Init using existing config
+- [ ] `init/using-starter-project/index.ts` - Init using starter project
+- [ ] `init/using-starter-project/utils.ts` - Init using starter project utilities
+- [ ] `login/index.ts` - Login
+- [ ] `logout/index.ts` - Logout
+- [ ] `logs/index.ts` - Logs
+- [ ] `package-workloads/index.ts` - Package workloads
+- [ ] `param-get/index.ts` - Param get
+- [ ] `preview-changes/index.ts` - Preview changes
+- [ ] `rollback/index.ts` - Rollback
+- [ ] `script-run/index.ts` - Script run
+- [ ] `script-run/utils.ts` - Script run utilities
+- [ ] `secret-create/index.ts` - Secret create
+- [ ] `secret-delete/index.ts` - Secret delete
+- [ ] `secret-get/index.ts` - Secret get
+- [ ] `stack-info/index.ts` - Stack info
+- [ ] `stack-list/index.ts` - Stack list
+- [ ] `version/index.ts` - Version
+
+---
+
+## API Layer (`src/api/`)
+
+### CLI (`src/api/cli/`)
+- [ ] `index.ts` - CLI entry point
+
+### NPM SDK (`src/api/npm/sdk/`)
+- [ ] `index.ts` - SDK entry point
+
+### NPM TypeScript (`src/api/npm/ts/`)
+- [ ] `child-resources.ts` - Child resources
+- [ ] `config.ts` - Config
+- [ ] `directives.ts` - Directives
+- [ ] `global-aws-services.ts` - Global AWS services
+- [ ] `index.ts` - TypeScript entry point
+- [ ] `resource-metadata.ts` - Resource metadata
+- [ ] `resources.ts` - Resources
+- [ ] `type-properties.ts` - Type properties
+
+---
+
+## Summary
+
+- **Total Files**: 274
+- **Completed**: 9 (1 pre-existing + 8 from Batch 1)
+- **Remaining**: 265
+
+## Test Statistics
+- **Total Tests**: ~260 (estimated from Batch 1)
+- **Total Assertions**: ~450 (estimated from Batch 1)
+
+---
+
+## Batching Strategy
+
+Given the complexity of the src/ folder, tests will be organized in the following batches:
+
+### Batch 1: Simple Utils (Priority: High) ✅ COMPLETED
+Focus on pure utility functions with minimal dependencies:
+- [x] `collections.ts` - LinkedList and Stack data structures (75 tests)
+- [x] `formatting.ts` - Time and object formatting (29 tests)
+- [x] `pretty-json.ts` - JSON pretty printing (28 tests)
+- [x] `uuid.ts` - UUID generation (10 tests)
+- [x] `time.ts` - AWS time synchronization (3 tests)
+- [x] `domains.ts` - Domain utilities (16 tests)
+- [x] `validation-utils.ts` - Validation utilities (21 tests)
+- [x] `ip.ts` - IP address utilities (5 tests)
+
+**Batch 1 Stats**: 8 files, ~187 tests, 100% passing
+
+### Batch 2: AWS Utils (Priority: High)
+AWS-related utilities with AWS SDK mocking:
+- `aws-config.ts`
+- `cloudformation.ts`
+- `cloudwatch-logs.ts`
+
+### Batch 3: File & System Utils (Priority: High)
+File system and system-related utilities:
+- `file-loaders.ts`
+- `temp-files.ts`
+- `dotenv.ts`
+
+### Batch 4: Error & Validation (Priority: High)
+- `errors.ts`
+- `validator.ts`
+
+### Batch 5: Config Manager Utils (Priority: High)
+Simple config manager utilities:
+- `config-manager/utils/validation.ts`
+- `config-manager/utils/misc.ts`
+- `config-manager/utils/resource-references.ts`
+
+### Batch 6: More Config Manager Utils (Priority: Medium)
+More complex config manager utilities:
+- `config-manager/utils/buckets.ts`
+- `config-manager/utils/sns-topics.ts`
+- `config-manager/utils/sqs-queues.ts`
+- `config-manager/utils/alarms.ts`
+
+### Batch 7: Naming & Type Utils (Priority: Medium)
+- `referenceable-types.ts`
+
+### Batch 8: Template Manager (Priority: Medium)
+- `template-manager/utils.ts`
+
+### Batch 9: Deployment Utils (Priority: Medium)
+- `deployment-artifact-manager/utils.ts`
+
+### Batch 10+: Remaining Files (Priority: Low to Medium)
+Will be organized after completing initial batches based on dependencies and complexity.
+
+---
+
+## Notes
+
+- Tests will require extensive AWS SDK mocking using bun:test's mock.module
+- Many domain managers will need integration-style tests with complex mocking
+- Commands will need CLI argument mocking and state manager mocking
+- Focus on testing business logic and edge cases
+- Some files may be skipped if they are entry points with minimal logic (e.g., `src/index.ts`)
