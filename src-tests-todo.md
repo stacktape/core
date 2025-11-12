@@ -21,7 +21,7 @@ This document tracks the testing progress for all files in the `src/` folder.
 - [x] `directives.spec.ts` - Directive utilities (ALREADY EXISTS)
 - [x] `aws-config.ts` - AWS configuration (Batch 2)
 - [ ] `aws-sdk-manager/index.ts` - AWS SDK manager
-- [ ] `aws-sdk-manager/utils.ts` - AWS SDK manager utilities
+- [x] `aws-sdk-manager/utils.ts` - AWS SDK manager utilities (Batch 21)
 - [x] `basic-compose-shim.ts` - Basic compose shim (Batch 11)
 - [x] `cli.ts` - CLI utilities (Batch 13)
 - [x] `cloudformation.ts` - CloudFormation utilities (Batch 2)
@@ -521,7 +521,12 @@ More complex config manager utilities:
 
 **Batch 20 Stats**: 1 file, ~18 tests, 100% passing
 
-### Batch 21+: Remaining Files (Priority: Low to Medium)
+### Batch 21: AWS SDK Manager Utils (Priority: Medium) ✅ COMPLETED
+- [x] `aws-sdk-manager/utils.ts` - AWS SDK error handling, logging plugin, credentials
+
+**Batch 21 Stats**: 1 file, ~22 tests, 100% passing
+
+### Batch 22+: Remaining Files (Priority: Low to Medium)
 Will be organized based on dependencies and complexity.
 
 ---
