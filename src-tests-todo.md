@@ -241,7 +241,7 @@ This document tracks the testing progress for all files in the `src/` folder.
 - [x] `utils/edge-functions.ts` - Edge functions utilities (Batch 18)
 - [x] `utils/efs-filesystems.ts` - EFS filesystems utilities (Batch 18)
 - [x] `utils/event-buses.ts` - Event buses utilities (Batch 17)
-- [ ] `utils/http-api-gateways.ts` - HTTP API gateways utilities
+- [x] `utils/http-api-gateways.ts` - HTTP API gateways utilities (Batch 20)
 - [x] `utils/iam.ts` - IAM utilities (Batch 14)
 - [ ] `utils/lambdas.ts` - Lambdas utilities
 - [x] `utils/misc.ts` - Miscellaneous utilities (Batch 5)
@@ -516,7 +516,12 @@ More complex config manager utilities:
 
 **Batch 19 Stats**: 2 files, ~32 tests, 100% passing
 
-### Batch 20+: Remaining Files (Priority: Low to Medium)
+### Batch 20: HTTP API Gateway Utils (Priority: Medium) ✅ COMPLETED
+- [x] `config-manager/utils/http-api-gateways.ts` - HTTP API Gateway integration and validation
+
+**Batch 20 Stats**: 1 file, ~18 tests, 100% passing
+
+### Batch 21+: Remaining Files (Priority: Low to Medium)
 Will be organized based on dependencies and complexity.
 
 ---
