@@ -22,7 +22,7 @@ This document tracks the testing progress for all files in the `src/` folder.
 - [x] `aws-config.ts` - AWS configuration (Batch 2)
 - [ ] `aws-sdk-manager/index.ts` - AWS SDK manager
 - [ ] `aws-sdk-manager/utils.ts` - AWS SDK manager utilities
-- [ ] `basic-compose-shim.ts` - Basic compose shim
+- [x] `basic-compose-shim.ts` - Basic compose shim (Batch 11)
 - [ ] `cli.ts` - CLI utilities
 - [x] `cloudformation.ts` - CloudFormation utilities (Batch 2)
 - [x] `cloudwatch-logs.ts` - CloudWatch logs utilities (Batch 2)
@@ -35,7 +35,7 @@ This document tracks the testing progress for all files in the `src/` folder.
 - [x] `formatting.ts` - Formatting utilities (Batch 1)
 - [ ] `git-info-manager/index.ts` - Git info manager
 - [ ] `git.ts` - Git utilities
-- [ ] `helper-lambdas.ts` - Helper lambdas utilities
+- [x] `helper-lambdas.ts` - Helper lambdas utilities (Batch 11)
 - [ ] `http-client.ts` - HTTP client utilities
 - [x] `ip.ts` - IP utilities (Batch 1)
 - [ ] `log-collector/index.ts` - Log collector
@@ -371,8 +371,8 @@ This document tracks the testing progress for all files in the `src/` folder.
 ## Summary
 
 - **Total Files**: 274
-- **Completed**: 29 (1 pre-existing + 8 from Batch 1 + 3 from Batch 2 + 3 from Batch 3 + 2 from Batch 4 + 3 from Batch 5 + 4 from Batch 6 + 1 from Batch 7 + 1 from Batch 8 + 1 from Batch 9 + 2 from Batch 10)
-- **Remaining**: 245
+- **Completed**: 31 (1 pre-existing + 8 from Batch 1 + 3 from Batch 2 + 3 from Batch 3 + 2 from Batch 4 + 3 from Batch 5 + 4 from Batch 6 + 1 from Batch 7 + 1 from Batch 8 + 1 from Batch 9 + 2 from Batch 10 + 2 from Batch 11)
+- **Remaining**: 243
 
 ## Test Statistics
 - **Total Tests**: ~560 (estimated)
@@ -457,7 +457,13 @@ More complex config manager utilities:
 
 **Batch 10 Stats**: 2 files, ~55 tests, 100% passing
 
-### Batch 11+: Remaining Files (Priority: Low to Medium)
+### Batch 11: Basic Utilities (Priority: Medium) ✅ COMPLETED
+- [x] `basic-compose-shim.ts` - CommonJS/ESM interop shim for basic-compose
+- [x] `helper-lambdas.ts` - Helper lambda loading and details
+
+**Batch 11 Stats**: 2 files, ~35 tests, 100% passing
+
+### Batch 12+: Remaining Files (Priority: Low to Medium)
 Will be organized based on dependencies and complexity.
 
 ---
