@@ -56,7 +56,7 @@ This document tracks the testing progress for all files in the `shared/` folder.
 - [x] `logical-names.ts` - Logical names
 - [x] `metadata-names.ts` - Metadata names
 - [x] `project-fs-paths.ts` - Project file system paths
-- [ ] `resource-names.ts` - Resource names (Note: actual file is aws-resource-names.ts)
+- [x] `aws-resource-names.ts` - AWS resource names (partial - core functions)
 - [x] `resource-referencable-params.ts` - Resource referencable parameters
 - [x] `resource-uris.ts` - Resource URIs
 - [x] `ssm-secret-parameters.ts` - SSM secret parameters
@@ -108,9 +108,15 @@ This document tracks the testing progress for all files in the `shared/` folder.
 
 ## AWS (`shared/aws/`)
 
-- [ ] `buckets.ts` - S3 buckets utilities
-- [ ] `cloudformation.ts` - CloudFormation utilities
-- [ ] `codebuild-deploy.ts` - CodeBuild deploy utilities
+- [x] `buckets.ts` - S3 transfer acceleration check
+- [x] `cloudformation.ts` - CloudFormation status constants
+- [ ] `codebuild.ts` - CodeBuild utilities
+- [ ] `ecs-deployment-monitoring.ts` - ECS deployment monitoring
+- [x] `fargate.ts` - Fargate CPU/memory configurations
+- [ ] `identity.ts` - AWS identity signing
+- [ ] `pricing-info.ts` - AWS pricing information
+- [x] `rds.ts` - RDS engine normalization
+- [ ] `stack-info.ts` - Stack information utilities
 
 ### S3 Sync (`shared/aws/s3-sync/`)
 - [ ] `index.ts` - S3 sync main
@@ -135,12 +141,12 @@ This document tracks the testing progress for all files in the `shared/` folder.
 ## Summary
 
 - **Total Files**: 79
-- **Completed**: 32
-- **Remaining**: 47
+- **Completed**: 37
+- **Remaining**: 42
 
 ## Test Statistics
-- **Total Tests**: 718
-- **Total Assertions**: 1397
+- **Total Tests**: 840
+- **Total Assertions**: 1689
 - **All tests passing** ✅
 
 ## Recently Completed (Batch 1 - 11 files)
@@ -182,3 +188,10 @@ This document tracks the testing progress for all files in the `shared/` folder.
 - `naming/fs-paths.ts` - Runtime file system paths (41 tests)
 - `naming/logical-names.ts` - CloudFormation logical names (69 tests)
 - `utils/json-fetch.ts` - JSON fetch wrapper (14 tests)
+
+## Recently Completed (Batch 5 - 5 files)
+- `aws/buckets.ts` - S3 transfer acceleration region check (15 tests)
+- `aws/rds.ts` - RDS engine type normalization (12 tests)
+- `aws/fargate.ts` - Fargate CPU/memory configurations (15 tests)
+- `aws/cloudformation.ts` - CloudFormation stack status constants (22 tests)
+- `naming/aws-resource-names.ts` - AWS resource names (partial - 49 tests)
