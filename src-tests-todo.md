@@ -283,7 +283,7 @@ This document tracks the testing progress for all files in the `src/` folder.
 
 ### Template Manager (`src/domain/template-manager/`)
 - [ ] `index.ts` - Template manager
-- [ ] `utils.ts` - Template manager utilities
+- [x] `utils.ts` - Template manager utilities (Batch 8)
 
 ### Third Party Provider Credentials Manager (`src/domain/third-party-provider-credentials-manager/`)
 - [ ] `index.ts` - Third party provider credentials manager
@@ -371,8 +371,8 @@ This document tracks the testing progress for all files in the `src/` folder.
 ## Summary
 
 - **Total Files**: 274
-- **Completed**: 25 (1 pre-existing + 8 from Batch 1 + 3 from Batch 2 + 3 from Batch 3 + 2 from Batch 4 + 3 from Batch 5 + 4 from Batch 6 + 1 from Batch 7)
-- **Remaining**: 249
+- **Completed**: 26 (1 pre-existing + 8 from Batch 1 + 3 from Batch 2 + 3 from Batch 3 + 2 from Batch 4 + 3 from Batch 5 + 4 from Batch 6 + 1 from Batch 7 + 1 from Batch 8)
+- **Remaining**: 248
 
 ## Test Statistics
 - **Total Tests**: ~560 (estimated)
@@ -441,8 +441,10 @@ More complex config manager utilities:
 
 **Batch 7 Stats**: 1 file, ~30 tests, 100% passing
 
-### Batch 8: Template Manager (Priority: Medium)
-- `template-manager/utils.ts`
+### Batch 8: Template Manager (Priority: Medium) ✅ COMPLETED
+- [x] `template-manager/utils.ts` - Initial CloudFormation template generation
+
+**Batch 8 Stats**: 1 file, ~16 tests, 100% passing
 
 ### Batch 9: Deployment Utils (Priority: Medium)
 - `deployment-artifact-manager/utils.ts`
