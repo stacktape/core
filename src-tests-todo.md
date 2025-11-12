@@ -237,9 +237,9 @@ This document tracks the testing progress for all files in the `src/` folder.
 - [ ] `utils/application-load-balancers.ts` - ALB utilities
 - [x] `utils/bastion.ts` - Bastion utilities (Batch 17)
 - [x] `utils/buckets.ts` - Buckets utilities (Batch 6)
-- [ ] `utils/custom-resource-definitions.ts` - Custom resource definitions utilities
-- [ ] `utils/edge-functions.ts` - Edge functions utilities
-- [ ] `utils/efs-filesystems.ts` - EFS filesystems utilities
+- [x] `utils/custom-resource-definitions.ts` - Custom resource definitions utilities (Batch 18)
+- [x] `utils/edge-functions.ts` - Edge functions utilities (Batch 18)
+- [x] `utils/efs-filesystems.ts` - EFS filesystems utilities (Batch 18)
 - [x] `utils/event-buses.ts` - Event buses utilities (Batch 17)
 - [ ] `utils/http-api-gateways.ts` - HTTP API gateways utilities
 - [x] `utils/iam.ts` - IAM utilities (Batch 14)
@@ -503,7 +503,14 @@ More complex config manager utilities:
 
 **Batch 17 Stats**: 4 files, ~34 tests, 100% passing
 
-### Batch 18+: Remaining Files (Priority: Low to Medium)
+### Batch 18: Config Manager EFS & Resource Utils (Priority: Medium) ✅ COMPLETED
+- [x] `config-manager/utils/edge-functions.ts` - Edge lambda function reference resolution
+- [x] `config-manager/utils/custom-resource-definitions.ts` - Custom resource definition references
+- [x] `config-manager/utils/efs-filesystems.ts` - EFS filesystem resolution and mount tracking
+
+**Batch 18 Stats**: 3 files, ~34 tests, 100% passing
+
+### Batch 19+: Remaining Files (Priority: Low to Medium)
 Will be organized based on dependencies and complexity.
 
 ---
