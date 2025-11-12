@@ -23,7 +23,7 @@ This document tracks the testing progress for all files in the `src/` folder.
 - [ ] `aws-sdk-manager/index.ts` - AWS SDK manager
 - [ ] `aws-sdk-manager/utils.ts` - AWS SDK manager utilities
 - [x] `basic-compose-shim.ts` - Basic compose shim (Batch 11)
-- [ ] `cli.ts` - CLI utilities
+- [x] `cli.ts` - CLI utilities (Batch 13)
 - [x] `cloudformation.ts` - CloudFormation utilities (Batch 2)
 - [x] `cloudwatch-logs.ts` - CloudWatch logs utilities (Batch 2)
 - [x] `collections.ts` - Collection utilities (Batch 1)
@@ -34,7 +34,7 @@ This document tracks the testing progress for all files in the `src/` folder.
 - [x] `file-loaders.ts` - File loader utilities (Batch 3)
 - [x] `formatting.ts` - Formatting utilities (Batch 1)
 - [ ] `git-info-manager/index.ts` - Git info manager
-- [ ] `git.ts` - Git utilities
+- [x] `git.ts` - Git utilities (Batch 13)
 - [x] `helper-lambdas.ts` - Helper lambdas utilities (Batch 11)
 - [ ] `http-client.ts` - HTTP client utilities
 - [x] `ip.ts` - IP utilities (Batch 1)
@@ -371,8 +371,8 @@ This document tracks the testing progress for all files in the `src/` folder.
 ## Summary
 
 - **Total Files**: 274
-- **Completed**: 33 (1 pre-existing + 8 from Batch 1 + 3 from Batch 2 + 3 from Batch 3 + 2 from Batch 4 + 3 from Batch 5 + 4 from Batch 6 + 1 from Batch 7 + 1 from Batch 8 + 1 from Batch 9 + 2 from Batch 10 + 2 from Batch 11 + 2 from Batch 12)
-- **Remaining**: 241
+- **Completed**: 35 (1 pre-existing + 8 from Batch 1 + 3 from Batch 2 + 3 from Batch 3 + 2 from Batch 4 + 3 from Batch 5 + 4 from Batch 6 + 1 from Batch 7 + 1 from Batch 8 + 1 from Batch 9 + 2 from Batch 10 + 2 from Batch 11 + 2 from Batch 12 + 2 from Batch 13)
+- **Remaining**: 239
 
 ## Test Statistics
 - **Total Tests**: ~560 (estimated)
@@ -469,7 +469,13 @@ More complex config manager utilities:
 
 **Batch 12 Stats**: 2 files, ~45 tests, 100% passing
 
-### Batch 13+: Remaining Files (Priority: Low to Medium)
+### Batch 13: CLI & Git Utilities (Priority: Medium) ✅ COMPLETED
+- [x] `git.ts` - Git variable extraction functions
+- [x] `cli.ts` - CLI argument parsing and transformation
+
+**Batch 13 Stats**: 2 files, ~35 tests, 100% passing
+
+### Batch 14+: Remaining Files (Priority: Low to Medium)
 Will be organized based on dependencies and complexity.
 
 ---
