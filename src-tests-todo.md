@@ -244,16 +244,16 @@ This document tracks the testing progress for all files in the `src/` folder.
 - [ ] `utils/http-api-gateways.ts` - HTTP API gateways utilities
 - [ ] `utils/iam.ts` - IAM utilities
 - [ ] `utils/lambdas.ts` - Lambdas utilities
-- [ ] `utils/misc.ts` - Miscellaneous utilities
+- [x] `utils/misc.ts` - Miscellaneous utilities (Batch 5)
 - [ ] `utils/multi-container-workloads.ts` - Multi-container workloads utilities
 - [ ] `utils/network-load-balancers.ts` - NLB utilities
 - [ ] `utils/nextjs-webs.ts` - Next.js webs utilities
 - [ ] `utils/relational-databases.ts` - Relational databases utilities
-- [ ] `utils/resource-references.ts` - Resource references utilities
+- [x] `utils/resource-references.ts` - Resource references utilities (Batch 5)
 - [ ] `utils/sns-topics.ts` - SNS topics utilities
 - [ ] `utils/sqs-queues.ts` - SQS queues utilities
 - [ ] `utils/user-pools.ts` - User pools utilities
-- [ ] `utils/validation.ts` - Validation utilities
+- [x] `utils/validation.ts` - Validation utilities (Batch 5)
 - [ ] `utils/web-app-firewall.ts` - Web app firewall utilities
 - [ ] `utils/web-services.ts` - Web services utilities
 
@@ -371,8 +371,8 @@ This document tracks the testing progress for all files in the `src/` folder.
 ## Summary
 
 - **Total Files**: 274
-- **Completed**: 17 (1 pre-existing + 8 from Batch 1 + 3 from Batch 2 + 3 from Batch 3 + 2 from Batch 4)
-- **Remaining**: 257
+- **Completed**: 20 (1 pre-existing + 8 from Batch 1 + 3 from Batch 2 + 3 from Batch 3 + 2 from Batch 4 + 3 from Batch 5)
+- **Remaining**: 254
 
 ## Test Statistics
 - **Total Tests**: ~560 (estimated)
@@ -419,11 +419,13 @@ File system and system-related utilities:
 
 **Batch 4 Stats**: 2 files, ~80 tests, 100% passing
 
-### Batch 5: Config Manager Utils (Priority: High)
+### Batch 5: Config Manager Utils (Priority: High) ✅ COMPLETED
 Simple config manager utilities:
-- `config-manager/utils/validation.ts`
-- `config-manager/utils/misc.ts`
-- `config-manager/utils/resource-references.ts`
+- [x] `config-manager/utils/validation.ts` - Packaging validation
+- [x] `config-manager/utils/misc.ts` - Config merging and cleaning
+- [x] `config-manager/utils/resource-references.ts` - Resource reference utilities
+
+**Batch 5 Stats**: 3 files, ~45 tests, 100% passing
 
 ### Batch 6: More Config Manager Utils (Priority: Medium)
 More complex config manager utilities:
