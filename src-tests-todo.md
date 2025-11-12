@@ -19,13 +19,13 @@ This document tracks the testing progress for all files in the `src/` folder.
 ## Utils (`src/utils/`)
 
 - [x] `directives.spec.ts` - Directive utilities (ALREADY EXISTS)
-- [ ] `aws-config.ts` - AWS configuration
+- [x] `aws-config.ts` - AWS configuration (Batch 2)
 - [ ] `aws-sdk-manager/index.ts` - AWS SDK manager
 - [ ] `aws-sdk-manager/utils.ts` - AWS SDK manager utilities
 - [ ] `basic-compose-shim.ts` - Basic compose shim
 - [ ] `cli.ts` - CLI utilities
-- [ ] `cloudformation.ts` - CloudFormation utilities
-- [ ] `cloudwatch-logs.ts` - CloudWatch logs utilities
+- [x] `cloudformation.ts` - CloudFormation utilities (Batch 2)
+- [x] `cloudwatch-logs.ts` - CloudWatch logs utilities (Batch 2)
 - [x] `collections.ts` - Collection utilities (Batch 1)
 - [ ] `decorators.ts` - Decorator utilities
 - [x] `domains.ts` - Domain utilities (Batch 1)
@@ -371,12 +371,12 @@ This document tracks the testing progress for all files in the `src/` folder.
 ## Summary
 
 - **Total Files**: 274
-- **Completed**: 9 (1 pre-existing + 8 from Batch 1)
-- **Remaining**: 265
+- **Completed**: 12 (1 pre-existing + 8 from Batch 1 + 3 from Batch 2)
+- **Remaining**: 262
 
 ## Test Statistics
-- **Total Tests**: ~260 (estimated from Batch 1)
-- **Total Assertions**: ~450 (estimated from Batch 1)
+- **Total Tests**: ~370 (estimated)
+- **Total Assertions**: ~650 (estimated)
 
 ---
 
@@ -397,11 +397,13 @@ Focus on pure utility functions with minimal dependencies:
 
 **Batch 1 Stats**: 8 files, ~187 tests, 100% passing
 
-### Batch 2: AWS Utils (Priority: High)
+### Batch 2: AWS Utils (Priority: High) ✅ COMPLETED
 AWS-related utilities with AWS SDK mocking:
-- `aws-config.ts`
-- `cloudformation.ts`
-- `cloudwatch-logs.ts`
+- [x] `aws-config.ts` - AWS profile management (24 tests)
+- [x] `cloudformation.ts` - CloudFormation utilities (31 tests)
+- [x] `cloudwatch-logs.ts` - CloudWatch log printers (22 tests)
+
+**Batch 2 Stats**: 3 files, ~77 tests, 100% passing
 
 ### Batch 3: File & System Utils (Priority: High)
 File system and system-related utilities:
