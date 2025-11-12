@@ -235,12 +235,12 @@ This document tracks the testing progress for all files in the `src/` folder.
 - [ ] `built-in-directives.ts` - Built-in directives
 - [x] `utils/alarms.ts` - Alarms utilities (Batch 6)
 - [ ] `utils/application-load-balancers.ts` - ALB utilities
-- [ ] `utils/bastion.ts` - Bastion utilities
+- [x] `utils/bastion.ts` - Bastion utilities (Batch 17)
 - [x] `utils/buckets.ts` - Buckets utilities (Batch 6)
 - [ ] `utils/custom-resource-definitions.ts` - Custom resource definitions utilities
 - [ ] `utils/edge-functions.ts` - Edge functions utilities
 - [ ] `utils/efs-filesystems.ts` - EFS filesystems utilities
-- [ ] `utils/event-buses.ts` - Event buses utilities
+- [x] `utils/event-buses.ts` - Event buses utilities (Batch 17)
 - [ ] `utils/http-api-gateways.ts` - HTTP API gateways utilities
 - [x] `utils/iam.ts` - IAM utilities (Batch 14)
 - [ ] `utils/lambdas.ts` - Lambdas utilities
@@ -252,9 +252,9 @@ This document tracks the testing progress for all files in the `src/` folder.
 - [x] `utils/resource-references.ts` - Resource references utilities (Batch 5)
 - [x] `utils/sns-topics.ts` - SNS topics utilities (Batch 6)
 - [x] `utils/sqs-queues.ts` - SQS queues utilities (Batch 6)
-- [ ] `utils/user-pools.ts` - User pools utilities
+- [x] `utils/user-pools.ts` - User pools utilities (Batch 17)
 - [x] `utils/validation.ts` - Validation utilities (Batch 5)
-- [ ] `utils/web-app-firewall.ts` - Web app firewall utilities
+- [x] `utils/web-app-firewall.ts` - Web app firewall utilities (Batch 17)
 - [ ] `utils/web-services.ts` - Web services utilities
 
 ### Deployed Stack Overview Manager (`src/domain/deployed-stack-overview-manager/`)
@@ -495,7 +495,15 @@ More complex config manager utilities:
 
 **Batch 16 Stats**: 3 files, ~62 tests, 100% passing
 
-### Batch 17+: Remaining Files (Priority: Low to Medium)
+### Batch 17: Config Manager Resource Utils (Priority: Medium) ✅ COMPLETED
+- [x] `config-manager/utils/bastion.ts` - Bastion resource reference resolution
+- [x] `config-manager/utils/user-pools.ts` - User pool reference resolution
+- [x] `config-manager/utils/event-buses.ts` - Event bus reference resolution
+- [x] `config-manager/utils/web-app-firewall.ts` - Firewall reference with scope validation
+
+**Batch 17 Stats**: 4 files, ~34 tests, 100% passing
+
+### Batch 18+: Remaining Files (Priority: Low to Medium)
 Will be organized based on dependencies and complexity.
 
 ---
