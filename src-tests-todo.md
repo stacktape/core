@@ -247,7 +247,7 @@ This document tracks the testing progress for all files in the `src/` folder.
 - [x] `utils/misc.ts` - Miscellaneous utilities (Batch 5)
 - [ ] `utils/multi-container-workloads.ts` - Multi-container workloads utilities
 - [ ] `utils/network-load-balancers.ts` - NLB utilities
-- [ ] `utils/nextjs-webs.ts` - Next.js webs utilities
+- [x] `utils/nextjs-webs.ts` - Next.js webs utilities (Batch 19)
 - [x] `utils/relational-databases.ts` - Relational databases utilities (Batch 14)
 - [x] `utils/resource-references.ts` - Resource references utilities (Batch 5)
 - [x] `utils/sns-topics.ts` - SNS topics utilities (Batch 6)
@@ -255,7 +255,7 @@ This document tracks the testing progress for all files in the `src/` folder.
 - [x] `utils/user-pools.ts` - User pools utilities (Batch 17)
 - [x] `utils/validation.ts` - Validation utilities (Batch 5)
 - [x] `utils/web-app-firewall.ts` - Web app firewall utilities (Batch 17)
-- [ ] `utils/web-services.ts` - Web services utilities
+- [x] `utils/web-services.ts` - Web services utilities (Batch 19)
 
 ### Deployed Stack Overview Manager (`src/domain/deployed-stack-overview-manager/`)
 - [ ] `index.ts` - Deployed stack overview manager
@@ -510,7 +510,13 @@ More complex config manager utilities:
 
 **Batch 18 Stats**: 3 files, ~34 tests, 100% passing
 
-### Batch 19+: Remaining Files (Priority: Low to Medium)
+### Batch 19: Config Manager Validation Utils (Priority: Medium) ✅ COMPLETED
+- [x] `config-manager/utils/web-services.ts` - Web service validation (load balancing, CDN, firewall)
+- [x] `config-manager/utils/nextjs-webs.ts` - Next.js web validation (directory, config, edge lambda)
+
+**Batch 19 Stats**: 2 files, ~32 tests, 100% passing
+
+### Batch 20+: Remaining Files (Priority: Low to Medium)
 Will be organized based on dependencies and complexity.
 
 ---
