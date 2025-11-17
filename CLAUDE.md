@@ -6,6 +6,10 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 Stacktape is a PaaS 2.0 platform that simplifies AWS deployment. It enables developers to deploy containers, Lambdas, databases, and 30+ AWS services without extensive DevOps knowledge while maintaining full control and AWS flexibility.
 
+## Writing rules
+
+Be extremely concise. Sacrifice grammar for the sake of concision.
+
 ## Code Rules
 
 - Only use comments when absolutely necessary. Let the code be self-explanatory.

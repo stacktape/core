@@ -1,6 +1,5 @@
 import { IS_DEV, SENTRY_CAPTURE_EXCEPTION_WAIT_TIME_MS, SENTRY_DSN } from '@config';
-import { RewriteFrames } from '@sentry/integrations';
-import { captureException, init, setTags } from '@sentry/node';
+import { captureException, init, rewriteFramesIntegration, setTags } from '@sentry/node';
 import { wait } from '@shared/utils/misc';
 import stripAnsi from 'strip-ansi';
 import { getStacktapeVersion } from './versioning';
@@ -9,7 +8,7 @@ export const initializeSentry = () => {
   if (!IS_DEV) {
     init({
       dsn: SENTRY_DSN,
-      integrations: [new RewriteFrames({ root: (global as any).__rootdir__ })],
+      integrations: [rewriteFramesIntegration({ root: (global as any).__rootdir__ })],
       release: getStacktapeVersion(),
       maxValueLength: 10000,
       beforeBreadcrumb: (breadcrumb) => {
