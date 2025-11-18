@@ -24,15 +24,6 @@ import {
 import { generateStarterProjectsMetadata } from '../generate-starter-projects-metadata';
 import { packageHelperLambdas } from '../package-helper-lambdas';
 
-const _BINARY_FOLDER_NAMES: { [_platform in SupportedPlatform]: string } = {
-  win: 'windows',
-  macos: 'macos',
-  linux: 'linux',
-  'macos-arm': 'macos-arm',
-  alpine: 'alpine',
-  'linux-arm': 'linux-arm'
-};
-
 const main = async () => {
   const argv = yargsParser(process.argv.slice(2));
   const platform = argv.platform as SupportedPlatform;

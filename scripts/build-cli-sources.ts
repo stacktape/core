@@ -45,6 +45,24 @@ export const ALL_SUPPORTED_PLATFORMS: SupportedPlatform[] = [
   'linux-arm'
 ];
 
+export const buildEsbuildRegister = async ({ distFolderPath }: { distFolderPath?: string }) => {
+  logInfo('Copying esbuild-register...');
+  const esbuildRegisterDistFolderPath = join(distFolderPath, 'esbuild', 'esbuild-register.js');
+  await buildEsCode({
+    rawCode: 'require("esbuild-register/dist/node").register();',
+    distPath: esbuildRegisterDistFolderPath,
+    externals: [],
+    sourceMaps: 'disabled',
+    sourceMapBannerType: 'disabled',
+    tsConfigPath: localBuildTsConfigPath,
+    keepNames: false,
+    minify: true,
+    nodeTarget: '18',
+    cwd: process.cwd()
+  });
+  logSuccess('esbuild-register copied successfully.');
+};
+
 const BINARY_FOLDER_NAMES: { [_platform in SupportedPlatform]: string } = {
   win: 'windows',
   macos: 'macos',
@@ -89,26 +107,6 @@ const copyBridgeFiles = async ({ distFolderPath }: { distFolderPath?: string }) 
   logInfo('Copying bridge files...');
   await copy(BRIDGE_FILES_SOURCE_FOLDER_PATH, join(distFolderPath, BRIDGE_FILES_FOLDER_NAME));
   logSuccess('Bridge files copied successfully.');
-};
-
-const buildEsbuildRegister = async ({ distFolderPath }: { distFolderPath?: string }) => {
-  logInfo('Copying esbuild-register...');
-  // const sourceFolderPath = join(process.cwd(), 'scripts', 'assets', 'esbuild-register.js');
-  const esbuildRegisterDistFolderPath = join(distFolderPath, 'esbuild', 'esbuild-register.js');
-  await buildEsCode({
-    rawCode: 'require("esbuild-register/dist/node").register();',
-    distPath: esbuildRegisterDistFolderPath,
-    externals: [],
-    sourceMaps: 'disabled',
-    sourceMapBannerType: 'disabled',
-    tsConfigPath: localBuildTsConfigPath,
-    keepNames: false,
-    minify: true,
-    nodeTarget: '18',
-    cwd: process.cwd()
-  });
-  // await retryableCopy(sourceFolderPath, esbuildRegisterDistFolderPath);
-  logSuccess('esbuild-register copied successfully.');
 };
 
 export const buildBinaryFile = async ({

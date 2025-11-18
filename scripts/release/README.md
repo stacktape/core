@@ -27,6 +27,7 @@ When using `--prerelease`, the version must follow the format: `X.Y.Z-{alpha|bet
 - Users need to explicitly install prerelease versions: `npm install stacktape@alpha`
 
 Examples:
+
 - `2.23.0-alpha.0` - First alpha prerelease
 - `2.23.0-beta.1` - Second beta prerelease
 - `2.23.0-rc.0` - First release candidate
@@ -47,6 +48,7 @@ bun run release --version 2.23.0-alpha.0 --prerelease
 ## Architecture
 
 The release process has been modularized to:
+
 1. **Avoid code duplication** - Shared logic is in `utils/`
 2. **Enable selective releases** - Can release CLI or NPM independently
 3. **Improve maintainability** - Each concern is in its own module
@@ -55,6 +57,7 @@ The release process has been modularized to:
 ## Flow
 
 ### Full Release (`release.ts`)
+
 1. Get version (flag or prompt)
 2. Validate project (ESLint + TypeScript)
 3. Build CLI binaries
@@ -70,6 +73,7 @@ The release process has been modularized to:
 13. Publish schemas
 
 ### CLI-Only Release (`release-cli.ts`)
+
 1. Get version
 2. Validate project
 3. Build CLI binaries
@@ -80,6 +84,7 @@ The release process has been modularized to:
 8. Commit changes
 
 ### NPM-Only Release (`release-npm.ts`)
+
 1. Get version
 2. Validate project
 3. Build CLI binaries (needed for platform packages)
