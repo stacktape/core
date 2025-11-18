@@ -71,7 +71,7 @@ const main = async () => {
 
     if (response.status === 204) {
       logSuccess(
-        'Release workflow triggered successfully!\n\nView workflow runs at: https://github.com/stacktape/core/actions/workflows/release.yml'
+        'Release workflow triggered successfully!\n\nView workflow runs at: https://github.com/stacktape/core/actions'
       );
     } else {
       throw new Error(`Unexpected response status: ${response.status}`);
