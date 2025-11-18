@@ -4,49 +4,7 @@ This directory contains modular release scripts for Stacktape.
 
 ## Scripts
 
-### Main Release Scripts
-
-- **`release.ts`** - Full release (both CLI to GitHub and NPM packages)
-  - Run with: `bun run release`
-  - Builds CLI binaries, creates GitHub release, publishes to NPM
-
-- **`release-cli.ts`** - CLI-only release (GitHub only)
-  - Run with: `bun run release:cli`
-  - Builds CLI binaries and creates GitHub release with install scripts
-
-- **`release-npm.ts`** - NPM-only release
-  - Run with: `bun run release:npm`
-  - Builds and publishes NPM packages (main + platform-specific)
-
-### Utility Modules
-
-Located in `utils/` directory:
-
-- **`version.ts`** - Version management utilities
-  - `getVersion()` - Get version from flags or prompt user
-  - `adjustPackageJsonVersion()` - Update package.json version
-  - `getVersionFlags()` - Parse CLI flags
-
-- **`git.ts`** - Git operations
-  - `checkBranch()` - Verify on master branch
-  - `gitCommitProject()` - Commit release changes
-
-- **`github.ts`** - GitHub release operations
-  - `createGithubRelease()` - Create GitHub release
-  - `uploadReleaseAssets()` - Upload binaries to release
-
-- **`npm.ts`** - NPM publishing
-  - `publishMainNpmPackage()` - Publish main stacktape package
-  - `publishPlatformPackages()` - Publish platform-specific packages
-
-- **`build.ts`** - Build operations
-  - `buildCliForRelease()` - Build CLI binaries for all platforms
-  - `buildNpmPackageForRelease()` - Build main NPM package
-
-- **`validation.ts`** - Project validation
-  - `validateProject()` - Run ESLint and TypeScript checks
-
-## Flags
+# Flags
 
 All release scripts support these flags:
 
@@ -56,7 +14,7 @@ All release scripts support these flags:
 - `--patch` - Auto-increment patch version (e.g., 1.0.0 → 1.0.1)
 - `--prerelease` - Create a prerelease version (must end with `-alpha.N`, `-beta.N`, or `-rc.N`)
 - `--dev` - Development mode (skips validation, git checks, and publishing)
-- `--spc` - Skip project check (skip branch validation)
+- `--spc` - Skip project check
 
 If no version flag is provided, you'll be prompted to enter a version manually.
 
@@ -84,21 +42,6 @@ bun run release --patch
 
 # Prerelease with explicit version
 bun run release --version 2.23.0-alpha.0 --prerelease
-
-# Prerelease with prompt (will suggest X.Y.Z-alpha.0)
-bun run release --prerelease
-
-# CLI-only release with minor version bump
-bun run release:cli --minor
-
-# NPM-only prerelease
-bun run release:npm --version 2.23.0-beta.0 --prerelease
-
-# NPM-only release in dev mode (no publishing)
-bun run release:npm --dev
-
-# Full release with manual version input (will prompt)
-bun run release
 ```
 
 ## Architecture
