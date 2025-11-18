@@ -86,10 +86,10 @@ jobs:
             os: ubuntu-latest
             target: linux-x64-musl
           - platform: macos
-            os: macos-13
+            os: ubuntu-latest
             target: darwin-x64
           - platform: macos-arm
-            os: macos-14
+            os: ubuntu-latest
             target: darwin-arm64
           - platform: windows
             os: windows-latest
