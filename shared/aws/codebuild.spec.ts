@@ -2,12 +2,20 @@ import { describe, expect, mock, test } from 'bun:test';
 
 // Mock dependencies
 mock.module('@shared/naming/aws-resource-names', () => ({
-  awsResourceNames: {
-    codebuildServiceRole: mock(() => 'stp-codebuild-role'),
-    stackOperationsLogGroup: mock(() => '/aws/stacktape/operations'),
-    codebuildProject: mock((region) => `stp-codebuild-${region}`),
-    codebuildDeploymentBucket: mock((region, accountId) => `stp-codebuild-${region}-${accountId}`)
-  }
+  awsResourceNames: new Proxy(
+    {
+      codebuildServiceRole: mock(() => 'stp-codebuild-role'),
+      stackOperationsLogGroup: mock(() => '/aws/stacktape/operations'),
+      codebuildProject: mock((region) => `stp-codebuild-${region}`),
+      codebuildDeploymentBucket: mock((region, accountId) => `stp-codebuild-${region}-${accountId}`)
+    },
+    {
+      get: (target, prop) => {
+        if (prop in target) return target[prop];
+        return mock((...args) => `mock-${String(prop)}-${args.join('-')}`);
+      }
+    }
+  )
 }));
 
 mock.module('@shared/naming/ssm-secret-parameters', () => ({
@@ -76,7 +84,10 @@ describe('codebuild', () => {
       const mockAwsSdkManager: any = {
         region: 'us-east-1',
         putSsmParameterValue: mock(async () => {}),
-        startCodebuildDeployment: mock(async () => ({ id: 'build-123', arn: 'arn:aws:codebuild:us-east-1:123:build/test:build-123' })),
+        startCodebuildDeployment: mock(async () => ({
+          id: 'build-123',
+          arn: 'arn:aws:codebuild:us-east-1:123:build/test:build-123'
+        })),
         waitForCodebuildDeploymentToReachBuildPhase: mock(async () => {}),
         deleteSsmParameter: mock(async () => {}),
         getCodebuildDeployment: mock(async () => ({ id: 'build-123' }))
@@ -110,7 +121,10 @@ describe('codebuild', () => {
       const mockAwsSdkManager: any = {
         region: 'us-east-1',
         putSsmParameterValue: mock(async () => {}),
-        startCodebuildDeployment: mock(async () => ({ id: 'build-123', arn: 'arn:aws:codebuild:us-east-1:123:build/test:build-123' })),
+        startCodebuildDeployment: mock(async () => ({
+          id: 'build-123',
+          arn: 'arn:aws:codebuild:us-east-1:123:build/test:build-123'
+        })),
         waitForCodebuildDeploymentToReachBuildPhase: mock(async () => {}),
         deleteSsmParameter: mock(async () => {}),
         getCodebuildDeployment: mock(async () => ({ id: 'build-123' }))

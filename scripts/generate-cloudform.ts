@@ -1,6 +1,6 @@
 import fs from 'node:fs';
 import { CLOUDFORM_FOLDER_PATH, CLOUDFORM_ROOT_HELPER_FOLDER_PATH } from '@shared/naming/project-fs-paths';
-import { logInfo, logSuccess } from '@shared/utils/logging.js';
+import { logInfo, logSuccess } from '@shared/utils/logging';
 import { prettify } from '@shared/utils/prettier';
 import { copy, mkdir, remove } from 'fs-extra';
 import camelCase from 'lodash/camelCase';

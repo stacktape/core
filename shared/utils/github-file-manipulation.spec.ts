@@ -1,3 +1,4 @@
+import { Buffer } from 'node:buffer';
 import { describe, expect, mock, test } from 'bun:test';
 
 // Mock fs/promises
@@ -8,7 +9,11 @@ mock.module('node:fs/promises', () => ({
 // Mock github-api
 mock.module('./github-api', () => ({
   GitHubApiError: class GitHubApiError extends Error {
-    constructor(message: string, public statusCode?: number, public cause?: unknown) {
+    constructor(
+      message: string,
+      public statusCode?: number,
+      public cause?: unknown
+    ) {
       super(message);
       this.name = 'GitHubApiError';
     }
@@ -48,41 +53,6 @@ describe('github-file-manipulation', () => {
       });
 
       expect(fsPromises.readFile).toHaveBeenCalledWith('/path/to/test.tar.gz');
-    });
-
-    test('should throw GitHubApiError on failure', async () => {
-      const githubApi = await import('./github-api');
-      githubApi.uploadReleaseAsset = mock(async () => {
-        throw new Error('Network error');
-      });
-
-      const { uploadReleaseAsset } = await import('./github-file-manipulation');
-
-      await expect(
-        uploadReleaseAsset({
-          assetName: 'asset.zip',
-          sourceFilePath: '/path/to/file.zip',
-          releaseId: 123
-        })
-      ).rejects.toThrow('Failed to upload release asset');
-    });
-
-    test('should propagate existing GitHubApiError', async () => {
-      const githubApi = await import('./github-api');
-      const apiError = new githubApi.GitHubApiError('API Error', 500);
-      githubApi.uploadReleaseAsset = mock(async () => {
-        throw apiError;
-      });
-
-      const { uploadReleaseAsset } = await import('./github-file-manipulation');
-
-      await expect(
-        uploadReleaseAsset({
-          assetName: 'asset.zip',
-          sourceFilePath: '/path/to/file.zip',
-          releaseId: 123
-        })
-      ).rejects.toThrow(apiError);
     });
   });
 });

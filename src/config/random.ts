@@ -2,15 +2,7 @@ export const IS_DEV_NATIVE = process.env.STP_DEV_MODE === 'true';
 export const IS_DEV_BIN = process.env.STP_DEV_BIN_MODE === 'true';
 export const IS_DEV = IS_DEV_NATIVE || IS_DEV_BIN;
 
-export const VALID_CONFIG_PATHS = [
-  'stacktape.yaml',
-  'stacktape.yml',
-  // 'stacktape.json',
-  // 'stacktape.ini',
-  'stacktape.js',
-  'stacktape.ts'
-  // 'stacktape.py'
-];
+export const VALID_CONFIG_PATHS = ['stacktape.yaml', 'stacktape.yml', 'stacktape.js', 'stacktape.ts'];
 export const ANNOUNCEMENTS_ENDPOINT = 'https://announcements.stacktape-dev.com';
 export const SENTRY_DSN = 'https://93ed0b30b9b743bcbef5745266e8a30b@sentry.io/2119088';
 export const SCHEMAS_BUCKET_NAME =
@@ -43,7 +35,7 @@ export const possiblySupportedLangExtensions = [
 ] as const;
 
 export const lambdaRuntimesForFileExtension: {
-  [ext in (typeof possiblySupportedLangExtensions)[number]]: string[];
+  [_ext in (typeof possiblySupportedLangExtensions)[number]]: string[];
 } = {
   js: ['nodejs22.x', 'nodejs20.x', 'nodejs18.x', 'nodejs16.x'], // 'nodejs14.x', 'nodejs12.x'],
   ts: ['nodejs22.x', 'nodejs20.x', 'nodejs18.x', 'nodejs16.x'], // 'nodejs14.x', 'nodejs12.x'],
@@ -132,7 +124,7 @@ export const defaultLogRetentionDays = {
   relationalDatabase: 90
 };
 
-export const RESOURCE_DEFAULTS: { [resourceType in StpResourceType]: Partial<StpResource> } = {
+export const RESOURCE_DEFAULTS: { [_resourceType in StpResourceType]: Partial<StpResource> } = {
   'batch-job': {
     resources: {
       memory: 1024
@@ -247,7 +239,7 @@ export const HELPER_LAMBDA_NAMES = [
 ] as const;
 
 export const SUPPORTED_CF_INFRASTRUCTURE_MODULES: {
-  [infrastructureModuleType in StpCfInfrastructureModuleType]: CfInfrastructureModuleData;
+  [_infrastructureModuleType in StpCfInfrastructureModuleType]: CfInfrastructureModuleData;
 } = {
   // WARNING: before editing anything in this section please read info about CfInfrastructureModuleData interface
   atlasMongo: {
@@ -308,9 +300,6 @@ export const HELPER_LAMBDAS: HelperLambdaName[] = [
   'cdnOriginResponseLambda',
   'stacktapeServiceLambda'
 ];
-
-export const LAMBDA_PYTHON_VERSIONS = [3.7, 3.8, 3.9];
-export const LAMBDA_JAVA_VERSIONS = [9, 11];
 
 export const RECORDED_STACKTAPE_COMMANDS: StacktapeRecordedCommand[] = [
   'deploy',

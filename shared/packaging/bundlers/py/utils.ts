@@ -33,7 +33,7 @@ export const getBundleDigest = async ({
 export const detectPackageManager = async (sourcePath: string) =>
   (await exists(`${sourcePath}/requirements.txt`))
     ? 'pip'
-    : (await exists(`${sourcePath}/pipfile`))
+    : (await exists(`${sourcePath}/Pipfile`))
       ? 'pipenv'
       : (await exists(`${sourcePath}/pyproject.toml`))
         ? 'poetry'

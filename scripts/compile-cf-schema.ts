@@ -1,7 +1,7 @@
 import { join } from 'node:path';
 import { GENERATED_FILES_FOLDER_PATH } from '@shared/naming/project-fs-paths';
 import { downloadFile } from '@shared/utils/download-file';
-import { logInfo, logSuccess } from '@shared/utils/logging.js';
+import { logInfo, logSuccess } from '@shared/utils/logging';
 import { unzip } from '@shared/utils/unzip';
 import { mkdirp, outputJSON, readdirSync, readJson, remove } from 'fs-extra';
 

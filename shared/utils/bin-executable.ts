@@ -95,7 +95,7 @@ export const getPlatform = (): SupportedPlatform => {
 };
 
 export const getInstallationScript = () => {
-  const installationScripts: { [platform in SupportedPlatform]: string } = {
+  const installationScripts: { [_platform in SupportedPlatform]: string } = {
     win: 'iwr https://installs.stacktape.com/windows.ps1 -useb | iex',
     linux: 'curl -L https://installs.stacktape.com/linux.sh | sh',
     'linux-arm': 'curl -L https://installs.stacktape.com/linux-arm.sh | sh',

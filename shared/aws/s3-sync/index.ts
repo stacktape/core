@@ -1,7 +1,7 @@
-/* eslint-disable @typescript-eslint/no-this-alias */
-// @ts-nocheck
-// ORIGINALLY this repo https://github.com/auth0/node-s3-client
+/* eslint-disable */
+// @ts-nocheck - this is a legacy codebase that we are not going to maintain
 
+// ORIGINALLY this repo https://github.com/auth0/node-s3-client
 import assert from 'node:assert';
 import { EventEmitter } from 'node:events';
 import fs from 'node:fs';

@@ -1,7 +1,3 @@
-/**
- * Generates resource class declarations with their getters
- */
-
 import type { ReferenceableParam, ReferenceableParamsMap } from './types';
 import { getResourcesWithAugmentedProps, RESOURCES } from '../../src/api/npm/ts/resource-metadata';
 

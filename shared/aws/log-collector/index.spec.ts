@@ -1,4 +1,4 @@
-import { describe, expect, mock, test, beforeEach } from 'bun:test';
+import { describe, expect, mock, test } from 'bun:test';
 
 // Mock dependencies
 mock.module('@shared/utils/misc', () => ({
@@ -17,7 +17,8 @@ mock.module('@shared/utils/misc', () => ({
     }
     return chunks;
   }),
-  removeColoringFromString: mock((str) => str.replace(/\u001b\[\d+m/g, '')),
+  // eslint-disable-next-line
+  removeColoringFromString: mock((str) => str.replace(/\u001B\[(\d+)m/g, '')),
   wait: mock(async () => {})
 }));
 
@@ -69,7 +70,7 @@ describe('log-collector/index', () => {
       const stream = new LogCollectorStream();
 
       await new Promise((resolve) => {
-        stream.write('\u001b[31mRed text\u001b[0m', () => {
+        stream.write('\u001B[31mRed text\u001B[0m', () => {
           resolve(undefined);
         });
       });
@@ -110,7 +111,9 @@ describe('log-collector/index', () => {
       const stream = new LogCollectorStream();
       const mockAwsSdkManager: any = {
         isInitialized: true,
-        getLogGroup: mock(async () => null).mockResolvedValueOnce(null).mockResolvedValueOnce({ logGroupName: 'test-group' }),
+        getLogGroup: mock(async () => null)
+          .mockResolvedValueOnce(null)
+          .mockResolvedValueOnce({ logGroupName: 'test-group' }),
         createLogGroup: mock(async () => {}),
         createLogStream: mock(async () => {}),
         putLogEvents: mock(async () => {})

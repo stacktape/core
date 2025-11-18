@@ -38,6 +38,7 @@ import type TaskDefinition from '@cloudform/ecs/taskDefinition';
 import type { Policy } from '@cloudform/iam/role';
 import type { Stats } from 'node:fs';
 import type { Readable } from 'node:stream';
+import { Buffer } from 'node:buffer';
 import path from 'node:path';
 import {
   ACMClient,
@@ -661,7 +662,6 @@ export class AwsSdkManager {
                   RoleName: roleName
                 })
               )
-              // eslint-disable-next-line promise/no-nesting
               .catch(errHandler);
             return;
           }
@@ -1627,7 +1627,6 @@ export class AwsSdkManager {
   }): Promise<FilteredLogEvent[]> => {
     const errHandler = this.#getErrorHandler('Failed to get log event.');
     const params = {
-      // @ts-ignore
       logGroupName,
       logStreamNames,
       logStreamNamePrefix: logStreamPrefix,
@@ -2724,7 +2723,9 @@ export class AwsSdkManager {
                 'on-failure': 'RETRY-2', // will retry up to 3 times
                 commands: [
                   // track attempt count
+                  // eslint-disable-next-line no-template-curly-in-string
                   'if [ -z "${CODEBUILD_ATTEMPT+x}" ]; then export CODEBUILD_ATTEMPT=1; else CODEBUILD_ATTEMPT=$((CODEBUILD_ATTEMPT+1)); export CODEBUILD_ATTEMPT; fi',
+                  // eslint-disable-next-line no-template-curly-in-string
                   'echo "Install Phase - Attempt #${CODEBUILD_ATTEMPT}"',
                   'docker run --privileged --rm public.ecr.aws/vend/tonistiigi/binfmt:latest --install arm64',
                   ...additionalInstallCommands,
@@ -2750,6 +2751,7 @@ export class AwsSdkManager {
                   'if [ "$CODEBUILD_ATTEMPT" -ge 3 ] || [ "$CODEBUILD_BUILD_SUCCEEDING" -eq 1 ]; then ' +
                     `  echo "Running cleanup…"; aws ssm delete-parameters --names "${apiKeySsmParameterName}"; ` +
                     'else ' +
+                    // eslint-disable-next-line no-template-curly-in-string
                     '  echo "Install failed on attempt #${CODEBUILD_ATTEMPT}, sleeping 10s before retry…"; ' +
                     '  sleep 10; ' +
                     'fi'

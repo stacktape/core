@@ -396,7 +396,7 @@ export const resolvePrisma = async ({
 };
 
 export const getModuleNameFromArgs = (args: esbuild.OnResolveArgs) => {
-  const moduleName = args.path.endsWith('/') ? args.path.slice(0, args.path.length - 2) : args.path;
+  const moduleName = args.path.endsWith('/') ? args.path.slice(0, args.path.length - 1) : args.path;
   const [firstPart, secondPart] = moduleName.split('/');
   return firstPart.startsWith('@') ? [firstPart, secondPart].join('/') : firstPart;
 };

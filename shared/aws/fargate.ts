@@ -1,5 +1,5 @@
 export const ALLOWED_MEMORY_VALUES_FOR_CPU: {
-  [key in StpContainerWorkload['resources']['cpu']]: number[];
+  [_key in StpContainerWorkload['resources']['cpu']]: number[];
 } = {
   '0.25': [512, 1024, 2048],
   '0.5': [1024, 2048, 3072, 4096],

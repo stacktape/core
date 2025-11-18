@@ -63,7 +63,7 @@ export const respondToCloudformation = async ({
 
   const stringifiedBody = JSON.stringify(body);
 
-  return global.fetch(event.ResponseURL, {
+  return globalThis.fetch(event.ResponseURL, {
     headers: { 'content-length': `${stringifiedBody.length}` },
     method: 'PUT',
     body: stringifiedBody

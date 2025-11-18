@@ -1,7 +1,7 @@
 import { join } from 'node:path';
 import { copy, mkdir, readJson, remove, writeJson } from 'fs-extra';
 import { NPM_PACKAGE_JSON_SOURCE_PATH, NPM_RELEASE_FOLDER_PATH } from '../shared/naming/project-fs-paths';
-import { logInfo, logSuccess } from '../shared/utils/logging.js';
+import { logInfo, logSuccess } from '../shared/utils/logging';
 import { buildNpmMainExport } from './build-npm-main-export';
 import { buildNpmSdkExport } from './build-npm-sdk-export.js';
 import { getVersion } from './release/utils/args';

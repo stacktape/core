@@ -34,7 +34,7 @@ export const initUsingExistingConfig = async () => {
   let template;
   try {
     template = await stacktapeTrpcApiManager.apiClient.template({ templateId: templateId.trim() });
-  } catch (err) {
+  } catch {
     throw stpErrors.e509({ templateId });
   }
   if (globalStateManager.args.configFormat === 'typescript') {

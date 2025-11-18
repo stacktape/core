@@ -90,7 +90,7 @@ export const cfEvaluatedLinks = {
         'elasticache',
         Sub(
           `redis-cluster-nodes:id=\${replicationGroupIdentifier}-${paddedShardNumber};clusters=${Array.from(
-            new Array(numberOfNodesInCluster).keys(),
+            Array.from({ length: numberOfNodesInCluster }).keys(),
             (clusterNodeNumMinusOne) =>
               `\${replicationGroupIdentifier}-${paddedShardNumber}-${`${clusterNodeNumMinusOne + 1}`.padStart(3, '0')}`
           ).join('!')}`,
@@ -104,7 +104,7 @@ export const cfEvaluatedLinks = {
       'elasticache',
       Sub(
         `redis-group-nodes:id=\${replicationGroupIdentifier};clusters=${Array.from(
-          new Array(numberOfNodesInCluster).keys(),
+          Array.from({ length: numberOfNodesInCluster }).keys(),
           (clusterNodeNumMinusOne) =>
             `\${replicationGroupIdentifier}-${`${clusterNodeNumMinusOne + 1}`.padStart(3, '0')}`
         ).join('!')}`,

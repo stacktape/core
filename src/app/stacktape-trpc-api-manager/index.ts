@@ -14,12 +14,10 @@ class StacktapeTrpcApiManager {
     for (const prop in this.apiClient) {
       if (prop !== 'init' && prop !== '#client') {
         const oldMethod = this.apiClient[prop];
-        // @ts-ignore
         this.apiClient[prop] = async (...args) => {
           const start = Date.now();
           try {
             printer.debug(`Performing TRPC operation ${prop}.`);
-            // @ts-ignore
             const res = await oldMethod(...args);
             printer.debug(`Stacktape TRPC operation ${prop} took ${Date.now() - start}ms.`);
             return res;

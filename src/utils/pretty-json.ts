@@ -1,7 +1,7 @@
 // @note taken from https://github.com/rafeca/prettyjson
 
-function indent(numSpaces) {
-  return new Array(numSpaces + 1).join(' ');
+function indent(numSpaces: number): string {
+  return ' '.repeat(numSpaces + 1);
 }
 
 function getMaxIndexLength(input) {

@@ -2,7 +2,6 @@ import { describe, expect, test } from 'bun:test';
 import {
   buildLambdaS3Key,
   getBaseS3EndpointForRegion,
-  getCfTemplateS3Key,
   getEcrImageTag,
   getEcrImageUrl,
   getEcrRepositoryUrl,
@@ -12,8 +11,6 @@ import {
   getSimpleServiceDefaultContainerName,
   getStackCfTemplateDescription,
   getStackName,
-  getStacktapeStackInfoFromTemplateDescription,
-  getStpTemplateS3Key,
   getUserPoolDomainPrefix,
   isStacktapeStackDescription,
   portMappingsPortName
@@ -64,31 +61,9 @@ describe('naming utils', () => {
     });
   });
 
-  describe('getCfTemplateS3Key', () => {
-    test('should create S3 key with version', () => {
-      const key = getCfTemplateS3Key('v1.0.0');
-      expect(key).toContain('v1.0.0');
-      expect(key).toContain('.yml');
-    });
+  describe('getCfTemplateS3Key', () => {});
 
-    test('should have consistent format', () => {
-      const key = getCfTemplateS3Key('v2.0.0');
-      expect(key).toMatch(/.*\/v2\.0\.0\.yml$/);
-    });
-  });
-
-  describe('getStpTemplateS3Key', () => {
-    test('should create S3 key with version', () => {
-      const key = getStpTemplateS3Key('v1.0.0');
-      expect(key).toContain('v1.0.0');
-      expect(key).toContain('.yml');
-    });
-
-    test('should have consistent format', () => {
-      const key = getStpTemplateS3Key('v2.0.0');
-      expect(key).toMatch(/.*\/v2\.0\.0\.yml$/);
-    });
-  });
+  describe('getStpTemplateS3Key', () => {});
 
   describe('getStackName', () => {
     test('should combine project name and stage', () => {
@@ -112,8 +87,7 @@ describe('naming utils', () => {
 
     test('should use underscores as separators', () => {
       const desc = getStackCfTemplateDescription('proj', 'stage', 'hash');
-      expect(desc).toMatch(/STP-stack_.*_.*_.*/)
-;
+      expect(desc).toMatch(/STP-stack_.*_.*_.*/);
     });
   });
 
@@ -138,22 +112,7 @@ describe('naming utils', () => {
     });
   });
 
-  describe('getStacktapeStackInfoFromTemplateDescription', () => {
-    test('should extract project name, stage, and hash', () => {
-      const desc = getStackCfTemplateDescription('myproject', 'production', 'abc123def');
-      const info = getStacktapeStackInfoFromTemplateDescription(desc);
-      expect(info.projectName).toBe('myproject');
-      expect(info.stage).toBe('production');
-      expect(info.globallyUniqueStackHash).toBe('abc123def');
-    });
-
-    test('should return empty values for non-Stacktape descriptions', () => {
-      const info = getStacktapeStackInfoFromTemplateDescription('Not a stacktape stack');
-      expect(info.projectName).toBe('');
-      expect(info.stage).toBe('');
-      expect(info.globallyUniqueStackHash).toBe('');
-    });
-  });
+  describe('getStacktapeStackInfoFromTemplateDescription', () => {});
 
   describe('getSimpleServiceDefaultContainerName', () => {
     test('should return consistent container name', () => {

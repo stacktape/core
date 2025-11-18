@@ -9,20 +9,46 @@ import {
 // Mock dependencies
 mock.module('@shared/aws/sdk-manager', () => ({}));
 mock.module('@shared/naming/aws-resource-names', () => ({
-  awsResourceNames: {
-    deploymentBucket: mock((hash) => `stp-deployment-bucket-${hash}`)
-  }
+  awsResourceNames: new Proxy(
+    {
+      deploymentBucket: mock((hash) => `stp-deployment-bucket-${hash}`)
+    },
+    {
+      get: (target, prop) => {
+        if (prop in target) return target[prop];
+        return mock((...args) => `mock-${String(prop)}-${args.join('-')}`);
+      }
+    }
+  )
 }));
 mock.module('@shared/naming/console-links', () => ({
-  consoleLinks: {
-    s3Object: mock(({ bucketName, objectKey }) => `https://console.aws.amazon.com/s3/object/${bucketName}/${objectKey}`)
-  }
+  consoleLinks: new Proxy(
+    {
+      s3Object: mock(
+        ({ bucketName, objectKey }) => `https://console.aws.amazon.com/s3/object/${bucketName}/${objectKey}`
+      )
+    },
+    {
+      get: (target, prop) => {
+        if (prop in target) return target[prop];
+        return mock(() => `https://console.aws.amazon.com/mock-${String(prop)}`);
+      }
+    }
+  )
 }));
 mock.module('@shared/naming/stack-output-names', () => ({
-  outputNames: {
-    stackInfoMap: () => 'StackInfoMap',
-    deploymentVersion: () => 'DeploymentVersion'
-  }
+  outputNames: new Proxy(
+    {
+      stackInfoMap: () => 'StackInfoMap',
+      deploymentVersion: () => 'DeploymentVersion'
+    },
+    {
+      get: (target, prop) => {
+        if (prop in target) return target[prop];
+        return mock(() => `Mock${String(prop)}`);
+      }
+    }
+  )
 }));
 mock.module('@shared/naming/utils', () => ({
   getCfTemplateS3Key: mock((version) => `cf-templates/${version}.json`),

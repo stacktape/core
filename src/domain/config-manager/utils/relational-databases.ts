@@ -22,7 +22,7 @@ export const resolveReferenceToRelationalDatabase = ({
 };
 
 const validEngineSpecificLogOptions: {
-  [engineType in NormalizedSQLEngine]: (keyof PostgresLoggingOptions | keyof MysqlLoggingOptions)[];
+  [_engineType in NormalizedSQLEngine]: (keyof PostgresLoggingOptions | keyof MysqlLoggingOptions)[];
 } = {
   'aurora-mysql': ['long_query_time', 'server_audit_events'],
   mariadb: ['long_query_time', 'server_audit_events'],

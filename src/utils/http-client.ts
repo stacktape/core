@@ -6,7 +6,7 @@ type FetchOptions = {
 
 export const jsonFetch = (url: string, options?: FetchOptions): Promise<any> => {
   const { method = 'GET', headers = {}, body } = options || {};
-  return global
+  return globalThis
     .fetch(url, {
       method,
       ...(body && { body: JSON.stringify(body) }),

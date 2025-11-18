@@ -24,8 +24,12 @@ const mockTrpcClient = {
   },
   template: { query: mock(async () => ({ id: 'template-1', organizationId: 'org-1' })) },
   canDeploy: { query: mock(async () => ({ canDeploy: true })) },
-  defaultDomainsInfo: { query: mock(async () => ({ suffix: '.example.com', certDomainSuffix: '.cert.example.com', version: 1 })) },
-  createProjectFromCli: { mutate: mock(async () => ({ id: 'project-1', name: 'Test Project', organizationId: 'org-1' })) },
+  defaultDomainsInfo: {
+    query: mock(async () => ({ suffix: '.example.com', certDomainSuffix: '.cert.example.com', version: 1 }))
+  },
+  createProjectFromCli: {
+    mutate: mock(async () => ({ id: 'project-1', name: 'Test Project', organizationId: 'org-1' }))
+  },
   deleteUndeployedStageFromCli: { mutate: mock(async () => ({ success: true })) }
 };
 

@@ -1,7 +1,3 @@
-/**
- * Generates override types for resources based on their CloudFormation child resources
- */
-
 import type { ChildResourceMetadata, ChildResourcesMap } from './types';
 import { getResourcesWithOverrides } from '../../src/api/npm/ts/resource-metadata';
 import { cfTypeToInterface, getPropertyNameFromLogicalName } from './cloudform-utils';

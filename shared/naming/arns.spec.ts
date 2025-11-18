@@ -106,7 +106,7 @@ describe('arns utilities', () => {
 
       expect(arn).not.toContain('us-east-1');
       expect(arn).not.toContain('us-west-2');
-      expect(arn).toMatch(/^arn:aws:iam::[0-9]+:role\//);
+      expect(arn).toMatch(/^arn:aws:iam::\d+:role\//);
     });
   });
 

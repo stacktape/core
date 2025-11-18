@@ -35,11 +35,7 @@ describe('telemetry', () => {
 
       await trackEventToMixpanel('test_event', { property: 'value' });
 
-      expect(mockMixpanelClient.track).toHaveBeenCalledWith(
-        'test_event',
-        { property: 'value' },
-        expect.any(Function)
-      );
+      expect(mockMixpanelClient.track).toHaveBeenCalledWith('test_event', { property: 'value' }, expect.any(Function));
     });
 
     test('should handle errors in non-dev mode', async () => {
@@ -51,7 +47,7 @@ describe('telemetry', () => {
     });
 
     test('should timeout after 2 seconds', async () => {
-      mockMixpanelClient.track = mock((event, data, callback) => {
+      mockMixpanelClient.track = mock(() => {
         // Never call callback to simulate timeout
       });
 

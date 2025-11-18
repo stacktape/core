@@ -25,6 +25,7 @@ describe('id-generation utilities', () => {
 
     test('should not contain invalid characters', () => {
       const id = generateShortUuid();
+      // eslint-disable-next-line regexp/prefer-w, regexp/use-ignore-case
       expect(id).toMatch(/^[a-zA-Z0-9\-_]+$/);
     });
   });
@@ -52,7 +53,7 @@ describe('id-generation utilities', () => {
       const id = generateInvocationId();
       const [, uuid] = id.split('_');
       expect(uuid.length).toBeGreaterThan(0);
-      expect(uuid).toMatch(/^[a-zA-Z0-9\-_]+$/);
+      expect(uuid).toMatch(/^[\w\-]+$/);
     });
 
     test('should generate unique invocation IDs', () => {

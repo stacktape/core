@@ -93,7 +93,7 @@ export const resolveRedisClusters = async () => {
     });
     if (isSharded) {
       // adding monitoring link for each shard
-      Array.from(new Array(resource.numShards).keys()).forEach((shardNumMinusOne) => {
+      Array.from({ length: resource.numShards }).forEach((_, shardNumMinusOne) => {
         const shardNumber = shardNumMinusOne + 1;
         calculatedStackOverviewManager.addStacktapeResourceLink({
           linkName: `metrics-shard-${`${shardNumber}`.padStart(4, '0')}`,

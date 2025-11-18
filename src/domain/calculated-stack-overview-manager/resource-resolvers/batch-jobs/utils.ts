@@ -267,7 +267,7 @@ export const getBatchStateMachineDefinitionString = (
   region: AWSRegion,
   accountId: string
 ) => {
-  const usesGpu = workload.resources.hasOwnProperty('gpu');
+  const usesGpu = Boolean(workload.resources.gpu);
   let states: StpStateMachine['definition']['States'] = {};
   states = {
     fail: {

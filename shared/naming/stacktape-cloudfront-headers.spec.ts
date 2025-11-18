@@ -19,7 +19,7 @@ describe('stacktape-cloudfront-headers', () => {
       stacktapeCloudfrontHeaders.originType()
     ];
 
-    allHeaders.forEach(header => {
+    allHeaders.forEach((header) => {
       expect(header).toMatch(/^X-Stp-/);
     });
   });

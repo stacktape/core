@@ -4,25 +4,33 @@ import { getSignedGetCallerIdentityRequest } from './identity';
 // Mock AWS SDK modules
 mock.module('@aws-sdk/client-sts', () => ({
   STSClient: mock(function (config) {
+    // @ts-expect-error - this is a mock
     this.config = config;
   }),
   GetCallerIdentityCommand: mock(function (input) {
+    // @ts-expect-error - this is a mock
     this.input = input;
   })
 }));
 
 mock.module('@aws-sdk/signature-v4', () => ({
-  SignatureV4: mock(function (config) {
-    this.config = config;
-    this.sign = mock(async (request) => ({
-      ...request,
-      headers: {
-        ...request.headers,
-        'X-Amz-Date': '20240101T000000Z',
-        Authorization: 'AWS4-HMAC-SHA256 Credential=...'
-      }
-    }));
-  })
+  SignatureV4: class {
+    config: any;
+    constructor(config: any) {
+      this.config = config;
+    }
+
+    async sign(request: any) {
+      return {
+        ...request,
+        headers: {
+          ...request.headers,
+          'X-Amz-Date': '20240101T000000Z',
+          Authorization: 'AWS4-HMAC-SHA256 Credential=...'
+        }
+      };
+    }
+  }
 }));
 
 mock.module('@aws-sdk/util-create-request', () => ({

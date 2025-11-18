@@ -1,5 +1,5 @@
-import { describe, expect, test } from 'bun:test';
 import { join } from 'node:path';
+import { describe, expect, test } from 'bun:test';
 import * as paths from './project-fs-paths';
 
 describe('project-fs-paths', () => {
@@ -159,9 +159,7 @@ describe('project-fs-paths', () => {
     });
 
     test('AJV_VALIDATION_CODE_PATH should be in schemas folder', () => {
-      expect(paths.AJV_VALIDATION_CODE_PATH).toBe(
-        join(paths.JSON_SCHEMAS_FOLDER_PATH, 'validate-config-schema.js')
-      );
+      expect(paths.AJV_VALIDATION_CODE_PATH).toBe(join(paths.JSON_SCHEMAS_FOLDER_PATH, 'validate-config-schema.js'));
     });
   });
 
@@ -203,7 +201,9 @@ describe('project-fs-paths', () => {
 
   describe('helper lambdas paths', () => {
     test('HELPER_LAMBDAS_DIST_FOLDER_PATH should be in dist', () => {
-      expect(paths.HELPER_LAMBDAS_DIST_FOLDER_PATH).toBe(join(paths.DIST_FOLDER_PATH, paths.HELPER_LAMBDAS_FOLDER_NAME));
+      expect(paths.HELPER_LAMBDAS_DIST_FOLDER_PATH).toBe(
+        join(paths.DIST_FOLDER_PATH, paths.HELPER_LAMBDAS_FOLDER_NAME)
+      );
     });
 
     test('HELPER_LAMBDAS_SOURCE_FOLDER_PATH should be at root', () => {

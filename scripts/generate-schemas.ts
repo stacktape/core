@@ -7,7 +7,7 @@ import {
   sdkCommands
 } from '@cli-config';
 import { CLI_SCHEMA_PATH, JSON_SCHEMAS_FOLDER_PATH, SDK_SCHEMA_PATH } from '@shared/naming/project-fs-paths';
-import { logInfo, logSuccess } from '@shared/utils/logging.js';
+import { logInfo, logSuccess } from '@shared/utils/logging';
 import { mkdir, remove } from 'fs-extra';
 import {
   generateAjvValidationCode,

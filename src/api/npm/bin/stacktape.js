@@ -9,14 +9,11 @@ const { spawnSync, execSync } = require('node:child_process');
 const { createWriteStream, existsSync, chmodSync, mkdirSync } = require('node:fs');
 const { get: httpsGet } = require('node:https');
 const { platform, arch, homedir } = require('node:os');
-const { join, dirname } = require('node:path');
-const { pipeline } = require('node:stream');
-const { promisify } = require('node:util');
-
-const streamPipeline = promisify(pipeline);
+const { join } = require('node:path');
 
 // Get version from package.json
 const PACKAGE_VERSION = require('../package.json').version;
+
 const GITHUB_REPO = 'stacktape/stacktape';
 
 // Platform detection and mapping
@@ -80,7 +77,7 @@ async function downloadFile(url, destPath, retries = 3) {
                 return;
               }
 
-              const totalBytes = parseInt(redirectResponse.headers['content-length'], 10);
+              const totalBytes = Number.parseInt(redirectResponse.headers['content-length'], 10);
               let downloadedBytes = 0;
 
               redirectResponse.on('data', (chunk) => {
@@ -104,7 +101,7 @@ async function downloadFile(url, destPath, retries = 3) {
             return;
           }
 
-          const totalBytes = parseInt(response.headers['content-length'], 10);
+          const totalBytes = Number.parseInt(response.headers['content-length'], 10);
           let downloadedBytes = 0;
 
           response.on('data', (chunk) => {
@@ -127,7 +124,7 @@ async function downloadFile(url, destPath, retries = 3) {
       if (i === retries - 1) {
         throw error;
       }
-      console.log(`\nRetrying download (${i + 1}/${retries})...`);
+      console.info(`\nRetrying download (${i + 1}/${retries})...`);
     }
   }
 }
@@ -172,7 +169,7 @@ function setExecutablePermissions(binDir) {
     if (existsSync(exe)) {
       try {
         chmodSync(exe, 0o755);
-      } catch (error) {
+      } catch {
         // Ignore chmod errors
       }
     }
@@ -197,8 +194,8 @@ async function ensureBinary() {
     return binaryPath;
   }
 
-  console.log(`Stacktape binary not found in cache.`);
-  console.log(`Installing Stacktape ${version} for ${platformKey}...`);
+  console.info(`Stacktape binary not found in cache.`);
+  console.info(`Installing Stacktape ${version} for ${platformKey}...`);
 
   // Create cache directory
   if (!existsSync(cacheDir)) {
@@ -211,11 +208,11 @@ async function ensureBinary() {
 
   try {
     // Download the archive
-    console.log(`Downloading from ${downloadUrl}...`);
+    console.info(`Downloading from ${downloadUrl}...`);
     await downloadFile(downloadUrl, archivePath);
 
     // Extract the archive
-    console.log('Extracting...');
+    console.info('Extracting...');
     await platformInfo.extract(archivePath, cacheDir);
 
     // Set executable permissions
@@ -230,16 +227,16 @@ async function ensureBinary() {
       throw new Error(`Binary not found after extraction: ${binaryPath}`);
     }
 
-    console.log(`✓ Stacktape ${version} installed successfully`);
-    console.log('');
+    console.info(`✓ Stacktape ${version} installed successfully`);
 
     return binaryPath;
   } catch (error) {
-    console.error(`\nError installing Stacktape:`);
-    console.error(error.message);
-    console.error('');
-    console.error('You can also install Stacktape directly using:');
-    console.error(getManualInstallCommand(platformKey));
+    console.error(`
+Error installing Stacktape:
+${error.message}
+
+You can also install Stacktape directly using:
+${getManualInstallCommand(platformKey)}`);
     process.exit(1);
   }
 }

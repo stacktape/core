@@ -26,7 +26,9 @@
       "Bash(unzip:*)",
       "Bash(./windows/stacktape.exe:*)",
       "Bash(timeout 3 ./stacktape.exe login:*)",
-      "Bash(bunx eslint:*)"
+      "Bash(bunx eslint:*)",
+      "Bash(cut:*)",
+      "Bash(test-results.txt)"
     ],
     "deny": [],
     "ask": []

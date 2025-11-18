@@ -12,16 +12,6 @@ import { compile as compileJsonSchemaToTypescript } from 'json-schema-to-typescr
 import { buildGenerator, getProgramFromFiles } from 'typescript-json-schema';
 
 export const getJsonSchemaGenerator = async () => {
-  // logInfo('Temporary removing @stacktape/sdk to avoid conflicts during schema generation');
-
-  // try {
-  //   await exec('bun', ['remove', '@stacktape/sdk'], { disableStdout: true, disableStderr: true });
-  // } catch (err) {
-  //   if (!`${err}`.includes('t specified in a package.json')) {
-  //     throw err;
-  //   }
-  // }
-
   const [srcFiles, typeFiles] = await Promise.all([
     fastGlob('src/**/*', { dot: true }),
     fastGlob('types/**/*', { dot: true })
@@ -40,11 +30,7 @@ export const getJsonSchemaGenerator = async () => {
       noExtraProps: true
     });
   } finally {
-    // logInfo('Installing back @stacktape/sdk');
-    // await exec('bun', ['add', `@stacktape/sdk`], {
-    //   disableStdout: true,
-    //   disableStderr: true
-    // });
+    //
   }
   return jsonSchemaGenerator;
 };

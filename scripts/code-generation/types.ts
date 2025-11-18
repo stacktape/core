@@ -1,8 +1,4 @@
 /**
- * Type definitions for code generation
- */
-
-/**
  * Metadata about a child resource from CHILD_RESOURCES
  */
 export type ChildResourceMetadata = {

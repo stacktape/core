@@ -1,5 +1,5 @@
-import { describe, expect, test } from 'bun:test';
 import { StackStatus } from '@aws-sdk/client-cloudformation';
+import { describe, expect, test } from 'bun:test';
 import {
   STACK_IS_READY_FOR_MODIFYING_OPERATION_STATUS,
   STACK_IS_READY_FOR_ROLLBACK_OPERATION_STATUS,

@@ -1,7 +1,3 @@
-/**
- * Generates type properties class declarations (engines, packaging, events, etc.)
- */
-
 import { TYPE_PROPERTIES } from '../../src/api/npm/ts/resource-metadata';
 
 /**

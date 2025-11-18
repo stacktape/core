@@ -104,8 +104,8 @@ const getCloudwatchAlarmResource = ({ alarm, resource }: { alarm: AlarmDefinitio
     case 'sqs-queue-not-empty':
       return getSqsQueueNotEmptyAlarm({ resource: resource as StpSqsQueue, alarm });
     default:
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars, no-case-declarations
-      const exhaustiveCheck: never = alarm.trigger;
+      // @note this is to ensure that we handle all possible types, even when new types are added
+      const _alarmTriggerCheck: never = alarm.trigger;
   }
 };
 

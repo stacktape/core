@@ -79,7 +79,7 @@ export const isBucketNativelySupportedHeader = (headerName: string) =>
   );
 
 export const automaticUploadFilterPresets: {
-  [presetName in DirectoryUpload['headersPreset']]: DirectoryUploadFilter[];
+  [_presetName in DirectoryUpload['headersPreset']]: DirectoryUploadFilter[];
 } = {
   'gatsby-static-website': [
     {

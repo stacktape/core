@@ -6,7 +6,7 @@ import {
   HELPER_LAMBDAS_SOURCE_FOLDER_PATH
 } from '@shared/naming/project-fs-paths';
 import { buildUsingStacktapeEsLambdaBuildpack } from '@shared/packaging/stacktape-es-lambda-buildpack';
-import { logInfo, logSuccess } from '@shared/utils/logging.js';
+import { logInfo, logSuccess } from '@shared/utils/logging';
 import { localBuildTsConfigPath } from '@shared/utils/misc';
 import fsExtra, { remove } from 'fs-extra';
 

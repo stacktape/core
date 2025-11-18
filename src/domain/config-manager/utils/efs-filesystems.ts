@@ -19,11 +19,6 @@ export const resolveReferenceToEfsFilesystem = ({
   });
 };
 
-/**
- * Resolves references to all unique EFS filesystems mounted by a given resource.
- * @param resource - The Container Workload or Lambda Function resource.
- * @returns An array of unique StpEfsFilesystem configurations.
- */
 export const resolveReferencesToMountedEfsFilesystems = ({
   resource
 }: {

@@ -9,10 +9,9 @@ import { raiseError } from './misc';
 import { findProjectRoot } from './monorepo';
 
 class DependencyInstaller {
-  // @ts-ignore
   pendingInstalls: {
-    [pm in SupportedEsPackageManager]: Promise<ExecaReturnValue<string>>;
-  } = {};
+    [_pm in SupportedEsPackageManager]: Promise<ExecaReturnValue<string>>;
+  } = {} as { [_pm in SupportedEsPackageManager]: Promise<ExecaReturnValue<string>> };
 
   install = async ({
     rootProjectDirPath,

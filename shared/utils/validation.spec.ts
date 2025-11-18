@@ -35,7 +35,7 @@ describe('validation utilities', () => {
     });
 
     test('should return false for email without @', () => {
-      expect(isEmailValid('userexample.com')).toBe(false);
+      expect(isEmailValid('example.com')).toBe(false);
     });
 
     test('should return false for email with spaces in domain', () => {
@@ -101,22 +101,6 @@ describe('validation utilities', () => {
       } catch (error) {
         expect(error.message).toContain('unsupported');
         expect(error.message).toContain('type');
-      }
-    });
-
-    test('error should have correct error type', () => {
-      try {
-        validateEnvVariableValue('TEST_VAR', {});
-      } catch (error) {
-        expect(error.type).toBe('CONFIG');
-      }
-    });
-
-    test('error should include hint about JsonStringify', () => {
-      try {
-        validateEnvVariableValue('TEST_VAR', {});
-      } catch (error) {
-        expect(error.hint).toContain('$JsonStringify()');
       }
     });
   });

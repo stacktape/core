@@ -1,3 +1,4 @@
+/* eslint-disable unicorn/error-message */
 import { isAbsolute, join } from 'node:path';
 import { eventManager } from '@application-services/event-manager';
 import { IS_DEV } from '@config';
@@ -30,7 +31,6 @@ export class UnexpectedError extends Error {
   isExpected = false;
   details?: ReturnType<typeof getErrorDetails>;
 
-  // @ts-ignore
   constructor({ error, customMessage }: { error?: Error; customMessage?: string }) {
     const message = `${customMessage || ''}${error ? `${error?.message}` : ''}`;
     const lastCapturedEventPart = `Last captured event: ${eventManager.lastEvent?.eventType || 'NONE'}`;
@@ -81,66 +81,62 @@ export const getPrettyStacktrace = (
   colorizeDependencyCode?: (msg: string) => string
 ) => {
   const trace = stacktrace.parse(error);
-  return (
-    trace
-      .filter(({ fileName, native }) => {
-        if (fileName) {
-          return (
-            !native &&
-            !fileName.startsWith('internal/') &&
-            fileName !== '------' &&
-            !fileName.startsWith('node:internal') &&
-            fileName !== 'vm.js' &&
-            !fileName.includes('bootstrap_node.js') &&
-            !/webpack(\\|\/)(bootstrap|startup)/.test(fileName) &&
-            (IS_DEV ? true : !fileName.includes('__publish-folder') && !fileName.includes('stacktape.js:1'))
-          );
+  return trace
+    .filter(({ fileName, native }) => {
+      if (fileName) {
+        return (
+          !native &&
+          !fileName.startsWith('internal/') &&
+          fileName !== '------' &&
+          !fileName.startsWith('node:internal') &&
+          fileName !== 'vm.js' &&
+          !fileName.includes('bootstrap_node.js') &&
+          (IS_DEV ? true : !fileName.includes('__publish-folder') && !fileName.includes('stacktape.js:1'))
+        );
+      }
+      return false;
+    })
+    .map((callsite) => {
+      const { fileName, lineNumber, columnNumber, functionName } = callsite;
+      let isUserCode = true;
+      let adjustedFileName: string = fileName;
+      let adjustedFunctionName = `${functionName} `;
+      if (functionName && functionName.includes('Object.')) {
+        adjustedFunctionName = '';
+      } else if (!functionName) {
+        adjustedFunctionName = '<anonymous> ';
+      }
+      if (fileName) {
+        isUserCode =
+          !fileName.includes('node_modules') &&
+          !fileName.includes('node:') &&
+          !fileName.includes('var/runtime/Runtime');
+        if (fileName.includes('webpack:') && !/'webpack\\'|'webpack\/'/.exec(fileName)) {
+          adjustedFileName = fileName
+            .replace(/(.*)webpack:\/stacktape/, '')
+            .replace(/(.*)webpack:\\stacktape/, '')
+            .replace(/\/|\\/, '');
         }
-        return false;
-      })
-      // @ts-ignore
-      .map((callsite) => {
-        const { fileName, lineNumber, columnNumber, functionName } = callsite;
-        let isUserCode = true;
-        let adjustedFileName: string = fileName;
-        let adjustedFunctionName = `${functionName} `;
-        if (functionName && functionName.includes('Object.')) {
-          adjustedFunctionName = '';
-        } else if (!functionName) {
-          adjustedFunctionName = '<anonymous> ';
-        }
-        if (fileName) {
-          isUserCode =
-            !fileName.includes('node_modules') &&
-            !fileName.includes('node:') &&
-            !fileName.includes('var/runtime/Runtime');
-          if (fileName.includes('webpack:') && !/'webpack\\'|'webpack\/'/.exec(fileName)) {
-            adjustedFileName = fileName
-              .replace(/(.*)webpack:\/stacktape/, '')
-              .replace(/(.*)webpack:\\stacktape/, '')
-              .replace(/\/|\\/, '');
-          }
-        }
-        if (isAbsolute(fileName) && isFileAccessible(fileName)) {
-          adjustedFileName = getRelativePath(fileName).replaceAll('\\', '/');
-        } else {
-          adjustedFileName = getRelativePath(join(process.cwd(), fileName)).replaceAll('\\', '/');
-        }
-        adjustedFileName = adjustedFileName.replace('C:/snapshot/core/', '').replace('/snapshot/core/', '');
-        const position = `(${isUserCode ? './' : ''}${adjustedFileName}:${lineNumber}${
-          columnNumber ? `:${columnNumber}` : ''
-        })`;
-        const res = `at ${adjustedFunctionName}${fileName ? position : ''}`;
-        return isUserCode
-          ? colorizeOwnCode
-            ? colorizeOwnCode(res)
-            : res
-          : colorizeDependencyCode
-            ? colorizeDependencyCode(res)
-            : res;
-      })
-      .join('\n')
-  );
+      }
+      if (isAbsolute(fileName) && isFileAccessible(fileName)) {
+        adjustedFileName = getRelativePath(fileName).replaceAll('\\', '/');
+      } else {
+        adjustedFileName = getRelativePath(join(process.cwd(), fileName)).replaceAll('\\', '/');
+      }
+      adjustedFileName = adjustedFileName.replace('C:/snapshot/core/', '').replace('/snapshot/core/', '');
+      const position = `(${isUserCode ? './' : ''}${adjustedFileName}:${lineNumber}${
+        columnNumber ? `:${columnNumber}` : ''
+      })`;
+      const res = `at ${adjustedFunctionName}${fileName ? position : ''}`;
+      return isUserCode
+        ? colorizeOwnCode
+          ? colorizeOwnCode(res)
+          : res
+        : colorizeDependencyCode
+          ? colorizeDependencyCode(res)
+          : res;
+    })
+    .join('\n');
 };
 
 export const getErrorDetails = (error: UnexpectedError | ExpectedError) => {

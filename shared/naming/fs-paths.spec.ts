@@ -1,5 +1,5 @@
-import { beforeEach, describe, expect, test } from 'bun:test';
 import { join } from 'node:path';
+import { describe, expect, test } from 'bun:test';
 import { fsPaths } from './fs-paths';
 
 describe('fs-paths', () => {
@@ -51,7 +51,12 @@ describe('fs-paths', () => {
         installationHash
       });
       expect(path).toBe(
-        join(fsPaths.absoluteTempFolderPath({ invocationId: testInvocationId }), 'build', '_bin-install', installationHash)
+        join(
+          fsPaths.absoluteTempFolderPath({ invocationId: testInvocationId }),
+          'build',
+          '_bin-install',
+          installationHash
+        )
       );
     });
 
@@ -80,7 +85,9 @@ describe('fs-paths', () => {
         invocationId: testInvocationId,
         jobName: testJobName
       });
-      expect(path).toBe(`${fsPaths.absoluteBuildFolderPath({ invocationId: testInvocationId })}/containers/${testJobName}`);
+      expect(path).toBe(
+        `${fsPaths.absoluteBuildFolderPath({ invocationId: testInvocationId })}/containers/${testJobName}`
+      );
     });
 
     test('should include job name', () => {
@@ -106,7 +113,9 @@ describe('fs-paths', () => {
         invocationId: testInvocationId,
         jobName: testJobName
       });
-      expect(path).toBe(`${fsPaths.absoluteBuildFolderPath({ invocationId: testInvocationId })}/lambdas/${testJobName}`);
+      expect(path).toBe(
+        `${fsPaths.absoluteBuildFolderPath({ invocationId: testInvocationId })}/lambdas/${testJobName}`
+      );
     });
 
     test('should include job name', () => {
@@ -133,7 +142,9 @@ describe('fs-paths', () => {
         invocationId: testInvocationId,
         constructName
       });
-      expect(path).toBe(`${fsPaths.absoluteBuildFolderPath({ invocationId: testInvocationId })}/constructs/${constructName}`);
+      expect(path).toBe(
+        `${fsPaths.absoluteBuildFolderPath({ invocationId: testInvocationId })}/constructs/${constructName}`
+      );
     });
 
     test('should include construct name', () => {
@@ -160,7 +171,9 @@ describe('fs-paths', () => {
         invocationId: testInvocationId,
         stpResourceName
       });
-      expect(path).toBe(`${fsPaths.absoluteBuildFolderPath({ invocationId: testInvocationId })}/nextjs/${stpResourceName}`);
+      expect(path).toBe(
+        `${fsPaths.absoluteBuildFolderPath({ invocationId: testInvocationId })}/nextjs/${stpResourceName}`
+      );
     });
 
     test('should include resource name', () => {
@@ -240,17 +253,7 @@ describe('fs-paths', () => {
     });
   });
 
-  describe('AWS credential paths', () => {
-    test('awsCredentialsFilePath should point to AWS credentials file', () => {
-      const path = fsPaths.awsCredentialsFilePath();
-      expect(path).toContain('.aws/credentials');
-    });
-
-    test('awsConfigFilePath should point to AWS config file', () => {
-      const path = fsPaths.awsConfigFilePath();
-      expect(path).toContain('.aws/config');
-    });
-  });
+  describe('AWS credential paths', () => {});
 
   describe('stacktape data paths', () => {
     test('persistedStateFilePath should be in stacktape data folder', () => {

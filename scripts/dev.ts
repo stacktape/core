@@ -1,6 +1,6 @@
 import { CLI_DIST_PATH, CLI_SOURCE_PATH, DIST_FOLDER_PATH } from '@shared/naming/project-fs-paths';
 import { dynamicRequire } from '@shared/utils/fs-utils';
-import { logError, logInfo, logWarn } from '@shared/utils/logging.js';
+import { logError, logInfo, logWarn } from '@shared/utils/logging';
 import packageJson from '../package.json';
 import { packageHelperLambdas } from './package-helper-lambdas';
 

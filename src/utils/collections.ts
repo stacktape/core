@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/member-ordering */
-
 export class LinkedList<T> {
   private _head: LinkedListItem<T>;
   private _tail: LinkedListItem<T>;

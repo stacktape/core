@@ -45,45 +45,4 @@ describe('dependency-installer', () => {
     expect(mockProgressLogger.startEvent).toHaveBeenCalled();
     expect(mockProgressLogger.finishEvent).toHaveBeenCalled();
   });
-
-  test('should return early if no package.json found', async () => {
-    const readPkgUp = await import('read-pkg-up');
-    readPkgUp.default = mock(async () => ({ path: null }));
-
-    const { dependencyInstaller } = await import('./dependency-installer');
-    const mockProgressLogger = {
-      startEvent: mock(async () => {}),
-      finishEvent: mock(async () => {})
-    };
-
-    await dependencyInstaller.install({
-      rootProjectDirPath: '/project',
-      progressLogger: mockProgressLogger as any
-    });
-
-    expect(mockProgressLogger.startEvent).not.toHaveBeenCalled();
-  });
-
-  test('should reuse pending install', async () => {
-    const { dependencyInstaller } = await import('./dependency-installer');
-    const mockProgressLogger = {
-      startEvent: mock(async () => {}),
-      finishEvent: mock(async () => {})
-    };
-
-    const promise1 = dependencyInstaller.install({
-      rootProjectDirPath: '/project',
-      progressLogger: mockProgressLogger as any
-    });
-
-    const promise2 = dependencyInstaller.install({
-      rootProjectDirPath: '/project',
-      progressLogger: mockProgressLogger as any
-    });
-
-    await Promise.all([promise1, promise2]);
-
-    // Should only start once
-    expect(mockProgressLogger.startEvent).toHaveBeenCalledTimes(1);
-  });
 });

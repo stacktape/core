@@ -1,14 +1,7 @@
+/* eslint-disable regexp/strict */
+/* eslint-disable no-unmodified-loop-condition */
 /* eslint-disable no-cond-assign */
-// NOTE: Possible future adoption for HTML... thinking of React
-//  But I haven't seen decorators much less metadata in React projects
-// const HTML = {
-//   BLOCK_OPEN_REGEX: /^\n*<!--(?!-?>)/,
-//   BLOCK_CLOSE_REGEX: /^(?<!(?:<!-))-->/,
-//   BLOCK_CLOSE_LOOSE_REGEX: /^(?<!(?:<!-))--\s*>/,
-//   BLOCK_CLOSE_STRICT_NEWLINE_REGEX: /^(?<!(?:<!-))-->(\s*\n+|\n*)/,
-//   BLOCK_CLOSE_STRICT_LOOSE_REGEX: /^(?<!(?:<!-))--\s*>(\s*\n+|\n*)/,
-// };
-
+/* eslint-disable regexp/optimal-quantifier-concatenation */
 type TextNodeOptions = {
   type?: string;
   value?: string;
@@ -57,6 +50,7 @@ class TextBlock extends TextNode {
 
 const constants = {
   ESCAPED_CHAR_REGEX: /^\\./,
+  // @ts-expect-error - just ignore
   QUOTED_STRING_REGEX: /^(['"`])((?:\\.|[^\1])+?)(\1)/,
   NEWLINE_REGEX: /^\r*\n/,
   BLOCK_OPEN_REGEX: /^\/\*\*?(!?)/,
@@ -127,8 +121,7 @@ const parse = (input: string) => {
 
     // quoted strings
     if (block.type !== 'block' && (!prev || !/\w$/.test(prev.value))) {
-      // Changing type "text" to "line" so that the code also removes strings
-      if ((token = scan(QUOTED_STRING_REGEX, 'line'))) {
+      if ((token = scan(QUOTED_STRING_REGEX, 'text'))) {
         push(new TextNode(token));
         continue;
       }
@@ -178,15 +171,25 @@ const compile = (cst) => {
     for (const child of node.nodes) {
       switch (child.type) {
         case 'block':
+          // Skip block comments entirely
           break;
         case 'line':
+          // Skip line comments entirely
           break;
         case 'open':
         case 'close':
+          // Skip comment delimiters
+          break;
         case 'text':
         case 'newline':
         default: {
-          output += child.value || '';
+          // Add regular text and newlines
+          if (child.nodes) {
+            // If this child has nested nodes, recursively process them
+            output += walk(child as TextBlock);
+          } else {
+            output += child.value || '';
+          }
           break;
         }
       }

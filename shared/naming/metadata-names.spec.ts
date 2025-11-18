@@ -30,7 +30,7 @@ describe('metadata-names', () => {
       stackMetadataNames.budgetName()
     ];
 
-    allNames.forEach(name => {
+    allNames.forEach((name) => {
       expect(typeof name).toBe('string');
       expect(name.length).toBeGreaterThan(0);
     });

@@ -1,5 +1,6 @@
+// eslint-disable-next-line ts/ban-ts-comment
+// @ts-nocheck - this is a legacy codebase that we are not going to maintain
 import crypto from 'node:crypto';
-// @ts-nocheck
 import { Transform } from 'node:stream';
 
 /* For objects uploaded via a single request to S3, the ETag is simply the hex

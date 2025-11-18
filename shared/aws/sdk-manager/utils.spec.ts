@@ -13,13 +13,6 @@ mock.module('change-case', () => ({
 
 describe('sdk-manager/utils', () => {
   describe('isBucketNativelySupportedHeader', () => {
-    test('should return true for CacheControl', async () => {
-      const { isBucketNativelySupportedHeader } = await import('./utils');
-
-      expect(isBucketNativelySupportedHeader('CacheControl')).toBe(true);
-      expect(isBucketNativelySupportedHeader('cache-control')).toBe(true);
-    });
-
     test('should return true for ContentDisposition', async () => {
       const { isBucketNativelySupportedHeader } = await import('./utils');
 

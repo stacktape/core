@@ -1,6 +1,7 @@
+// from https://github.com/anatine/esbuildnx/tree/main/packages/esbuild-decorators
+
 import type { Plugin } from 'esbuild';
 import type { ParsedCommandLine } from 'typescript';
-// from https://github.com/anatine/esbuildnx/tree/main/packages/esbuild-decorators
 import { dirname, join } from 'node:path';
 import { inspect } from 'node:util';
 import { dynamicRequireLibraryFromUserNodeModules } from '@shared/utils/fs-utils';
@@ -19,7 +20,7 @@ export type EsbuildDecoratorsOptions = {
   tsx?: boolean;
 };
 
-// eslint-disable-next-line prefer-regex-literals
+// eslint-disable-next-line
 const theFinder = new RegExp(/((?<![(\s]\s*['"])@\w[.[\]\w]*\s*(?!;)[(?=\s)])/);
 
 const findDecorators = (fileContent) => theFinder.test(strip(fileContent));
@@ -33,7 +34,7 @@ export const esbuildDecorators = (options: EsbuildDecoratorsOptions = {}): Plugi
     let typescriptLib;
     try {
       typescriptLib = dynamicRequireLibraryFromUserNodeModules({ libraryName: 'typescript', searchFrom: cwd });
-    } catch (err) {
+    } catch {
       throw getError({
         type: 'MISSING_PREREQUISITE',
         message: 'Using "emitDecoratorMetadata" requires "typescript" library to be installed in the project.'

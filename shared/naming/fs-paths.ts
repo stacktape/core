@@ -92,7 +92,8 @@ export const fsPaths = {
     ];
 
     // Return the first location that exists
-    const fs = require('fs');
+    // eslint-disable-next-line ts/no-require-imports
+    const fs = require('node:fs');
     for (const location of possibleLocations) {
       try {
         if (fs.existsSync(location)) {
@@ -141,7 +142,8 @@ export const fsPaths = {
     ];
 
     // Return the first location that exists
-    const fs = require('fs');
+    // eslint-disable-next-line ts/no-require-imports
+    const fs = require('node:fs');
     for (const location of possibleLocations) {
       try {
         if (fs.existsSync(location)) {

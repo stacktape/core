@@ -1,7 +1,4 @@
-/**
- * Generates CloudFormation Properties interfaces from cloudform files
- */
-
+import fs from 'node:fs';
 import { join } from 'node:path';
 import {
   cfTypeToFilePath,
@@ -15,7 +12,6 @@ import {
  */
 export function generatePropertiesInterfaces(CHILD_RESOURCES: any): string {
   // First, extract and include the base types that all interfaces depend on
-  const fs = require('node:fs');
   const dataTypesPath = join(process.cwd(), '@generated', 'cloudform', 'dataTypes.ts');
   const resourcePath = join(process.cwd(), '@generated', 'cloudform', 'resource.ts');
 
@@ -27,8 +23,8 @@ export function generatePropertiesInterfaces(CHILD_RESOURCES: any): string {
     // Extract type definitions (Value, List, Condition, etc.)
     const typeMatches = dataTypesContent.match(/export type \w.*?;/g) || [];
     // Only keep non-Value/List types since we'll simplify those away
-    const filteredTypes = typeMatches.filter(
-      (t) => !t.includes('Value') && !t.includes('List') && !t.includes('Condition')
+    const filteredTypes: string[] = typeMatches.filter(
+      (t: string) => !t.includes('Value') && !t.includes('List') && !t.includes('Condition')
     );
     baseTypes += `${filteredTypes.join('\n')}\n\n`;
 

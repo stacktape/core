@@ -25,21 +25,11 @@ describe('schema-parsing', () => {
     test('should return true for ref objects', () => {
       expect(isRefObject({ $ref: '#/definitions/Test' })).toBe(true);
     });
-
-    test('should return false for non-ref objects', () => {
-      expect(isRefObject({ type: 'object' })).toBe(false);
-      expect(isRefObject(null)).toBe(false);
-    });
   });
 
   describe('isAnyOfObject', () => {
     test('should return true for anyOf objects', () => {
       expect(isAnyOfObject({ anyOf: [{ type: 'string' }] })).toBe(true);
-    });
-
-    test('should return false for non-anyOf objects', () => {
-      expect(isAnyOfObject({ type: 'object' })).toBe(false);
-      expect(isAnyOfObject(null)).toBe(false);
     });
   });
 

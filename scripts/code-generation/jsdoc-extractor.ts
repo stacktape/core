@@ -1,16 +1,9 @@
-/**
- * Utilities for extracting JSDoc comments from TypeScript source files
- */
-
 import type { JSDocComment, PropertyInfo } from './types';
 import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import * as ts from 'typescript';
 
-/**
- * Extracts JSDoc comment from a TypeScript node
- */
-function extractJSDocFromNode(node: ts.Node, sourceFile: ts.SourceFile): JSDocComment | undefined {
+function extractJSDocFromNode(node: ts.Node): JSDocComment | undefined {
   const jsDocTags = ts.getJSDocTags(node);
   const jsDocComments = ts.getJSDocCommentsAndTags(node);
 
@@ -40,9 +33,6 @@ function extractJSDocFromNode(node: ts.Node, sourceFile: ts.SourceFile): JSDocCo
   };
 }
 
-/**
- * Finds a property in an interface and extracts its information
- */
 function findPropertyInInterface(
   interfaceName: string,
   propertyName: string,
@@ -57,7 +47,7 @@ function findPropertyInInterface(
           if (member.name.text === propertyName) {
             const type = member.type ? member.type.getText(sourceFile) : 'any';
             const optional = member.questionToken !== undefined;
-            const jsdoc = extractJSDocFromNode(member, sourceFile);
+            const jsdoc = extractJSDocFromNode(member);
 
             result = {
               name: propertyName,

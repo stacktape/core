@@ -1,6 +1,7 @@
 import { isAlphanumeric } from '@shared/utils/misc';
 
 export const startsLikeDirective = (str: string) => {
+  // eslint-disable-next-line regexp/no-unused-capturing-group
   return /^\$(.*)\(/.test(str);
 };
 
@@ -173,7 +174,7 @@ const parseParamValue = (param: string): DirectiveParam | null => {
   if (trimmed === 'false') {
     return { value: false };
   }
-  if (trimmed !== '' && !isNaN(Number(trimmed))) {
+  if (trimmed !== '' && !Number.isNaN(Number(trimmed))) {
     return { value: Number(trimmed) };
   }
   if (trimmed.startsWith("'") && trimmed.endsWith("'")) {

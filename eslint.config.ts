@@ -53,11 +53,13 @@ export default antfu(
       'antfu/consistent-list-newline': 'off',
       'ts/no-empty-function': ['error', { allow: ['arrowFunctions'] }],
       'n/prefer-global/process': ['error', 'always'],
-      'dot-notation': ['off']
+      'dot-notation': ['off'],
+      'no-case-declarations': ['off']
     },
     typescript: {
       overrides: {
-        'ts/consistent-type-definitions': ['error', 'type'],
+        'ts/no-unused-expressions': ['off'],
+        'ts/consistent-type-definitions': ['off'],
         'ts/no-use-before-define': ['off']
       }
     }

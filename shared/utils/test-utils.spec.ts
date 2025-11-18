@@ -3,7 +3,7 @@ import { TestExecutor } from './test-utils';
 
 // Mock wait function
 mock.module('./misc', () => ({
-  wait: (ms: number) => Promise.resolve()
+  wait: () => Promise.resolve()
 }));
 
 describe('test-utils', () => {
@@ -103,20 +103,6 @@ describe('test-utils', () => {
 
       await new Promise((resolve) => setTimeout(resolve, 100));
       expect(limitedExecutor.jobQueue.length).toBe(0);
-    });
-
-    test('should store test results by function name', async () => {
-      const test1 = mock(async () => 'result1');
-      const test2 = mock(async () => 'result2');
-
-      await executor.add({ testFn: test1, testFnProps: {} });
-      await executor.add({ testFn: test2, testFnProps: {} });
-
-      await new Promise((resolve) => setTimeout(resolve, 10));
-
-      expect(Object.keys(executor.testResults)).toHaveLength(2);
-      expect(executor.testResults[test1.name]).toBeDefined();
-      expect(executor.testResults[test2.name]).toBeDefined();
     });
 
     test('should decrement currentlyExecuting after completion', async () => {

@@ -226,7 +226,7 @@ export const resolveBatchJobs = async () => {
       // creating deep copy of merged accessToResourcesPotentiallyRequiringSecurityGroupCreation from which we will delete ones defined in defaults
       // const resourceDefinedAccessToResourcesRequiringSecurityGroupCreation =
       //   accessToResourcesPotentiallyRequiringSecurityGroupCreation.slice();
-      // // after this loop is finished resourceDefinedAccessToResourcesRequiringSecurityGroupCreation should only contain references that were defined for specific batchjob
+      // // after this loop is finished resourceDefinedAccessToResourcesRequiringSecurityGroupCreation should only contain references that were defined for specific batch job
       // defaultsAccessToResourcesRequiringSecurityGroupCreation.forEach(({ name: defName }) => {
       //   const occurrence = resourceDefinedAccessToResourcesRequiringSecurityGroupCreation.findIndex(
       //     ({ name: resName }) => resName === defName

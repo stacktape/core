@@ -45,7 +45,7 @@ export const isAlarmEligibleForResource = ({ alarm, resource }: { alarm: AlarmDe
 };
 
 export const resourceTypesForAlarmType: {
-  [alarmType in AlarmTriggerType]: StpAlarmEnabledResource['type'][];
+  [_alarmType in AlarmTriggerType]: StpAlarmEnabledResource['type'][];
 } = {
   'application-load-balancer-error-rate': ['application-load-balancer'],
   'application-load-balancer-unhealthy-targets': ['application-load-balancer'],

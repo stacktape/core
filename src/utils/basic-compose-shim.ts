@@ -4,6 +4,14 @@
 const basicComposeModule = require('basic-compose');
 
 // The module exports default via CommonJS
-const compose = basicComposeModule.default || basicComposeModule;
+const composeOriginal = basicComposeModule.default || basicComposeModule;
+
+type Decorator<T> = (target: T) => T;
+
+const compose = <T>(...decorators: Array<Decorator<T>>) => {
+  return (target: T): T => {
+    return composeOriginal(...decorators)(target);
+  };
+};
 
 export default compose;

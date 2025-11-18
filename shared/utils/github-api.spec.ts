@@ -1,3 +1,4 @@
+import { Buffer } from 'node:buffer';
 import { beforeEach, describe, expect, mock, test } from 'bun:test';
 
 // Mock Octokit and plugins
@@ -61,10 +62,10 @@ describe('github-api', () => {
   describe('getAllStacktapeIssues', () => {
     test('should fetch all issues with pagination', async () => {
       mockOctokit.issues.listForRepo.mockResolvedValueOnce({
-        data: Array(100).fill({ id: 1, title: 'Issue' })
+        data: Array.from({ length: 100 }, () => ({ id: 1, title: 'Issue' }))
       });
       mockOctokit.issues.listForRepo.mockResolvedValueOnce({
-        data: Array(50).fill({ id: 2, title: 'Issue 2' })
+        data: Array.from({ length: 50 }, () => ({ id: 2, title: 'Issue 2' }))
       });
 
       const { getAllStacktapeIssues } = await import('./github-api');
@@ -76,7 +77,7 @@ describe('github-api', () => {
 
     test('should handle single page of results', async () => {
       mockOctokit.issues.listForRepo.mockResolvedValueOnce({
-        data: Array(50).fill({ id: 1, title: 'Issue' })
+        data: Array.from({ length: 50 }, () => ({ id: 1, title: 'Issue' }))
       });
 
       const { getAllStacktapeIssues } = await import('./github-api');
@@ -133,9 +134,10 @@ describe('github-api', () => {
         email: 'test@example.com'
       });
 
-      const callArgs = mockOctokit.issues.create.mock.calls[0][0];
-      expect(callArgs.body).toContain('Test User');
-      expect(callArgs.body).toContain('test@example.com');
+      // @ts-expect-error - just ignore
+      const callArgs = mockOctokit.issues.create.mock.calls[0][0] as any;
+      expect(callArgs?.body).toContain('Test User');
+      expect(callArgs?.body).toContain('test@example.com');
     });
   });
 
@@ -253,7 +255,7 @@ describe('github-api', () => {
   describe('uploadReleaseAsset', () => {
     test('should upload asset to release', async () => {
       const { uploadReleaseAsset } = await import('./github-api');
-      const data = Buffer.from('test data');
+      const data = Buffer.from('test data') as any;
 
       await uploadReleaseAsset({
         releaseId: 456,

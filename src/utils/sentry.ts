@@ -8,7 +8,7 @@ export const initializeSentry = () => {
   if (!IS_DEV) {
     init({
       dsn: SENTRY_DSN,
-      integrations: [rewriteFramesIntegration({ root: (global as any).__rootdir__ })],
+      integrations: [rewriteFramesIntegration({ root: globalThis.__rootdir__ })],
       release: getStacktapeVersion(),
       maxValueLength: 10000,
       beforeBreadcrumb: (breadcrumb) => {

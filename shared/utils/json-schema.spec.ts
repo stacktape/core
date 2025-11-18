@@ -1,5 +1,5 @@
-import { describe, expect, test } from 'bun:test';
 import type { Definition } from 'typescript-json-schema';
+import { describe, expect, test } from 'bun:test';
 import { getTypeDetailsFromNode, resolveRef } from './json-schema';
 
 describe('json-schema utilities', () => {
@@ -66,7 +66,7 @@ describe('json-schema utilities', () => {
     test('should handle $ref with various definition names', () => {
       const schema: Definition = {
         definitions: {
-          'MyComplexType': {
+          MyComplexType: {
             type: 'number'
           }
         }

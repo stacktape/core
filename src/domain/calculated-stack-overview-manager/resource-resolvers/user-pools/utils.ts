@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
-
 import type { SchemaAttribute } from '@cloudform/cognito/userPool';
 import { globalStateManager } from '@application-services/global-state-manager';
 import UserPool from '@cloudform/cognito/userPool';
@@ -186,7 +184,6 @@ export const getUserPoolClientResource = (
     callbackURLs,
     logoutURLs,
     identityProviders,
-    enableHostedUi,
     allowOnlyExternalIdentityProviders,
     generateClientSecret
   }: StpUserAuthPool,
@@ -250,7 +247,7 @@ export const getIdentityProviderResource = (
     UserPoolId: Ref(cfLogicalNames.userPool(userPoolName)),
     AttributeMapping: attributeMapping || { email: 'email' },
     ProviderDetails: {
-      authorize_scopes: authorizeScopes || authorize_scopes,
+      authorize_scopes: authorizeScopes ? authorizeScopes.join(' ') : authorize_scopes,
       client_id,
       client_secret,
       ...(providerDetails || {})

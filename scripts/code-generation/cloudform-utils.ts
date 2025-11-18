@@ -1,3 +1,4 @@
+/* eslint-disable regexp/no-useless-assertions */
 /**
  * Utilities for working with CloudFormation resource types
  */
@@ -200,15 +201,6 @@ export function simplifyCloudFormationTypes(content: string): string {
 }
 
 /**
- * Extracts code blocks (interfaces, types, enums, classes) from TypeScript content
- */
-type CodeBlock = {
-  type: 'interface' | 'type' | 'enum' | 'class';
-  name: string;
-  content: string;
-};
-
-/**
  * Extracts all exported interfaces, types, and enums from a CloudFormation file
  * @param filePath Path to the CloudFormation TypeScript file
  * @returns Extracted and combined code blocks
@@ -299,6 +291,7 @@ export function prefixInterfaceNames(content: string, serviceName: string): stri
   const typeDefRegex = /export (?:interface|type|enum) (\w+)/g;
   let typeMatch;
 
+  // eslint-disable-next-line no-cond-assign
   while ((typeMatch = typeDefRegex.exec(prefixed)) !== null) {
     definedTypes.add(typeMatch[1]);
   }

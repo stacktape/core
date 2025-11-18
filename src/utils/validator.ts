@@ -14,6 +14,7 @@ import { printer } from './printer';
 import { getCommandShortDescription, getPrettyCommand } from './validation-utils';
 
 export const validateDomain = (domain: string) => {
+  // eslint-disable-next-line regexp/no-super-linear-backtracking
   if (!domain.match(/^((?:(?:\w[.\-+]?)*\w)+)((?:(?:\w[.\-+]?){0,62}\w)+)\.(\w{2,6})$/)?.length) {
     throw new ExpectedError('CONFIG_VALIDATION', `Domain name '${domain}' is not a valid domain name.`);
   }
@@ -304,31 +305,6 @@ export const validateStackOutputName = (outputName: string) => {
       'CONFIG',
       `Stack output names must be alphanumeric (a-z, A-Z, 0-9). Received ${outputName}.`
     );
-  }
-};
-
-const getUpgradeToHigherTierMessage = () =>
-  `To deploy more resources and get other benefits, visit ${printer.getLink(
-    'pricingPage',
-    'Pricing page'
-  )} and upgrade to higher tier.`;
-
-export const validateMaxResourcesLimit = (amountOfResources: number) => {
-  if (globalStateManager.maxAllowedResources < amountOfResources) {
-    throw new ExpectedError(
-      'QUOTA',
-      `You are trying to deploy ${amountOfResources} resources, but your maximum quota is ${globalStateManager.maxAllowedResources}.`,
-      getUpgradeToHigherTierMessage()
-    );
-  }
-};
-
-export const validateApproachingMaxResourcesLimit = (amountOfResources: number) => {
-  if (globalStateManager.maxAllowedResources < amountOfResources + 2) {
-    printer.warn(
-      `You are approaching your limit of ${globalStateManager.maxAllowedResources} resources you can deploy.`
-    );
-    printer.hint(getUpgradeToHigherTierMessage());
   }
 };
 

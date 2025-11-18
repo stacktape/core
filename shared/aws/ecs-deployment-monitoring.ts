@@ -209,4 +209,4 @@ export const isEcsServiceCreateOrUpdateCloudformationEvent = (stackEvent: StackE
   (stackEvent.ResourceStatus === ResourceStatus.CREATE_IN_PROGRESS ||
     stackEvent.ResourceStatus === ResourceStatus.ROLLBACK_IN_PROGRESS ||
     stackEvent.ResourceStatus === ResourceStatus.UPDATE_IN_PROGRESS) &&
-  stackEvent.PhysicalResourceId;
+  Boolean(stackEvent.PhysicalResourceId);

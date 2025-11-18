@@ -25,7 +25,7 @@ async function isGitRoot(dir: string): Promise<boolean> {
         return true;
       }
     }
-  } catch (e) {
+  } catch {
     return false;
   }
 
@@ -56,7 +56,7 @@ async function isMonorepoRoot(dir: string): Promise<boolean> {
       if (pkg.lerna) {
         return true;
       }
-    } catch (e) {
+    } catch {
       // Invalid JSON or other error, not a root
       return false;
     }

@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, mock, test } from 'bun:test';
+import { describe, expect, mock, test } from 'bun:test';
 import { getDefaultRuntimeForExtension } from './runtimes';
 
 // Mock the config
@@ -44,7 +44,7 @@ describe('runtimes', () => {
 
     test('should return first runtime for .java extension', () => {
       const runtime = getDefaultRuntimeForExtension('.java' as any);
-      expect(runtime).toBe('java21');
+      expect(runtime).toBe('java21' as any);
     });
 
     test('should always return the first element from the runtime array', () => {

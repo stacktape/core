@@ -370,7 +370,6 @@ export const getPoliciesForRoles = ({
           connectToStatements.push(...getStatementsForAccessingSnsTopic(statementProps));
           break;
         }
-        // no special policies for these resource
         // @todo
         // case 'custom-resource-definition':
         // case 'deployment-script':
@@ -378,8 +377,8 @@ export const getPoliciesForRoles = ({
         // case 'nextjs-web':
         // break;
         default: {
-          // eslint-disable-next-line @typescript-eslint/no-unused-vars
-          const resourceCheck: never = resource;
+          // @note this is to ensure that we handle all possible types, even when new types are added
+          const _resourceCheck: never = resource;
         }
       }
     });

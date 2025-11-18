@@ -330,7 +330,7 @@ export const getEcsEc2InstanceLaunchTemplate = ({ workload }: { workload: StpCon
         Sub(
           [
             '#!/bin/bash',
-
+            // eslint-disable-next-line no-template-curly-in-string
             'echo ECS_CLUSTER=${clusterName} >> /etc/ecs/ecs.config;',
             'echo ECS_WARM_POOLS_CHECK=true >> /etc/ecs/ecs.config;',
             'echo ECS_ENABLE_CONTAINER_METADATA=true >> /etc/ecs/ecs.config;'

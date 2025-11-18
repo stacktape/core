@@ -1,5 +1,4 @@
 import { describe, expect, mock, test } from 'bun:test';
-import { join } from 'node:path';
 
 // Mock dependencies
 mock.module('@config', () => ({

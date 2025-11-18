@@ -27,7 +27,7 @@ export const getStatFunction = ({ alarm }: { alarm: AlarmDefinition }) => {
   ];
 };
 
-const defaultComparisonOperators: { [alarmType in AlarmDefinition['trigger']['type']]: ComparisonOperator } = {
+const defaultComparisonOperators: { [_alarmType in AlarmDefinition['trigger']['type']]: ComparisonOperator } = {
   'lambda-error-rate': 'GreaterThanThreshold',
   'lambda-duration': 'GreaterThanThreshold',
   'database-connection-count': 'GreaterThanThreshold',
@@ -45,7 +45,7 @@ const defaultComparisonOperators: { [alarmType in AlarmDefinition['trigger']['ty
   'application-load-balancer-custom': 'GreaterThanThreshold'
 };
 
-const defaultStatFunctions: { [alarmType in AlarmDefinition['trigger']['type']]?: StatisticFunction } = {
+const defaultStatFunctions: { [_alarmType in AlarmDefinition['trigger']['type']]?: StatisticFunction } = {
   'lambda-duration': 'avg',
   'database-connection-count': 'avg',
   'database-cpu-utilization': 'avg',
@@ -58,7 +58,7 @@ const defaultStatFunctions: { [alarmType in AlarmDefinition['trigger']['type']]?
   'application-load-balancer-custom': 'avg'
 };
 
-export const measuringUnits: { [alarmType in AlarmDefinition['trigger']['type']]: string } = {
+export const measuringUnits: { [_alarmType in AlarmDefinition['trigger']['type']]: string } = {
   'lambda-error-rate': '%',
   'lambda-duration': 'ms',
   'database-connection-count': '',
@@ -76,7 +76,7 @@ export const measuringUnits: { [alarmType in AlarmDefinition['trigger']['type']]
   'application-load-balancer-custom': ''
 };
 
-const statFunctionMapping: { [func in StatisticFunction]: string } = {
+const statFunctionMapping: { [_func in StatisticFunction]: string } = {
   avg: 'Average',
   max: 'Maximum',
   min: 'Minimum',
@@ -153,13 +153,14 @@ export const getAffectedResourceInfo = ({
         )
       };
     }
-    default:
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars, no-case-declarations
-      const exhaustiveCheck: never = alarm.trigger;
+    default: {
+      // @note this is to ensure that we handle all possible types, even when new types are added
+      const _alarmTriggerCheck: never = alarm.trigger;
+    }
   }
 };
 
-export const comparisonOperatorToSymbolMapping: { [operator in ComparisonOperator]: string } = {
+export const comparisonOperatorToSymbolMapping: { [_operator in ComparisonOperator]: string } = {
   GreaterThanThreshold: '>',
   GreaterThanOrEqualToThreshold: '>=',
   LessThanOrEqualToThreshold: '<=',

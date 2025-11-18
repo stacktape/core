@@ -17,8 +17,7 @@ export const loadHelperLambdaDetails = async ({
     };
   }
 
-  // @ts-ignore
-  const res: HelperLambdaDetails = {};
+  const res: HelperLambdaDetails = {} as HelperLambdaDetails;
   const dirEntries = await fsExtra.readdir(fsPaths.helperLambdasDir());
   dirEntries.forEach((entry) => {
     const [name, digest] = entry.replace('.zip', '').split('-');

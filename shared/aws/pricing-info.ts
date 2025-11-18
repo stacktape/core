@@ -385,7 +385,7 @@ export const productsInfo = {
 } as const;
 
 export const productNameBuilders: {
-  [offerCode in AwsServiceCsvOfferCode]?: (product: CsvRow) => string | string[] | undefined;
+  [_offerCode in AwsServiceCsvOfferCode]?: (product: CsvRow) => string | string[] | undefined;
 } = {
   AmazonECS: ({ productFamily, storageType, memoryType, cpuArchitecture, operatingSystem, cpuType }) => {
     if (

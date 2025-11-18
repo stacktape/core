@@ -1,5 +1,5 @@
+import { Ref } from '@cloudform/functions';
 import { describe, expect, test } from 'bun:test';
-import { Ref, Sub } from '@cloudform/functions';
 import { cfEvaluatedLinks } from './cf-evaluated-links';
 
 describe('cf-evaluated-links', () => {

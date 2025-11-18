@@ -38,7 +38,8 @@ export const DEPENDENCIES_WITH_BINARIES = [
   'radium',
   'ffi',
   'microtime',
-  '@tensorflow/tfjs-node'
+  '@tensorflow/tfjs-node',
+  'sharp'
 ];
 
 export const IGNORED_MODULES = [

@@ -1,6 +1,8 @@
 const NEWLINE = '\n';
-const RE_INI_KEY_VAL = /^\s*([\w.-]+)\s*=\s*(.*)?\s*$/;
+// eslint-disable-next-line regexp/no-super-linear-backtracking
+const RE_INI_KEY_VAL = /^\s*([\w.-]+)\s*=\s*(.*)\s*$/;
 const RE_NEWLINES = /\\n/g;
+// eslint-disable-next-line regexp/no-dupe-disjunctions
 const NEWLINES_MATCH = /\n|\r|\r\n/;
 
 // Parses src into an Object

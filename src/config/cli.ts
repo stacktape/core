@@ -77,7 +77,7 @@ export const commandsWithDisabledAnnouncements: StacktapeCommand[] = ['dev', 've
 
 export const commandsNotRequiringApiKey = ['login', 'logout', 'version', 'help', 'defaults:list', 'defaults:configure'];
 
-export const allowedCliArgs: { [command in StacktapeCliCommand]: StacktapeCliArg[] } = {
+export const allowedCliArgs: { [_command in StacktapeCliCommand]: StacktapeCliArg[] } = {
   deploy: [
     ...universalCliArgs,
     ...argsForCommandsWorkingWithStack,
@@ -224,7 +224,7 @@ export const allowedCliArgs: { [command in StacktapeCliCommand]: StacktapeCliArg
   logout: [...universalCliArgs, 'apiKey']
 };
 
-export const requiredCliArgs: { [command in StacktapeCliCommand]: StacktapeCliArg[] } = {
+export const requiredCliArgs: { [_command in StacktapeCliCommand]: StacktapeCliArg[] } = {
   deploy: ['stage', 'region'],
   'codebuild:deploy': ['stage', 'region'],
   dev: ['resourceName', 'region', 'stage'],
@@ -262,7 +262,7 @@ export const requiredCliArgs: { [command in StacktapeCliCommand]: StacktapeCliAr
   logout: []
 };
 
-export const allowedSdkArgs: { [command in StacktapeSdkCommand]: StacktapeSdkArg[] } = {
+export const allowedSdkArgs: { [_command in StacktapeSdkCommand]: StacktapeSdkArg[] } = {
   deploy: [
     ...universalSdkArgs,
     ...argsForCommandsWorkingWithStack,
@@ -361,7 +361,7 @@ export const allowedSdkArgs: { [command in StacktapeSdkCommand]: StacktapeSdkArg
   ]
 };
 
-export const requiredSdkArgs: { [command in StacktapeSdkCommand]: StacktapeSdkArg[] } = {
+export const requiredSdkArgs: { [_command in StacktapeSdkCommand]: StacktapeSdkArg[] } = {
   deploy: [],
   'codebuild:deploy': [],
   dev: ['resourceName', 'region', 'stage'],
@@ -384,7 +384,7 @@ export const requiredSdkArgs: { [command in StacktapeSdkCommand]: StacktapeSdkAr
   'bucket:sync': []
 };
 
-export const cliArgsAliases: { [cliArgs in StacktapeCliArg | StacktapeSdkArg]: string } = {
+export const cliArgsAliases: { [_cliArg in StacktapeCliArg | StacktapeSdkArg]: string } = {
   event: 'e',
   jsonEvent: 'je',
   stage: 's',

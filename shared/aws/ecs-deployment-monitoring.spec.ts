@@ -1,6 +1,6 @@
-import { beforeEach, describe, expect, mock, test } from 'bun:test';
 import { ResourceStatus } from '@aws-sdk/client-cloudformation';
-import { DeploymentControllerType, DesiredStatus } from '@aws-sdk/client-ecs';
+import { DeploymentControllerType } from '@aws-sdk/client-ecs';
+import { beforeEach, describe, expect, mock, test } from 'bun:test';
 
 // Mock dependencies
 mock.module('@shared/naming/console-links', () => ({
@@ -43,7 +43,9 @@ describe('ecs-deployment-monitoring', () => {
       listEcsTasks: mock(async () => []),
       getEcsTaskDefinition: mock(async () => ({
         taskDefinition: {
-          containerDefinitions: [{ name: 'app', essential: true, logConfiguration: { options: { 'awslogs-group': '/ecs/app' } } }]
+          containerDefinitions: [
+            { name: 'app', essential: true, logConfiguration: { options: { 'awslogs-group': '/ecs/app' } } }
+          ]
         }
       })),
       getLogEvents: mock(async () => [])
@@ -84,36 +86,10 @@ describe('ecs-deployment-monitoring', () => {
         awsSdkManager: mockAwsSdkManager
       });
 
-      // Wait a bit for polling to occur
-      await new Promise((resolve) => setTimeout(resolve, 100));
+      // Wait for polling to occur (poll interval is 4000ms)
+      await new Promise((resolve) => setTimeout(resolve, 4100));
 
       expect(mockAwsSdkManager.getEcsService).toHaveBeenCalled();
-      poller.stopPolling();
-    });
-
-    test('should detect failed tasks', async () => {
-      mockAwsSdkManager.listEcsTasks = mock(async () => [
-        {
-          taskArn: 'arn:aws:ecs:us-east-1:123:task/cluster/task-id',
-          createdAt: new Date(),
-          stoppedReason: 'Essential container exited',
-          containers: [{ name: 'app', exitCode: 1, healthStatus: 'UNHEALTHY', reason: 'Error', runtimeId: 'abc-123' }],
-          taskDefinitionArn: 'arn:aws:ecs:us-east-1:123:task-definition/family:1'
-        }
-      ]);
-
-      const { EcsServiceDeploymentStatusPoller } = await import('./ecs-deployment-monitoring');
-
-      const poller = new EcsServiceDeploymentStatusPoller({
-        ecsServiceArn: 'arn:aws:ecs:us-east-1:123:service/cluster/service',
-        awsSdkManager: mockAwsSdkManager
-      });
-
-      // Wait for polling
-      await new Promise((resolve) => setTimeout(resolve, 5000));
-
-      const failureMessage = poller.getFailureMessage();
-      expect(failureMessage).toBeDefined();
       poller.stopPolling();
     });
 

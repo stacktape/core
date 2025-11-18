@@ -150,6 +150,8 @@ interface UserAuthPoolProps {
   allowedOAuthFlows?: AllowedOauthFlow[];
   /**
    * #### The OAuth 2.0 scopes allowed for this user pool.
+   * ---
+   * Example: ['email', 'openid', 'profile']
    */
   allowedOAuthScopes?: string[];
   /**

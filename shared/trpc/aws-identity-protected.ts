@@ -1,4 +1,5 @@
 import type { CreateTRPCClientOptions } from '@trpc/client';
+import { Buffer } from 'node:buffer';
 import { createTRPCClient, httpBatchLink } from '@trpc/client';
 import { getSignedGetCallerIdentityRequest } from '../aws/identity';
 

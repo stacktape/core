@@ -2,7 +2,7 @@ import type { Definition } from 'typescript-json-schema';
 
 export const resolveRef = (node: Definition, schema: Definition): Definition => {
   if (node.$ref) {
-    // @ts-ignore
+    // @ts-expect-error - just ignore
     return { ...node, ...schema.definitions[node.$ref.slice(14)] };
   }
   return node;
@@ -15,7 +15,7 @@ export const getTypeDetailsFromNode = (
   allowedValues?: (string | number)[];
 } => {
   if (node.enum) {
-    // @ts-ignore
+    // @ts-expect-error - just ignore
     return { allowedTypes: [node.type], allowedValues: node.enum };
   }
   if (Array.isArray(node.type)) {

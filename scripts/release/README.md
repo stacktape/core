@@ -41,7 +41,6 @@ Located in `utils/` directory:
 
 - **`build.ts`** - Build operations
   - `buildCliForRelease()` - Build CLI binaries for all platforms
-  - `buildPlatformPackagesForRelease()` - Build platform-specific NPM packages
   - `buildNpmPackageForRelease()` - Build main NPM package
 
 - **`validation.ts`** - Project validation
