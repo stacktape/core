@@ -16,9 +16,9 @@ export class GitHubApiError extends Error {
 
 // Validate GitHub token from environment variable
 const getGitHubToken = (): string => {
-  const token = process.env.GITHUB_AUTH_TOKEN || process.env.GH_TOKEN;
+  const token = process.env.GITHUB_AUTH_TOKEN || process.env.GH_TOKEN || process.env.GITHUB_TOKEN || process.env.RELEASE_GITHUB_TOKEN;
   if (!token) {
-    throw new GitHubApiError('GitHub token not found. Please set GITHUB_AUTH_TOKEN or GH_TOKEN environment variable.');
+    throw new GitHubApiError('GitHub token not found. Please set GITHUB_AUTH_TOKEN, GH_TOKEN, GITHUB_TOKEN, or RELEASE_GITHUB_TOKEN environment variable.');
   }
   return token;
 };

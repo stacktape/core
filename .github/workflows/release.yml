@@ -100,10 +100,6 @@ jobs:
           mkdir -p __binary-dist
           find __binary-dist-raw -type f -exec mv {} __binary-dist/ \;
 
-      - name: Set GitHub token
-        run: |
-          echo "RELEASE_GITHUB_TOKEN=${{ github.token }}" >> $GITHUB_ENV
-
       - name: Install Stacktape CLI
         run: |
           curl -L https://installs.stacktape.com/linux.sh | sh
