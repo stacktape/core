@@ -91,7 +91,7 @@ jobs:
     needs: build-binaries
     runs-on: ubuntu-latest
     permissions:
-      contents: read
+      contents: write  # Required for creating releases and pushing commits
       id-token: write  # Required for npm OIDC authentication
     steps:
       - name: Checkout code
