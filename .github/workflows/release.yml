@@ -141,6 +141,12 @@ jobs:
       - name: Build npm package
         run: bun run build:npm --version ${{ inputs.version }}
 
+      - name: Setup Node.js for npm publish
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          registry-url: 'https://registry.npmjs.org'
+
       - name: Create GitHub Release
         id: create_release
         env:
