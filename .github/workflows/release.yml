@@ -147,6 +147,9 @@ jobs:
           node-version: '20'
           registry-url: 'https://registry.npmjs.org'
 
+      - name: Update npm to latest
+        run: npm install -g npm@latest
+
       - name: Create GitHub Release
         id: create_release
         env:
