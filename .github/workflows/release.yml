@@ -81,7 +81,9 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: binary-${{ matrix.platform }}
-          path: __binary-dist/${{ matrix.platform }}.*
+          path: |
+            __binary-dist/*.tar.gz
+            __binary-dist/*.zip
           retention-days: 1
 
   release:
