@@ -1,5 +1,5 @@
-// eslint-disable-next-line ts/ban-ts-comment
-// @ts-nocheck - this is a legacy codebase that we are not going to maintain
+/* eslint-disable */
+// @ts-nocheck
 import crypto from 'node:crypto';
 import { Transform } from 'node:stream';
 

@@ -1,10 +1,8 @@
 /* eslint-disable */
-// @ts-nocheck - this is a legacy codebase that we are not going to maintain
-
+// @ts-nocheck
 // ORIGINALLY this repo https://github.com/auth0/node-s3-client
 import assert from 'node:assert';
 import { EventEmitter } from 'node:events';
-import fs from 'node:fs';
 import path from 'node:path';
 import { PassThrough } from 'node:stream';
 import url from 'node:url';
@@ -13,6 +11,7 @@ import { Pend, stringMatchesGlob } from '@shared/utils/misc';
 import fdSlicer from 'fd-slicer';
 import findit from 'findit2';
 import fsExtra from 'fs-extra';
+import fs from 'graceful-fs';
 import mime from 'mime';
 import StreamSink from 'streamsink';
 import { MultipartETag } from './multipart-etag';
