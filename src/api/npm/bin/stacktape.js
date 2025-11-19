@@ -194,7 +194,6 @@ async function ensureBinary() {
     return binaryPath;
   }
 
-  console.info(`Stacktape binary not found in cache.`);
   console.info(`Installing Stacktape ${version} for ${platformKey}...`);
 
   // Create cache directory
