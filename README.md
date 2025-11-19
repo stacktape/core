@@ -232,6 +232,12 @@ Run them with:
 stacktape script:run --scriptName migrate
 ```
 
+## Stacktape console
+
+Stacktape offers a console that allows you to deploy and manage your stacks.
+
+https://www.stacktape.com/videos/2-manage.mp4
+
 ## Advanced Features
 
 ### Private Networking
@@ -318,7 +324,7 @@ Stacktape is released under the [MIT License](LICENSE).
 
 **Ready to simplify your AWS deployments?**
 
-[Get Started]([https://docs.stacktape.com/getting-started/](https://docs.stacktape.com/getting-started/basics)) • [Join Slack]([https://discord.gg/stacktape](https://join.slack.com/t/stacktape-community/shared_invite/zt-16st4nmgl-B8adf0YnZWSMEbuz9Ih6vg)) • [Starter Projects]([https://docs.stacktape.com/starter-projects/](https://github.com/stacktape/stacktape/tree/master/starter-projects))
+[Get Started](https://docs.stacktape.com/getting-started/basics) • [Join Slack](https://join.slack.com/t/stacktape-community/shared_invite/zt-16st4nmgl-B8adf0YnZWSMEbuz9Ih6vg) • [Starter Projects](https://github.com/stacktape/stacktape/tree/master/starter-projects)
 
 Made with ❤️ by the Stacktape team in EU
 
