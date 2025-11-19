@@ -39,12 +39,16 @@ export const publishInstallScripts = async ({
 }) => {
   await prepareInstallScripts({ version });
 
-  logInfo(`Publishing install scripts with default version ${version} to install scripts hosting bucket...`);
+  logInfo(
+    `Publishing install scripts with default version ${version} to ${bucketType} install scripts hosting bucket...`
+  );
   await syncBucket({
     bucketName: bucketType === 'production' ? INSTALL_SCRIPTS_BUCKET_NAME : INSTALL_SCRIPTS_PREVIEW_BUCKET_NAME,
     sourcePath: join(CLI_RELEASE_FOLDER_PATH, 'install-scripts')
   });
-  logSuccess(`Install scripts with default version ${version} published successfully.`);
+  logSuccess(
+    `Install scripts with default version ${version} published successfully to ${bucketType} install scripts hosting bucket.`
+  );
 };
 
 if (import.meta.main) {
