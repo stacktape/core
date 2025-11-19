@@ -38,7 +38,7 @@ jobs:
             os: ubuntu-latest
             target: darwin-arm64
           - platform: win
-            os: windows-latest
+            os: windows-latest-8-cores  # Larger runner: 8 cores, 32GB RAM (requires billing)
             target: win32-x64
     steps:
       - name: Checkout code
@@ -48,6 +48,16 @@ jobs:
         uses: oven-sh/setup-bun@v2
         with:
           bun-version: latest
+
+      - name: Cache dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.bun/install/cache
+            node_modules
+          key: ${{ runner.os }}-bun-${{ hashFiles('**/bun.lockb') }}
+          restore-keys: |
+            ${{ runner.os }}-bun-
 
       - name: Install dependencies
         run: bun install
@@ -78,6 +88,9 @@ jobs:
     name: Create Release and Publish
     needs: build-binaries
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      id-token: write  # Required for npm OIDC authentication
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -86,6 +99,16 @@ jobs:
         uses: oven-sh/setup-bun@v2
         with:
           bun-version: latest
+
+      - name: Cache dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.bun/install/cache
+            node_modules
+          key: ${{ runner.os }}-bun-${{ hashFiles('**/bun.lockb') }}
+          restore-keys: |
+            ${{ runner.os }}-bun-
 
       - name: Install dependencies
         run: bun install

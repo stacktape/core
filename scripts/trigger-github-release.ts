@@ -43,30 +43,9 @@ const main = async () => {
     });
 
     if (response.status === 204) {
-      logInfo('Workflow triggered, fetching run ID...');
-
-      // Wait a bit for GitHub to create the run
-      await new Promise((resolve) => setTimeout(resolve, 2000));
-
-      // Get the latest workflow run for this branch
-      const runs = await octokit.actions.listWorkflowRuns({
-        owner: 'stacktape',
-        repo: 'core',
-        workflow_id: 'release.yml',
-        branch: currentBranch,
-        per_page: 1
-      });
-
-      if (runs.data.workflow_runs.length > 0) {
-        const runId = runs.data.workflow_runs[0].id;
-        logSuccess(
-          `Release workflow triggered successfully!\n\nView workflow run at: https://github.com/stacktape/core/actions/runs/${runId}`
-        );
-      } else {
-        logSuccess(
-          'Release workflow triggered successfully!\n\nView workflow runs at: https://github.com/stacktape/core/actions'
-        );
-      }
+      logSuccess(
+        `Release workflow triggered successfully!\n\nView workflow runs at: https://github.com/stacktape/core/actions`
+      );
     } else {
       throw new Error(`Unexpected response status: ${response.status}`);
     }
