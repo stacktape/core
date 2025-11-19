@@ -89,7 +89,7 @@ jobs:
     needs: build-binaries
     runs-on: ubuntu-latest
     permissions:
-      contents: write
+      contents: read
       id-token: write  # Required for npm OIDC authentication
     steps:
       - name: Checkout code
