@@ -7,7 +7,7 @@
   "homepage": "https://stacktape.com",
   "repository": {
     "type": "git",
-    "url": "https://github.com/stacktape/core.git"
+    "url": "git+https://github.com/stacktape/core.git"
   },
   "bugs": {
     "url": "https://github.com/stacktape/core/issues"
@@ -35,8 +35,8 @@
   "main": "./index.js",
   "types": "./index.d.ts",
   "bin": {
-    "stacktape": "./bin/stacktape.js",
-    "stp": "./bin/stacktape.js"
+    "stacktape": "bin/stacktape.js",
+    "stp": "bin/stacktape.js"
   },
   "dependencies": {
     "adm-zip": "^0.5.16",
