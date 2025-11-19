@@ -38,7 +38,7 @@ jobs:
             os: ubuntu-latest
             target: darwin-arm64
           - platform: win
-            os: windows-latest-8-cores  # Larger runner: 8 cores, 32GB RAM (requires billing)
+            os: windows-latest
             target: win32-x64
     steps:
       - name: Checkout code
