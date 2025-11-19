@@ -1,10 +1,10 @@
 #!/usr/bin/env node
-/* eslint-disable  */
 
 /**
  * Stacktape CLI launcher
  * Downloads and caches the platform-specific binary on first run
  */
+
 const { spawnSync, execSync } = require('node:child_process');
 const { createWriteStream, existsSync, chmodSync, mkdirSync } = require('node:fs');
 const { get: httpsGet } = require('node:https');
@@ -24,7 +24,7 @@ const PLATFORM_MAP = {
   'linux-x64-musl': { fileName: 'alpine.tar.gz', extract: extractTarGz }
 };
 
-const detectPlatform = () => {
+function detectPlatform() {
   const currentPlatform = platform();
   const currentArch = arch();
 
@@ -52,9 +52,9 @@ const detectPlatform = () => {
   }
 
   return platformKey;
-};
+}
 
-const downloadFile = async (url, destPath, retries = 3) => {
+async function downloadFile(url, destPath, retries = 3) {
   for (let i = 0; i < retries; i++) {
     try {
       await new Promise((resolve, reject) => {
@@ -119,27 +119,25 @@ const downloadFile = async (url, destPath, retries = 3) => {
       console.info(`\nRetrying download (${i + 1}/${retries})...`);
     }
   }
-};
+}
 
-// lazy load only when needed
-const extractTarGz = async (archivePath, destDir) => {
+async function extractTarGz(archivePath, destDir) {
   const tar = require('tar');
   await tar.x({
     file: archivePath,
     cwd: destDir
   });
-};
+}
 
-// lazy load only when needed
-const extractZip = async (archivePath, destDir) => {
+async function extractZip(archivePath, destDir) {
   const AdmZip = require('adm-zip');
   const zip = new AdmZip(archivePath);
   zip.extractAllTo(destDir, true);
-};
+}
 
-const setExecutablePermissions = (binDir) => {
+function setExecutablePermissions(binDir) {
   if (platform() === 'win32') {
-    return; // Windows doesn't need chmod
+    return;
   }
 
   const executables = [
@@ -159,9 +157,9 @@ const setExecutablePermissions = (binDir) => {
       }
     }
   }
-};
+}
 
-const ensureBinary = async () => {
+async function ensureBinary() {
   const platformKey = detectPlatform();
   const platformInfo = PLATFORM_MAP[platformKey];
   const version = PACKAGE_VERSION;
@@ -174,7 +172,7 @@ const ensureBinary = async () => {
     return binaryPath;
   }
 
-  console.info(`Stacktape binary not found. Installing  version ${version} for ${platformKey}...`);
+  console.info(`Stacktape binary not found. Installing version ${version} for ${platformKey}...`);
 
   if (!existsSync(cacheDir)) {
     mkdirSync(cacheDir, { recursive: true });
@@ -211,11 +209,8 @@ You can also install Stacktape directly using:
 ${getManualInstallCommand(platformKey)}`);
     process.exit(1);
   }
-};
+}
 
-/**
- * Gets the manual installation command for the platform
- */
 function getManualInstallCommand(platformKey) {
   const commands = {
     'win32-x64': 'iwr https://installs.stacktape.com/windows.ps1 -useb | iex',
@@ -228,9 +223,6 @@ function getManualInstallCommand(platformKey) {
   return commands[platformKey] || 'See https://docs.stacktape.com for installation instructions';
 }
 
-/**
- * Main execution
- */
 async function main() {
   try {
     const binaryPath = await ensureBinary();
