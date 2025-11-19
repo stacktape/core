@@ -1,22 +1,20 @@
 #!/usr/bin/env node
+/* eslint-disable  */
 
 /**
  * Stacktape CLI launcher
  * Downloads and caches the platform-specific binary on first run
  */
-
 const { spawnSync, execSync } = require('node:child_process');
 const { createWriteStream, existsSync, chmodSync, mkdirSync } = require('node:fs');
 const { get: httpsGet } = require('node:https');
 const { platform, arch, homedir } = require('node:os');
 const { join } = require('node:path');
 
-// Get version from package.json
 const PACKAGE_VERSION = require('../package.json').version;
 
 const GITHUB_REPO = 'stacktape/stacktape';
 
-// Platform detection and mapping
 const PLATFORM_MAP = {
   'win32-x64': { fileName: 'windows.zip', extract: extractZip },
   'linux-x64': { fileName: 'linux.tar.gz', extract: extractTarGz },
@@ -26,10 +24,7 @@ const PLATFORM_MAP = {
   'linux-x64-musl': { fileName: 'alpine.tar.gz', extract: extractTarGz }
 };
 
-/**
- * Detects the current platform
- */
-function detectPlatform() {
+const detectPlatform = () => {
   const currentPlatform = platform();
   const currentArch = arch();
 
@@ -57,12 +52,9 @@ function detectPlatform() {
   }
 
   return platformKey;
-}
+};
 
-/**
- * Downloads a file from a URL with retry logic
- */
-async function downloadFile(url, destPath, retries = 3) {
+const downloadFile = async (url, destPath, retries = 3) => {
   for (let i = 0; i < retries; i++) {
     try {
       await new Promise((resolve, reject) => {
@@ -127,32 +119,25 @@ async function downloadFile(url, destPath, retries = 3) {
       console.info(`\nRetrying download (${i + 1}/${retries})...`);
     }
   }
-}
+};
 
-/**
- * Extracts a tar.gz archive
- */
-async function extractTarGz(archivePath, destDir) {
+// lazy load only when needed
+const extractTarGz = async (archivePath, destDir) => {
   const tar = require('tar');
   await tar.x({
     file: archivePath,
     cwd: destDir
   });
-}
+};
 
-/**
- * Extracts a zip archive
- */
-async function extractZip(archivePath, destDir) {
+// lazy load only when needed
+const extractZip = async (archivePath, destDir) => {
   const AdmZip = require('adm-zip');
   const zip = new AdmZip(archivePath);
   zip.extractAllTo(destDir, true);
-}
+};
 
-/**
- * Sets executable permissions on Unix systems
- */
-function setExecutablePermissions(binDir) {
+const setExecutablePermissions = (binDir) => {
   if (platform() === 'win32') {
     return; // Windows doesn't need chmod
   }
@@ -174,54 +159,42 @@ function setExecutablePermissions(binDir) {
       }
     }
   }
-}
+};
 
-/**
- * Ensures the binary is downloaded and cached
- */
-async function ensureBinary() {
+const ensureBinary = async () => {
   const platformKey = detectPlatform();
   const platformInfo = PLATFORM_MAP[platformKey];
   const version = PACKAGE_VERSION;
 
-  // Cache directory: ~/.stacktape/bin/{version}/
   const cacheDir = join(homedir(), '.stacktape', 'bin', version);
   const binaryName = platform() === 'win32' ? 'stacktape.exe' : 'stacktape';
   const binaryPath = join(cacheDir, binaryName);
 
-  // Check if binary is already cached
   if (existsSync(binaryPath)) {
     return binaryPath;
   }
 
-  console.info(`Installing Stacktape ${version} for ${platformKey}...`);
+  console.info(`Stacktape binary not found. Installing  version ${version} for ${platformKey}...`);
 
-  // Create cache directory
   if (!existsSync(cacheDir)) {
     mkdirSync(cacheDir, { recursive: true });
   }
 
-  // Download URL
   const downloadUrl = `https://github.com/${GITHUB_REPO}/releases/download/${version}/${platformInfo.fileName}`;
   const archivePath = join(cacheDir, platformInfo.fileName);
 
   try {
-    // Download the archive
     console.info(`Downloading from ${downloadUrl}...`);
     await downloadFile(downloadUrl, archivePath);
 
-    // Extract the archive
     console.info('Extracting...');
     await platformInfo.extract(archivePath, cacheDir);
 
-    // Set executable permissions
     setExecutablePermissions(cacheDir);
 
-    // Remove the archive
     const { unlinkSync } = require('node:fs');
     unlinkSync(archivePath);
 
-    // Verify the binary exists
     if (!existsSync(binaryPath)) {
       throw new Error(`Binary not found after extraction: ${binaryPath}`);
     }
@@ -238,7 +211,7 @@ You can also install Stacktape directly using:
 ${getManualInstallCommand(platformKey)}`);
     process.exit(1);
   }
-}
+};
 
 /**
  * Gets the manual installation command for the platform
