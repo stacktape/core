@@ -118,7 +118,7 @@ type PackageWorkloadInput = {
    * The name of the specific job (e.g., a container or function) within the resource. This is important for resources that can have multiple jobs, like a `multi-container-workload`.
    */
   jobName: string;
-  packaging: MultiContainerWorkloadContainerPackaging | BatchJobContainerPackaging | LambdaPackaging | HelperLambdaPackaging;
+  packaging: ContainerWorkloadContainerPackaging | BatchJobContainerPackaging | LambdaPackaging | HelperLambdaPackaging;
 };
 
 type HelperLambdaPackaging = {
@@ -126,7 +126,7 @@ type HelperLambdaPackaging = {
   properties: HelperLambdaData;
 };
 
-type MultiContainerWorkloadContainerPackaging =
+type ContainerWorkloadContainerPackaging =
   | StpBuildpackCwImagePackaging
   | ExternalBuildpackCwImagePackaging
   | NixpacksCwImagePackaging
@@ -142,13 +142,13 @@ type BatchJobContainerPackaging =
 
 type LambdaPackaging = StpBuildpackLambdaPackaging | CustomArtifactLambdaPackaging;
 
-type AllSupportedPackagingConfig = MultiContainerWorkloadContainerPackaging | BatchJobContainerPackaging | LambdaPackaging;
+type AllSupportedPackagingConfig = ContainerWorkloadContainerPackaging | BatchJobContainerPackaging | LambdaPackaging;
 
-type EnrichedCwContainerProps = MultiContainerWorkloadContainer & {
+type EnrichedCwContainerProps = ContainerWorkloadContainer & {
   workloadName: string;
   workloadType: StpWorkloadType;
   jobName: string;
-  resources: MultiContainerWorkloadResourcesConfig;
+  resources: ContainerWorkloadResourcesConfig;
 };
 
 type EnrichedWebServiceContainerProps = EnrichedCwContainerProps;

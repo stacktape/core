@@ -127,7 +127,7 @@ export const RESOURCES: ResourceDefinition[] = [
   {
     className: 'MultiContainerWorkload',
     resourceType: 'multi-container-workload',
-    propsType: 'MultiContainerWorkloadProps',
+    propsType: 'ContainerWorkloadProps',
     hasAugmentedProps: true,
     canConnectTo: [
       'RelationalDatabase',
@@ -428,27 +428,27 @@ export const TYPE_PROPERTIES: TypePropertiesDefinition[] = [
   {
     className: 'MultiContainerWorkloadHttpApiIntegration',
     typeValue: 'http-api-gateway',
-    propsType: 'MultiContainerWorkloadHttpApiIntegrationProps'
+    propsType: 'ContainerWorkloadHttpApiIntegrationProps'
   },
   {
     className: 'MultiContainerWorkloadLoadBalancerIntegration',
     typeValue: 'application-load-balancer',
-    propsType: 'MultiContainerWorkloadLoadBalancerIntegrationProps'
+    propsType: 'ContainerWorkloadLoadBalancerIntegrationProps'
   },
   {
     className: 'MultiContainerWorkloadNetworkLoadBalancerIntegration',
     typeValue: 'network-load-balancer',
-    propsType: 'MultiContainerWorkloadNetworkLoadBalancerIntegrationProps'
+    propsType: 'ContainerWorkloadNetworkLoadBalancerIntegrationProps'
   },
   {
     className: 'MultiContainerWorkloadInternalIntegration',
     typeValue: 'workload-internal',
-    propsType: 'MultiContainerWorkloadInternalIntegrationProps'
+    propsType: 'ContainerWorkloadInternalIntegrationProps'
   },
   {
     className: 'MultiContainerWorkloadServiceConnectIntegration',
     typeValue: 'service-connect',
-    propsType: 'MultiContainerWorkloadServiceConnectIntegrationProps'
+    propsType: 'ContainerWorkloadServiceConnectIntegrationProps'
   },
 
   // Scripts
