@@ -83,11 +83,14 @@ export const fsPaths = {
       // 2. Next to the main script being executed (for npm installations)
       join(dirname(process.argv[1]), 'helper-lambdas'),
 
-      // 3. Relative to the current module (when bundled with known structure)
+      // 3. In the current module directory (for npm package root)
+      join(getCurrentModuleDir(), 'helper-lambdas'),
+
+      // 4. Relative to the current module (when bundled with known structure)
       join(getCurrentModuleDir(), '../../helper-lambdas'),
       join(getCurrentModuleDir(), '../../../helper-lambdas'),
 
-      // 4. In the package bin directory (for npm packages)
+      // 5. In the package bin directory (for npm packages)
       join(getCurrentModuleDir(), '../../../bin/helper-lambdas')
     ];
 

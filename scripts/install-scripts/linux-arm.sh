@@ -36,22 +36,23 @@ version=${STACKTAPE_VERSION:="<<DEFAULT_VERSION>>"}
 archive_source_url=https://github.com/stacktape/core/releases/download/$version/linux-arm.tar.gz
 
 bin_dir_path="$HOME/.stacktape/bin"
-executable_file_path="$bin_dir_path/stacktape"
-alt_executable_file_path="$bin_dir_path/stp"
-esbuild_executable_file_path="$bin_dir_path/esbuild/exec"
-session_manager_plugin_executable_file_path="$bin_dir_path/session-manager-plugin/smp"
-pack_executable_file_path="$bin_dir_path/pack/pack"
-nixpacks_executable_file_path="$bin_dir_path/nixpacks/nixpacks"
+version_dir_path="$bin_dir_path/$version"
+
+executable_file_path="$version_dir_path/stacktape"
+esbuild_executable_file_path="$version_dir_path/esbuild/exec"
+session_manager_plugin_executable_file_path="$version_dir_path/session-manager-plugin/smp"
+pack_executable_file_path="$version_dir_path/pack/pack"
+nixpacks_executable_file_path="$version_dir_path/nixpacks/nixpacks"
 
 
-if [ ! -d "$bin_dir_path" ]; then
- 	mkdir -p "$bin_dir_path"
+if [ ! -d "$version_dir_path" ]; then
+ 	mkdir -p "$version_dir_path"
 fi
 
 echo "${Bold}${Green}Installing ${White}version ${Green}$version ${Format_Off}${Dim}from $archive_source_url${Format_Off}"
 
 curl -q --fail --location --progress-bar --output "$executable_file_path.tar.gz" "$archive_source_url"
-cd $bin_dir_path
+cd $version_dir_path
 tar xzf "$executable_file_path.tar.gz"
 chmod +x "$executable_file_path"
 chmod +x "$esbuild_executable_file_path"
@@ -61,7 +62,13 @@ chmod +x "$nixpacks_executable_file_path"
 
 rm "$executable_file_path.tar.gz"
 
-ln -sf $executable_file_path $alt_executable_file_path
+ln -sf $executable_file_path "$bin_dir_path/stacktape"
+ln -sf $executable_file_path "$bin_dir_path/stp"
+
+if [ -d "$version_dir_path/completions" ]; then
+  rm -rf "$bin_dir_path/completions"
+  ln -sf "$version_dir_path/completions" "$bin_dir_path/completions"
+fi
 
 user_profile_file_path="$HOME/.profile"
 set_path_line="export PATH=\$PATH:$bin_dir_path"

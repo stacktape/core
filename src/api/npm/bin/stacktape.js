@@ -6,7 +6,7 @@
  */
 
 const { spawnSync, execSync } = require('node:child_process');
-const { createWriteStream, existsSync, chmodSync, mkdirSync } = require('node:fs');
+const { createWriteStream, existsSync, chmodSync, mkdirSync, accessSync, constants } = require('node:fs');
 const { get: httpsGet } = require('node:https');
 const { platform, arch, homedir } = require('node:os');
 const { join } = require('node:path');
@@ -164,8 +164,18 @@ async function ensureBinary() {
   const platformInfo = PLATFORM_MAP[platformKey];
   const version = PACKAGE_VERSION;
 
-  const cacheDir = join(homedir(), '.stacktape', 'bin', version);
   const binaryName = platform() === 'win32' ? 'stacktape.exe' : 'stacktape';
+
+  let cacheDir;
+  try {
+    const localDir = join(__dirname, '..', '.stacktape', 'bin', version);
+    mkdirSync(localDir, { recursive: true });
+    accessSync(localDir, constants.W_OK);
+    cacheDir = localDir;
+  } catch {
+    cacheDir = join(homedir(), '.stacktape', 'bin', version);
+  }
+
   const binaryPath = join(cacheDir, binaryName);
 
   if (existsSync(binaryPath)) {

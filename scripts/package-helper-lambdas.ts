@@ -63,7 +63,6 @@ export const packageHelperLambdas = async ({ distFolderPath }: { isDev?: boolean
         zippedSizeLimit: Infinity,
         invocationId: 'helper-lambdas-install'
       });
-      await remove(join(lambdasDistFolderPath, name));
     })
   );
   logSuccess('Helper lambdas packaged successfully.');
