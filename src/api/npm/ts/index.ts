@@ -24,7 +24,6 @@ export {
   Bastion,
   BatchJob,
   Bucket,
-  ContainerWorkload,
   DynamoDbTable,
   EfsFilesystem,
   EventBus,
@@ -32,6 +31,7 @@ export {
   HttpApiGateway,
   LambdaFunction,
   MongoDbAtlasCluster,
+  MultiContainerWorkload,
   NetworkLoadBalancer,
   NextjsWeb,
   OpenSearchDomain,
@@ -70,10 +70,6 @@ export {
   CloudwatchLogIntegration,
   // EFS Mounts
   ContainerEfsMount,
-  // Container Workload Integrations
-  ContainerWorkloadHttpApiIntegration,
-  ContainerWorkloadInternalIntegration,
-  ContainerWorkloadServiceConnectIntegration,
   CustomArtifactLambdaPackaging,
   CustomDockerfilePackaging,
   CustomRuleGroup,
@@ -103,6 +99,12 @@ export {
   LocalScriptWithFileScripts,
   // Web App Firewall Rules
   ManagedRuleGroup,
+  // Multi Container Workload Integrations
+  MultiContainerWorkloadHttpApiIntegration,
+  MultiContainerWorkloadInternalIntegration,
+  MultiContainerWorkloadLoadBalancerIntegration,
+  MultiContainerWorkloadNetworkLoadBalancerIntegration,
+  MultiContainerWorkloadServiceConnectIntegration,
   NixpacksPackaging,
   NonCurrentVersionExpirationLifecycleRule,
   // Container Packaging
