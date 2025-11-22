@@ -14,7 +14,7 @@ export type ResourceTypeName =
   | 'WebService'
   | 'PrivateService'
   | 'WorkerService'
-  | 'ContainerWorkload'
+  | 'MultiContainerWorkload'
   | 'LambdaFunction'
   | 'BatchJob'
   | 'Bucket'
@@ -125,9 +125,9 @@ export const RESOURCES: ResourceDefinition[] = [
     ]
   },
   {
-    className: 'ContainerWorkload',
+    className: 'MultiContainerWorkload',
     resourceType: 'multi-container-workload',
-    propsType: 'ContainerWorkloadProps',
+    propsType: 'MultiContainerWorkloadProps',
     hasAugmentedProps: true,
     canConnectTo: [
       'RelationalDatabase',
@@ -424,21 +424,31 @@ export const TYPE_PROPERTIES: TypePropertiesDefinition[] = [
     propsType: 'SqsQueueEventBusIntegrationProps'
   },
 
-  // Container Workload Integrations
+  // Multi Container Workload Integrations
   {
-    className: 'ContainerWorkloadHttpApiIntegration',
+    className: 'MultiContainerWorkloadHttpApiIntegration',
     typeValue: 'http-api-gateway',
-    propsType: 'ContainerWorkloadHttpApiIntegrationProps'
+    propsType: 'MultiContainerWorkloadHttpApiIntegrationProps'
   },
   {
-    className: 'ContainerWorkloadInternalIntegration',
-    typeValue: 'internal',
-    propsType: 'ContainerWorkloadInternalIntegrationProps'
+    className: 'MultiContainerWorkloadLoadBalancerIntegration',
+    typeValue: 'application-load-balancer',
+    propsType: 'MultiContainerWorkloadLoadBalancerIntegrationProps'
   },
   {
-    className: 'ContainerWorkloadServiceConnectIntegration',
+    className: 'MultiContainerWorkloadNetworkLoadBalancerIntegration',
+    typeValue: 'network-load-balancer',
+    propsType: 'MultiContainerWorkloadNetworkLoadBalancerIntegrationProps'
+  },
+  {
+    className: 'MultiContainerWorkloadInternalIntegration',
+    typeValue: 'workload-internal',
+    propsType: 'MultiContainerWorkloadInternalIntegrationProps'
+  },
+  {
+    className: 'MultiContainerWorkloadServiceConnectIntegration',
     typeValue: 'service-connect',
-    propsType: 'ContainerWorkloadServiceConnectIntegrationProps'
+    propsType: 'MultiContainerWorkloadServiceConnectIntegrationProps'
   },
 
   // Scripts
@@ -591,7 +601,8 @@ export const REFERENCEABLE_PARAMS: Record<string, Array<{ name: string; descript
     { name: 'arn', description: 'EFS ARN' },
     { name: 'id', description: 'EFS ID' }
   ],
-  'nextjs-web': [{ name: 'url', description: 'Website URL' }]
+  'nextjs-web': [{ name: 'url', description: 'Website URL' }],
+  'multi-container-workload': [{ name: 'logGroupArn', description: 'Log group ARN' }]
 };
 
 // Helper functions

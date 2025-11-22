@@ -5,15 +5,15 @@
  *
  * You can route requests based on HTTP method, path, headers, query parameters, and source IP address.
  */
-interface ContainerWorkloadLoadBalancerIntegration {
+interface MultiContainerWorkloadLoadBalancerIntegration {
   type: 'application-load-balancer';
   /**
    * #### Properties of the integration
    */
-  properties: ContainerWorkloadLoadBalancerIntegrationProps;
+  properties: MultiContainerWorkloadLoadBalancerIntegrationProps;
 }
 
-interface ContainerWorkloadLoadBalancerIntegrationProps extends ApplicationLoadBalancerIntegrationProps {
+interface MultiContainerWorkloadLoadBalancerIntegrationProps extends ApplicationLoadBalancerIntegrationProps {
   /**
    * #### The container port that will receive traffic from the load balancer.
    */
@@ -152,7 +152,7 @@ interface LbQueryParamCondition {
    */
   values: string[];
 }
-interface ContainerWorkloadHttpApiIntegrationProps extends HttpApiIntegrationProps {
+interface MultiContainerWorkloadHttpApiIntegrationProps extends HttpApiIntegrationProps {
   /**
    * #### The container port that will receive traffic from the API Gateway.
    */
@@ -166,26 +166,26 @@ interface ContainerWorkloadHttpApiIntegrationProps extends HttpApiIntegrationPro
  *
  * You can route requests based on HTTP method and path.
  */
-interface ContainerWorkloadHttpApiIntegration {
+interface MultiContainerWorkloadHttpApiIntegration {
   type: 'http-api-gateway';
   /**
    * #### Properties of the integration
    */
-  properties: ContainerWorkloadHttpApiIntegrationProps;
+  properties: MultiContainerWorkloadHttpApiIntegrationProps;
 }
 
 /**
  * #### Opens a container port for connections from other containers within the same workload.
  */
-interface ContainerWorkloadInternalIntegration {
+interface MultiContainerWorkloadInternalIntegration {
   type: 'workload-internal';
   /**
    * #### Properties of the integration
    */
-  properties: ContainerWorkloadInternalIntegrationProps;
+  properties: MultiContainerWorkloadInternalIntegrationProps;
 }
 
-interface ContainerWorkloadInternalIntegrationProps {
+interface MultiContainerWorkloadInternalIntegrationProps {
   /**
    * #### The container port to open for internal traffic.
    */
@@ -195,15 +195,15 @@ interface ContainerWorkloadInternalIntegrationProps {
 /**
  * #### Opens a container port for connections from other compute resources in the same stack.
  */
-interface ContainerWorkloadServiceConnectIntegration {
+interface MultiContainerWorkloadServiceConnectIntegration {
   type: 'service-connect';
   /**
    * #### Properties of the integration
    */
-  properties: ContainerWorkloadServiceConnectIntegrationProps;
+  properties: MultiContainerWorkloadServiceConnectIntegrationProps;
 }
 
-interface ContainerWorkloadServiceConnectIntegrationProps {
+interface MultiContainerWorkloadServiceConnectIntegrationProps {
   /**
    * #### The container port to open for service-to-service communication.
    */
@@ -1147,15 +1147,15 @@ interface EventBusOnDeliveryFailure {
  *
  * A Network Load Balancer operates at the transport layer (Layer 4) and can handle TCP and TLS traffic.
  */
-interface ContainerWorkloadNetworkLoadBalancerIntegration {
+interface MultiContainerWorkloadNetworkLoadBalancerIntegration {
   type: 'network-load-balancer';
   /**
    * #### Properties of the integration
    */
-  properties: ContainerWorkloadNetworkLoadBalancerIntegrationProps;
+  properties: MultiContainerWorkloadNetworkLoadBalancerIntegrationProps;
 }
 
-interface ContainerWorkloadNetworkLoadBalancerIntegrationProps extends NetworkLoadBalancerIntegrationProps {
+interface MultiContainerWorkloadNetworkLoadBalancerIntegrationProps extends NetworkLoadBalancerIntegrationProps {
   /**
    * #### The container port that will receive traffic from the load balancer.
    */

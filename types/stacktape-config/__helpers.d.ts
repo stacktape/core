@@ -1142,7 +1142,7 @@ interface SimpleServiceContainer extends ResourceAccessProps {
    *
    * Configures the container image for the service.
    */
-  packaging: ContainerWorkloadContainerPackaging;
+  packaging: MultiContainerWorkloadContainerPackaging;
   /**
    * #### Environment Variables
    *
@@ -1160,7 +1160,7 @@ interface SimpleServiceContainer extends ResourceAccessProps {
    *
    * Container logs (from `stdout` and `stderr`) are automatically sent to a CloudWatch log group and retained for 180 days by default. You can view logs in the AWS CloudWatch console or by using the [`stacktape logs` command](https://docs.stacktape.com/cli/commands/logs/).
    */
-  logging?: ContainerWorkloadContainerLogging;
+  logging?: MultiContainerWorkloadContainerLogging;
   /**
    * #### Resource Allocation
    *
@@ -1255,7 +1255,7 @@ interface SimpleServiceContainer extends ResourceAccessProps {
   usePrivateSubnetsWithNAT?: boolean;
 }
 
-interface ServiceHelperContainer extends ContainerWorkloadContainerBase {
+interface ServiceHelperContainer extends MultiContainerWorkloadContainerBase {
   /**
    * #### Container Type
    *

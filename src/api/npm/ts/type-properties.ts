@@ -102,18 +102,26 @@ export const RateBasedRule = createTypePropertiesClass('RateBasedRule', 'rate-ba
 
 export const SqsQueueEventBusIntegration = createTypePropertiesClass('SqsQueueEventBusIntegration', 'event-bus');
 
-// ==================== CONTAINER WORKLOAD INTEGRATIONS ====================
+// ==================== MULTI CONTAINER WORKLOAD INTEGRATIONS ====================
 
-export const ContainerWorkloadHttpApiIntegration = createTypePropertiesClass(
-  'ContainerWorkloadHttpApiIntegration',
+export const MultiContainerWorkloadHttpApiIntegration = createTypePropertiesClass(
+  'MultiContainerWorkloadHttpApiIntegration',
   'http-api-gateway'
 );
-export const ContainerWorkloadInternalIntegration = createTypePropertiesClass(
-  'ContainerWorkloadInternalIntegration',
-  'internal'
+export const MultiContainerWorkloadLoadBalancerIntegration = createTypePropertiesClass(
+  'MultiContainerWorkloadLoadBalancerIntegration',
+  'application-load-balancer'
 );
-export const ContainerWorkloadServiceConnectIntegration = createTypePropertiesClass(
-  'ContainerWorkloadServiceConnectIntegration',
+export const MultiContainerWorkloadNetworkLoadBalancerIntegration = createTypePropertiesClass(
+  'MultiContainerWorkloadNetworkLoadBalancerIntegration',
+  'network-load-balancer'
+);
+export const MultiContainerWorkloadInternalIntegration = createTypePropertiesClass(
+  'MultiContainerWorkloadInternalIntegration',
+  'workload-internal'
+);
+export const MultiContainerWorkloadServiceConnectIntegration = createTypePropertiesClass(
+  'MultiContainerWorkloadServiceConnectIntegration',
   'service-connect'
 );
 

@@ -127,9 +127,11 @@ export const generateNpmSdkExportDeclarations = async ({ distFolderPath }: { dis
     'KafkaTopicIntegrationProps',
     'AlarmIntegrationProps',
     'SqsQueueEventBusIntegrationProps',
-    'ContainerWorkloadHttpApiIntegrationProps',
-    'ContainerWorkloadInternalIntegrationProps',
-    'ContainerWorkloadServiceConnectIntegrationProps',
+    'MultiContainerWorkloadHttpApiIntegrationProps',
+    'MultiContainerWorkloadLoadBalancerIntegrationProps',
+    'MultiContainerWorkloadNetworkLoadBalancerIntegrationProps',
+    'MultiContainerWorkloadInternalIntegrationProps',
+    'MultiContainerWorkloadServiceConnectIntegrationProps',
     'ContainerEfsMountProps',
     'LambdaEfsMountProps'
   ];

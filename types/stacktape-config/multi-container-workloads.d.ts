@@ -6,13 +6,13 @@
  * A multi-container workload is a fully managed, auto-scaling, and easy-to-use runtime for your Docker containers.
  * It allows you to run one or more containers together with shared resources.
  */
-interface ContainerWorkload {
+interface MultiContainerWorkload {
   type: 'multi-container-workload';
-  properties: ContainerWorkloadProps;
+  properties: MultiContainerWorkloadProps;
   overrides?: ResourceOverrides;
 }
 
-interface ContainerWorkloadProps extends ResourceAccessProps {
+interface MultiContainerWorkloadProps extends ResourceAccessProps {
   /**
    * #### A list of containers that will run in this workload.
    *
@@ -20,7 +20,7 @@ interface ContainerWorkloadProps extends ResourceAccessProps {
    *
    * A workload can consist of one or more containers. Containers within the same workload share computing resources and scale together as a single unit.
    */
-  containers: ContainerWorkloadContainer[];
+  containers: MultiContainerWorkloadContainer[];
   /**
    * #### Configures the computing resources (CPU, memory, and instance types) for the workload.
    *
@@ -32,7 +32,7 @@ interface ContainerWorkloadProps extends ResourceAccessProps {
    *
    * To use Fargate, specify the `cpu` and `memory` properties. To use EC2, specify the `instanceTypes` property.
    */
-  resources: ContainerWorkloadResourcesConfig;
+  resources: MultiContainerWorkloadResourcesConfig;
   /**
    * period of time scheduler should ignore unhealthy load balancer health checks after a task has first started.
    * This is only used when your multi-container-workload is configured to use a load balancer. This grace period can prevent the service scheduler from marking workload instances as unhealthy and stopping them before they have time to come up.
@@ -46,7 +46,7 @@ interface ContainerWorkloadProps extends ResourceAccessProps {
    * Scaling is handled horizontally, meaning more instances of your workload are added to handle increased demand.
    * Incoming traffic is automatically distributed among the available instances.
    */
-  scaling?: ContainerWorkloadScaling;
+  scaling?: MultiContainerWorkloadScaling;
   /**
    * #### Configures the deployment strategy for updating the workload.
    *
@@ -59,7 +59,7 @@ interface ContainerWorkloadProps extends ResourceAccessProps {
    *
    * > **Note:** To use gradual deployments, your workload must be integrated with an Application Load Balancer.
    */
-  deployment?: ContainerWorkloadDeploymentConfig;
+  deployment?: MultiContainerWorkloadDeploymentConfig;
   /**
    * #### Enables interactive shell access to running containers.
    *
@@ -89,7 +89,7 @@ interface ContainerWorkloadProps extends ResourceAccessProps {
   usePrivateSubnetsWithNAT?: boolean;
 }
 
-interface ContainerWorkloadDeploymentConfig {
+interface MultiContainerWorkloadDeploymentConfig {
   /**
    * #### The strategy to use for deploying updates.
    *
@@ -136,19 +136,19 @@ interface ContainerWorkloadDeploymentConfig {
   testListenerPort?: number;
 }
 
-type StpContainerWorkload = ContainerWorkload['properties'] & {
+type StpMultiContainerWorkload = MultiContainerWorkload['properties'] & {
   name: string;
-  type: ContainerWorkload['type'];
+  type: MultiContainerWorkload['type'];
   configParentResourceType:
     | WebService['type']
     | PrivateService['type']
     | WorkerService['type']
-    | ContainerWorkload['type'];
+    | MultiContainerWorkload['type'];
   nameChain: string[];
 };
-// type StpWebServiceContainerWorkload = Omit<StpContainerWorkload, 'type'> & { type: WebService['type'] };
+// type StpWebServiceMultiContainerWorkload = Omit<StpMultiContainerWorkload, 'type'> & { type: WebService['type'] };
 
-interface ContainerWorkloadResourcesConfig {
+interface MultiContainerWorkloadResourcesConfig {
   /**
    * #### The number of virtual CPUs allocated to the workload.
    *
@@ -219,7 +219,7 @@ interface ContainerWorkloadResourcesConfig {
   architecture?: 'x86_64' | 'arm64';
 }
 
-interface ContainerWorkloadScaling {
+interface MultiContainerWorkloadScaling {
   /**
    * #### The minimum number of workload instances to keep running.
    *
@@ -235,10 +235,10 @@ interface ContainerWorkloadScaling {
   /**
    * #### Configures the triggers for scaling actions.
    */
-  scalingPolicy?: ContainerWorkloadScalingPolicy;
+  scalingPolicy?: MultiContainerWorkloadScalingPolicy;
 }
 
-interface ContainerWorkloadScalingPolicy {
+interface MultiContainerWorkloadScalingPolicy {
   /**
    * #### The average CPU utilization target for scaling.
    *
@@ -263,7 +263,7 @@ interface ContainerWorkloadScalingPolicy {
   keepAvgMemoryUtilizationUnder?: number;
 }
 
-interface ContainerWorkloadContainerLogging extends LogForwardingBase {
+interface MultiContainerWorkloadContainerLogging extends LogForwardingBase {
   /**
    * #### Disables application logging to CloudWatch for this container.
    *
@@ -278,7 +278,7 @@ interface ContainerWorkloadContainerLogging extends LogForwardingBase {
   retentionDays?: 1 | 3 | 5 | 7 | 14 | 30 | 60 | 90 | 120 | 150 | 180 | 365 | 400 | 545 | 731 | 1827 | 3653;
 }
 
-interface ContainerWorkloadContainerBase {
+interface MultiContainerWorkloadContainerBase {
   /**
    * #### A unique name for the container within the workload.
    */
@@ -286,7 +286,7 @@ interface ContainerWorkloadContainerBase {
   /**
    * #### Configures the container image.
    */
-  packaging: ContainerWorkloadContainerPackaging;
+  packaging: MultiContainerWorkloadContainerPackaging;
   /**
    * #### Determines if this container is critical for the workload's health.
    *
@@ -306,7 +306,7 @@ interface ContainerWorkloadContainerBase {
    *   - Through the AWS CloudWatch console. Use the `stacktape stack-info` command to get a direct link.
    *   - Using the `stacktape logs` command to stream logs directly to your terminal.
    */
-  logging?: ContainerWorkloadContainerLogging;
+  logging?: MultiContainerWorkloadContainerLogging;
   /**
    * #### A list of other containers that this container depends on to start.
    *
@@ -317,13 +317,13 @@ interface ContainerWorkloadContainerBase {
    */
   dependsOn?: ContainerDependency[];
   /**
-   * #### A list of environment variables to inject into the container.
+   * #### Environment variables to inject into the container.
    *
    * ---
    *
    * Environment variables are ideal for providing configuration details to your container, such as database connection strings, API keys, or other dynamic parameters.
    */
-  environment?: EnvironmentVar[];
+  environment?: { [key: string]: string | number | boolean };
   /**
    * #### Configures an internal health check to determine if the container is healthy.
    *
@@ -354,7 +354,7 @@ interface ContainerWorkloadContainerBase {
   volumeMounts?: ContainerEfsMount[];
 }
 
-interface ContainerWorkloadContainer extends ContainerWorkloadContainerBase {
+interface MultiContainerWorkloadContainer extends MultiContainerWorkloadContainerBase {
   /**
    * #### Configures how this container receives traffic and events.
    *
@@ -365,11 +365,11 @@ interface ContainerWorkloadContainer extends ContainerWorkloadContainerBase {
    * - Communicate with other containers in the same workload.
    */
   events?: (
-    | ContainerWorkloadHttpApiIntegration
-    | ContainerWorkloadLoadBalancerIntegration
-    | ContainerWorkloadInternalIntegration
-    | ContainerWorkloadServiceConnectIntegration
-    | ContainerWorkloadNetworkLoadBalancerIntegration
+    | MultiContainerWorkloadHttpApiIntegration
+    | MultiContainerWorkloadLoadBalancerIntegration
+    | MultiContainerWorkloadInternalIntegration
+    | MultiContainerWorkloadServiceConnectIntegration
+    | MultiContainerWorkloadNetworkLoadBalancerIntegration
   )[];
   /**
    * #### Configures how a load balancer checks the health of this container.
@@ -559,11 +559,11 @@ interface ECSBlueGreenService {
   DependsOn: string[];
 }
 
-type ContainerWorkloadReferencableParam = 'logGroupArn';
+type MultiContainerWorkloadReferencableParam = 'logGroupArn';
 
-type ContainerWorkloadEvent =
-  | ContainerWorkloadLoadBalancerIntegration
-  | ContainerWorkloadHttpApiIntegration
-  | ContainerWorkloadInternalIntegration
-  | ContainerWorkloadServiceConnectIntegration
-  | ContainerWorkloadNetworkLoadBalancerIntegration;
+type MultiContainerWorkloadEvent =
+  | MultiContainerWorkloadLoadBalancerIntegration
+  | MultiContainerWorkloadHttpApiIntegration
+  | MultiContainerWorkloadInternalIntegration
+  | MultiContainerWorkloadServiceConnectIntegration
+  | MultiContainerWorkloadNetworkLoadBalancerIntegration;
