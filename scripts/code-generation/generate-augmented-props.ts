@@ -285,12 +285,16 @@ export function generateSdkPropsImports(): string {
 
 /**
  * Generate a StacktapeConfig type export that properly types resources with class names
+ * Accepts both class instances and plain objects matching the interface types
  */
 export function generateStacktapeConfigType(): string {
   const resourceClassNames = RESOURCES.map((r) => r.className);
 
   return `// Re-export StacktapeConfig with properly typed resources
+// Accepts both class instances and plain objects
+import type { StacktapeResourceDefinition } from './sdk';
+
 export type StacktapeConfig = Omit<import('./sdk').StacktapeConfig, 'resources'> & {
-  resources: { [resourceName: string]: ${resourceClassNames.join(' | ')} };
+  resources: { [resourceName: string]: ${resourceClassNames.join(' | ')} | StacktapeResourceDefinition };
 };`;
 }
