@@ -428,27 +428,27 @@ export const TYPE_PROPERTIES: TypePropertiesDefinition[] = [
   {
     className: 'MultiContainerWorkloadHttpApiIntegration',
     typeValue: 'http-api-gateway',
-    propsType: 'ContainerWorkloadHttpApiIntegrationProps'
+    propsType: 'MultiContainerWorkloadHttpApiIntegrationProps'
   },
   {
     className: 'MultiContainerWorkloadLoadBalancerIntegration',
     typeValue: 'application-load-balancer',
-    propsType: 'ContainerWorkloadLoadBalancerIntegrationProps'
+    propsType: 'MultiContainerWorkloadLoadBalancerIntegrationProps'
   },
   {
     className: 'MultiContainerWorkloadNetworkLoadBalancerIntegration',
     typeValue: 'network-load-balancer',
-    propsType: 'ContainerWorkloadNetworkLoadBalancerIntegrationProps'
+    propsType: 'MultiContainerWorkloadNetworkLoadBalancerIntegrationProps'
   },
   {
     className: 'MultiContainerWorkloadInternalIntegration',
     typeValue: 'workload-internal',
-    propsType: 'ContainerWorkloadInternalIntegrationProps'
+    propsType: 'MultiContainerWorkloadInternalIntegrationProps'
   },
   {
     className: 'MultiContainerWorkloadServiceConnectIntegration',
     typeValue: 'service-connect',
-    propsType: 'ContainerWorkloadServiceConnectIntegrationProps'
+    propsType: 'MultiContainerWorkloadServiceConnectIntegrationProps'
   },
 
   // Scripts
