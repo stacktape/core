@@ -9,7 +9,11 @@ import { prettifyFile } from '@shared/utils/prettier';
 import { outputFile } from 'fs-extra';
 import * as ts from 'typescript';
 import { getResourcesWithAugmentedProps, RESOURCES } from '../src/api/npm/ts/resource-metadata';
-import { generateAugmentedPropsTypes, generateSdkPropsImports } from './code-generation/generate-augmented-props';
+import {
+  generateAugmentedPropsTypes,
+  generateSdkPropsImports,
+  generateStacktapeConfigType
+} from './code-generation/generate-augmented-props';
 import { generatePropertiesInterfaces } from './code-generation/generate-cf-properties';
 import { generateOverrideTypes } from './code-generation/generate-overrides';
 import { generateResourceClassDeclarations } from './code-generation/generate-resource-classes';
@@ -297,6 +301,7 @@ export async function generateTypeDeclarations(): Promise<void> {
   // Generate custom declarations
   logInfo('Generating resource and type property declarations...');
   const augmentedPropsTypes = generateAugmentedPropsTypes();
+  const stacktapeConfigType = generateStacktapeConfigType();
   const resourceClassDeclarations = generateResourceClassDeclarations(REFERENCEABLE_PARAMS);
   const typePropertiesClassDeclarations = generateTypePropertiesClassDeclarations();
 
@@ -354,6 +359,12 @@ ${overridesTypes}
 // ==========================================
 
 ${resourceClassDeclarations}
+
+// ==========================================
+// STACKTAPE CONFIG TYPE
+// ==========================================
+
+${stacktapeConfigType}
 
 // ==========================================
 // TYPE PROPERTIES CLASS DECLARATIONS

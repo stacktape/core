@@ -282,3 +282,15 @@ export function generateSdkPropsImports(): string {
 
   return imports.join(',\n  ');
 }
+
+/**
+ * Generate a StacktapeConfig type export that properly types resources with class names
+ */
+export function generateStacktapeConfigType(): string {
+  const resourceClassNames = RESOURCES.map((r) => r.className);
+
+  return `// Re-export StacktapeConfig with properly typed resources
+export type StacktapeConfig = Omit<import('./sdk').StacktapeConfig, 'resources'> & {
+  resources: { [resourceName: string]: ${resourceClassNames.join(' | ')} };
+};`;
+}
