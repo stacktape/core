@@ -399,7 +399,10 @@ export const buildCliSources = async ({
   const version = suppliedVersion || (await getVersion());
   const { debug: debugFromArgs, skipArchiving: skipArchivingFromArgs } = getCliArgs();
   await remove(distFolderPath);
-  await Promise.all([packageHelperLambdas({ isDev: false, distFolderPath }), copyBridgeFiles({ distFolderPath })]);
+  await Promise.all([
+    packageHelperLambdas({ isDev: false, distFolderPath: DIST_FOLDER_PATH }),
+    copyBridgeFiles({ distFolderPath })
+  ]);
 
   const starterProjectsMetadataFilePath = await generateStarterProjectsMetadata();
   const platformPaths: Record<SupportedPlatform, string> = {} as Record<SupportedPlatform, string>;

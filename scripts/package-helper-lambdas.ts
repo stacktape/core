@@ -8,7 +8,7 @@ import {
 import { buildUsingStacktapeEsLambdaBuildpack } from '@shared/packaging/stacktape-es-lambda-buildpack';
 import { logInfo, logSuccess } from '@shared/utils/logging';
 import { localBuildTsConfigPath } from '@shared/utils/misc';
-import fsExtra, { remove } from 'fs-extra';
+import fsExtra from 'fs-extra';
 
 const helperLambdas = {
   stacktapeServiceLambda: {
@@ -35,6 +35,7 @@ export const packageHelperLambdas = async ({ distFolderPath }: { isDev?: boolean
   await fsExtra.ensureDir(HELPER_LAMBDAS_DIST_FOLDER_PATH);
 
   const lambdasDistFolderPath = join(distFolderPath, HELPER_LAMBDAS_FOLDER_NAME);
+  await fsExtra.ensureDir(lambdasDistFolderPath);
 
   await Promise.all(
     Object.entries(helperLambdas).map(async ([name, { filePath, bundleSizeLimit }]) => {

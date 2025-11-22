@@ -40,7 +40,7 @@ const main = async () => {
 
   // Prepare shared resources
   await Promise.all([
-    packageHelperLambdas({ isDev: false, distFolderPath })
+    packageHelperLambdas({ isDev: false, distFolderPath: DIST_FOLDER_PATH })
     // Note: copyBridgeFiles is not needed per-platform
   ]);
 
