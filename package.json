@@ -1,6 +1,6 @@
 {
   "name": "stacktape",
-  "version": "2.24.0-rc.15",
+  "version": "2.24.0-rc.16",
   "private": true,
   "bin": {
     "stacktape": "./index.js"
