@@ -32,7 +32,7 @@ export const getFileExtension = (filePath: string): SupportedFileExt => {
   return ext.split(':')[0] as SupportedFileExt;
 };
 
-export const getFilePathWithoutExtension = (filePath: string) => {
+const getFilePathWithoutExtension = (filePath: string) => {
   return filePath.slice(0, filePath.lastIndexOf('.'));
 };
 
@@ -206,7 +206,7 @@ export const getFileSize = async (filePath: string, unit: 'MB' | 'KB', decimals 
   return getByteSize(size, unit, decimals);
 };
 
-export const getDirectoryContent = ({
+const getDirectoryContent = ({
   absoluteDirectory,
   relativeDirectory
 }: {
@@ -226,7 +226,7 @@ export const getDirectoryContent = ({
   });
 };
 
-export const retryableCopy = (from: string, to: string, opts: CopyOptions = {}, attempts = 0) => {
+const retryableCopy = (from: string, to: string, opts: CopyOptions = {}, attempts = 0) => {
   return copy(from, to, opts).catch(async (err) => {
     if (err.code === 'EBUSY') {
       if (attempts >= 5) {
@@ -239,7 +239,7 @@ export const retryableCopy = (from: string, to: string, opts: CopyOptions = {}, 
   });
 };
 
-export const copyUsingTempDir = async (from: string, to: string, opts: CopyOptions = {}, deleteTempFolder = true) => {
+const copyUsingTempDir = async (from: string, to: string, opts: CopyOptions = {}, deleteTempFolder = true) => {
   const tempDirPath = join(await temporaryDirectoryLocation(), shortHash(to));
   await remove(tempDirPath);
   await copy(from, tempDirPath, opts);
@@ -249,7 +249,7 @@ export const copyUsingTempDir = async (from: string, to: string, opts: CopyOptio
   }
 };
 
-export const getAllFilesWithExtension = async (folder: string, extension: string) => {
+const getAllFilesWithExtension = async (folder: string, extension: string) => {
   const res = [];
   await walk(folder, (file) => {
     if (file.fullPath.endsWith(extension)) {
@@ -276,7 +276,7 @@ export const getRelativePath = (itemPath: string) => {
   return relative(process.cwd(), itemPath);
 };
 
-export const isPathInside = (childPath, parentPath) => {
+const isPathInside = (childPath, parentPath) => {
   const relation = relative(parentPath, childPath);
 
   return Boolean(
@@ -292,7 +292,7 @@ export const getFirstExistingPath = (paths: string[]) => {
   }
 };
 
-export const arrayToCsv = (items: Record<string, any>): string => {
+const arrayToCsv = (items: Record<string, any>): string => {
   const array = typeof items !== 'object' ? JSON.parse(items) : items;
   const str =
     `${Object.keys(array[0])

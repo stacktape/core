@@ -1,7 +1,7 @@
 import kleur from 'kleur';
 import stripAnsi from 'strip-ansi';
 
-export const getTimeString = () => {
+const getTimeString = () => {
   const date = new Date();
   return `(${kleur.gray(`${date.toLocaleTimeString('sk-SK')}:${date.getMilliseconds()}`)})`;
 };

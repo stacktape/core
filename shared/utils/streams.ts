@@ -1,7 +1,7 @@
 import { Transform } from 'node:stream';
 import { applyAll } from './misc';
 
-export const IGNORE_LINE_MARK = '__IGNORE_LINE_MARK__';
+const IGNORE_LINE_MARK = '__IGNORE_LINE_MARK__';
 
 export class StreamTransformer extends Transform {
   lastLineData = '';
@@ -60,24 +60,24 @@ export class StreamTransformer extends Transform {
   }
 }
 
-export const isJsonDockerErrorString = (line: string) => {
+const isJsonDockerErrorString = (line: string) => {
   return line.includes('{"errorType"');
 };
 
-export const removeDockerDaemonErrors = (line: string) => {
+const removeDockerDaemonErrors = (line: string) => {
   if (line.startsWith('docker: Error response from daemon:')) {
     return IGNORE_LINE_MARK + line;
   }
   return line;
 };
 
-export const removeErrorLines = (line: string) => {
+const removeErrorLines = (line: string) => {
   if (isJsonDockerErrorString(line)) {
     return IGNORE_LINE_MARK + line;
   }
   return line;
 };
 
-export const removeAllLines = (line: string) => {
+const removeAllLines = (line: string) => {
   return IGNORE_LINE_MARK + line;
 };

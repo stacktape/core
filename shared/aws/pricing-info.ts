@@ -54,7 +54,7 @@ type CsvRow = {
   throughputClass: string;
 };
 
-export type AwsServiceCsvOfferCode =
+type AwsServiceCsvOfferCode =
   | 'AmazonECS'
   | 'AmazonElastiCache'
   | 'AmazonEC2'
@@ -82,7 +82,7 @@ export type RegionalPricingInfo = {
   ADDITIONAL_METADATA?: { vCpu?: string; memory?: string; burstable?: boolean; cpuArchitecture?: 'ARM' | 'x86' };
 };
 
-export type ResourcePricingInformation = {
+type ResourcePricingInformation = {
   priceInfo: Awaited<ReturnType<typeof getCumulatedPriceInfoForProducts>>;
   relatedAwsPricingDocs?: { [linkName: string]: string };
   underTheHoodLink?: string;
@@ -93,7 +93,7 @@ type ProductInfo = ReturnType<(typeof productsInfo)['AmazonEC2']['instance']>;
 
 const ALL_REGIONS_MACRO = 'ALL_REGIONS';
 
-export const productsInfo = {
+const productsInfo = {
   AmazonECS: {
     cpu: ({
       cpuArchitecture = 'AMD64',
@@ -384,7 +384,7 @@ export const productsInfo = {
   }
 } as const;
 
-export const productNameBuilders: {
+const productNameBuilders: {
   [_offerCode in AwsServiceCsvOfferCode]?: (product: CsvRow) => string | string[] | undefined;
 } = {
   AmazonECS: ({ productFamily, storageType, memoryType, cpuArchitecture, operatingSystem, cpuType }) => {
@@ -682,7 +682,7 @@ export const downloadSimplePricingInfo = async ({
   return prices;
 };
 
-export const SERVICES_WITH_STATIC_PRICES: {
+const SERVICES_WITH_STATIC_PRICES: {
   AtlasMongo: PricingInfo;
   awswaf: PricingInfo;
   AWSEvents: PricingInfo;
@@ -817,7 +817,7 @@ const formatCostInfo = ({
   };
 };
 
-export const getProductsPricingInfoFromDynamoTable = async ({
+const getProductsPricingInfoFromDynamoTable = async ({
   products,
   dynamoDbTableName
 }: {
@@ -872,7 +872,7 @@ const getCumulatedPriceInfoForProducts = async ({
   };
 };
 
-export const getPricingInformationForResource = async ({
+const getPricingInformationForResource = async ({
   resource,
   region = 'us-east-1',
   dynamoDbTableName
@@ -1766,7 +1766,7 @@ export const getPricingInformationForResource = async ({
   }
 };
 
-export const loadProductPricesIntoDynamoTable = async ({
+const loadProductPricesIntoDynamoTable = async ({
   prices,
   dynamoDbTableName
 }: {
@@ -1801,7 +1801,7 @@ export const loadProductPricesIntoDynamoTable = async ({
   );
 };
 
-export const getCumulatedPriceInfoForStack = async ({
+const getCumulatedPriceInfoForStack = async ({
   stackConfig,
   region = 'us-east-1',
   dynamoDbTableName

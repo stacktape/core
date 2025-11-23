@@ -1,4 +1,5 @@
 {
   "entry": ["src/**/*.ts", "scripts/**/*.ts", "helper-lambdas/**/*.ts"],
+  "project": ["**/*.ts", "!**/*.spec.ts"],
   "ignore": ["@generated/**", "starter-projects/**"]
 }

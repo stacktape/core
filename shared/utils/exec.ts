@@ -25,11 +25,11 @@ type ExecProps = {
   inheritEnvVarsExcept?: string[];
 };
 
-export const cancellableExec = (command: string, args: string[], params: ExecProps) => {
+const cancellableExec = (command: string, args: string[], params: ExecProps) => {
   return getChildProcess(command, args, params);
 };
 
-export const nodeExec = (filePath: string, args: string[], params: ExecProps) => {
+const nodeExec = (filePath: string, args: string[], params: ExecProps) => {
   return getChildProcess(filePath, args, params, true);
 };
 

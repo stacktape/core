@@ -134,7 +134,7 @@ export const getInfoFromPackageJson = async ({
 };
 
 // @note we try our best to identify if a package has a binary
-export const hasBinary = (packageJsonContent: PackageJson): boolean => {
+const hasBinary = (packageJsonContent: PackageJson): boolean => {
   return !!(
     !!(packageJsonContent.gypfile || (packageJsonContent.binary && packageJsonContent.binary.module_path)) ||
     packageJsonContent?.dependencies?.['node-gyp'] ||
@@ -145,12 +145,12 @@ export const hasBinary = (packageJsonContent: PackageJson): boolean => {
   );
 };
 
-export const getEsPackageManager = (lockFilePath: string): SupportedEsPackageManager => {
+const getEsPackageManager = (lockFilePath: string): SupportedEsPackageManager => {
   const lockfile = basename(lockFilePath);
   return PACKAGE_LOCKS[lockfile];
 };
 
-export const PACKAGE_LOCKS = {
+const PACKAGE_LOCKS = {
   'package-lock.json': 'npm',
   'yarn.lock': 'yarn',
   'pnpm-lock.yaml': 'pnpm',
@@ -484,7 +484,7 @@ export const getAllJsDependenciesFromMultipleFiles = async ({
 //   allDependenciesToInstallInDocker.push(...allNextAppDeps);
 // };
 
-export const copyNodeModules = ({
+const copyNodeModules = ({
   distFolderPath,
   workingDir,
   moduleName
@@ -545,7 +545,7 @@ export const determineIfAlias = async ({
   return promiseResults.some(Boolean);
 };
 
-export const getModuleNameFromPath = ({ path, workingDir }: { path: string; workingDir: string }) => {
+const getModuleNameFromPath = ({ path, workingDir }: { path: string; workingDir: string }) => {
   return transformToUnixPath(path.slice(workingDir.length + 14)).split('/')[0];
 };
 
@@ -588,7 +588,7 @@ export const getExternalDeps = (depsInfo: PackageJsonDepsInfo, depsList: Set<str
   return depsList;
 };
 
-export const getModuleFromImporter = (importer: string) => {
+const getModuleFromImporter = (importer: string) => {
   let fullModulePath = transformToUnixPath(importer).split('node_modules')[1];
   if (!fullModulePath) {
     return null;

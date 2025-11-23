@@ -223,7 +223,7 @@ export const startCodebuildDeployment = async ({
   return awsSdkManager.getCodebuildDeployment({ buildId: build.id });
 };
 
-export const startCodebuildDelete = async ({
+const startCodebuildDelete = async ({
   awsSdkManager,
   awsAccountId,
   invocationId,
@@ -319,6 +319,6 @@ export const getCodebuildLogStreamNameFromBuildInfo = ({ buildInfo }: { buildInf
   return `${buildInfo.logs?.cloudWatchLogs?.streamName}/${buildInfo.arn.split(':').at(-1)}`;
 };
 
-export const getCodebuildLogGroupNameFromBuildInfo = ({ buildInfo }: { buildInfo: Build }) => {
+const getCodebuildLogGroupNameFromBuildInfo = ({ buildInfo }: { buildInfo: Build }) => {
   return buildInfo.logs?.cloudWatchLogs?.groupName;
 };

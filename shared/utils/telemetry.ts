@@ -61,7 +61,7 @@ export const identifyUserInMixpanel = async ({ systemId, userId }: { systemId: s
   });
 };
 
-export const deleteUserIdentityFromMixpanel = (distinctId: string) => {
+const deleteUserIdentityFromMixpanel = (distinctId: string) => {
   return new Promise((resolve, reject) => {
     // wait at most this much ms for the event to be logged so we don't hang out the process
     const timeout = setTimeout(resolve, 2000);
@@ -81,7 +81,7 @@ export const deleteUserIdentityFromMixpanel = (distinctId: string) => {
   });
 };
 
-export const mergeUserIdentityInMixpanel = ({ distinctId, alias }: { distinctId: string; alias: string }) => {
+const mergeUserIdentityInMixpanel = ({ distinctId, alias }: { distinctId: string; alias: string }) => {
   return new Promise((resolve, reject) => {
     // wait at most this much ms for the event to be logged so we don't hang out the process
     const timeout = setTimeout(resolve, 2000);

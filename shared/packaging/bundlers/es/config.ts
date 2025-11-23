@@ -6,7 +6,7 @@ export const FILES_TO_INCLUDE_IN_DIGEST = [
   'tsconfig.json'
 ];
 
-export const IGNORED_MISSING_DEPENDENCIES = ['.prisma'];
+const IGNORED_MISSING_DEPENDENCIES = ['.prisma'];
 
 export const SPECIAL_TREATMENT_PACKAGES = ['@prisma/client', 'chrome-aws-lambda', 'next'] as const;
 

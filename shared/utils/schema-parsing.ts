@@ -2,7 +2,7 @@ import { capitalCase } from 'change-case';
 import { get } from 'lodash';
 import configSchema from '../../@generated/schemas/config-schema.json';
 
-export function getDefinitionNameFromRefPath(refPath: string) {
+function getDefinitionNameFromRefPath(refPath: string) {
   return refPath.split('/').pop() ?? '';
 }
 
@@ -25,7 +25,7 @@ type RefObj = {
   $ref: string;
 } & Record<string, any>;
 
-export function isRefObject(obj: any): obj is RefObj {
+function isRefObject(obj: any): obj is RefObj {
   return !!obj.$ref;
 }
 
@@ -33,11 +33,11 @@ type AnyOfObj = {
   anyOf: Array<Record<string, any>>;
 } & Record<string, any>;
 
-export function isAnyOfObject(obj: any): obj is AnyOfObj {
+function isAnyOfObject(obj: any): obj is AnyOfObj {
   return !!obj.anyOf;
 }
 
-export function dereferenceJsonSchemaObject(obj: Record<string, any> | null) {
+function dereferenceJsonSchemaObject(obj: Record<string, any> | null) {
   if (!obj) {
     return {};
   }
@@ -106,7 +106,7 @@ export const getResourceCategory = (resourceType: StpResourceType) => {
 
 const FORCED_ORDER_RESOURCES = ['web-service', 'hosting-bucket', 'function'];
 
-export const getPrettyResourceName = (resourceName: string) => {
+const getPrettyResourceName = (resourceName: string) => {
   return capitalCase(resourceName)
     .replaceAll(' Db', 'Db')
     .replace('Sqs', 'SQS')

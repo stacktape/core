@@ -35,7 +35,7 @@ export const isNonNullObject = (obj: any) => {
   return obj !== null && typeof obj === 'object';
 };
 
-export const getCliArg = (arg: string) => {
+const getCliArg = (arg: string) => {
   const idx = process.argv.indexOf(`--${arg}`);
   return idx ? process.argv[idx + 1] : null;
 };
@@ -82,7 +82,7 @@ export const raiseError = (props: ArgsType<typeof getError>[0]): never => {
   throw getError(props);
 };
 
-export const safeJsonParse = (obj: any) => {
+const safeJsonParse = (obj: any) => {
   try {
     return JSON.parse(obj);
   } catch {
@@ -176,7 +176,7 @@ export const hasDuplicates = (array: any[]): boolean => {
   return array.length !== new Set(array).size;
 };
 
-export const isNumeric = (num: any) =>
+const isNumeric = (num: any) =>
   (typeof num === 'number' || (typeof num === 'string' && num.trim() !== '')) && !Number.isNaN(Number(num));
 
 export const processAllNodes = async (
@@ -295,7 +295,7 @@ export const isAlphanumeric = (str: string) => /^[a-z0-9]+$/i.test(str);
 
 export const definedValueOr = (val: any, defaultValue: any) => (val !== undefined ? val : defaultValue);
 
-export const compareObjectByKeyAlphabetically = (key: string) => (a, b) => {
+const compareObjectByKeyAlphabetically = (key: string) => (a, b) => {
   if (a[key] < b[key]) {
     return -1;
   }
@@ -354,7 +354,7 @@ export const processConcurrently = (jobs: ((...args: any[]) => Promise<any>)[], 
   });
 };
 
-export const streamToBuffer = (stream: Readable): Promise<Buffer> => {
+const streamToBuffer = (stream: Readable): Promise<Buffer> => {
   const chunks = [];
   return new Promise((resolve, reject) => {
     stream.on('data', (chunk) => chunks.push(Buffer.from(chunk)));
@@ -384,7 +384,7 @@ export const getByteSize = (size: number, unit: 'MB' | 'KB', decimals = 2) => {
   return Number(res.toFixed(decimals));
 };
 
-export const isMoreThanOneDefined = (...params: any[]) => {
+const isMoreThanOneDefined = (...params: any[]) => {
   let isOneDefined = false;
   for (const param of params) {
     if (param) {
@@ -405,9 +405,9 @@ export const propertyFromObjectOrNull = (obj: Record<string, any>, prop: string)
   }
 };
 
-export const removeDuplicates = <T>(items: any[]): T[] => Array.from(new Set(items));
+const removeDuplicates = <T>(items: any[]): T[] => Array.from(new Set(items));
 
-export const isOlderThanSeconds = (dateString: string, seconds: number) => {
+const isOlderThanSeconds = (dateString: string, seconds: number) => {
   return Date.now() - seconds * 1000 > new Date(dateString).getTime();
 };
 
@@ -420,7 +420,7 @@ export const hasProperties = (obj: any) => {
   return !!Object.keys(obj).length;
 };
 
-export const getLastSplitPart = (str: string, splitBy: string): string => {
+const getLastSplitPart = (str: string, splitBy: string): string => {
   const parts = str.split(splitBy);
   return parts[parts.length - 1];
 };
@@ -495,7 +495,7 @@ export const getTimeSinceProcessStart = () => {
   return Math.round(process.uptime() * 1000);
 };
 
-export const getLocalBuildExternals = async () => {
+const getLocalBuildExternals = async () => {
   const packageJsonContent = await readJson(join(process.cwd(), 'package.json'));
   return ['pnpapi', 'fsevents', ...Object.keys(packageJsonContent.dependencies)];
 };
@@ -565,7 +565,7 @@ export const applyAll = (functionsArray: ((...args: any) => any)[], value: any) 
   return res;
 };
 
-export const findNthIndex = (inputString: string, pattern: string, n: number) => {
+const findNthIndex = (inputString: string, pattern: string, n: number) => {
   const L = inputString.length;
   let i = -1;
 
@@ -580,7 +580,7 @@ export const findNthIndex = (inputString: string, pattern: string, n: number) =>
 
 export const filterDuplicates = (item: any, index: number, arr: any[]) => arr.indexOf(item) === index;
 
-export const measureTime = (fnName: string, fn: (...args: any) => any) => {
+const measureTime = (fnName: string, fn: (...args: any) => any) => {
   return async (...args) => {
     const start = Date.now();
     const res = await fn(...args);
@@ -589,7 +589,7 @@ export const measureTime = (fnName: string, fn: (...args: any) => any) => {
   };
 };
 
-export const getInstanceMethodNames = (obj) => {
+const getInstanceMethodNames = (obj) => {
   return Object.getOwnPropertyNames(Object.getPrototypeOf(obj)).filter(
     (name) => name !== 'constructor' && typeof obj[name] === 'function'
   );
@@ -612,7 +612,7 @@ export const groupBy = <T, K extends keyof any>(list: T[], getKey: (item: T) => 
     {} as Record<K, T[]>
   );
 
-export const deletePropertiesWithValues = (obj: Record<string, any>, values: any[]) => {
+const deletePropertiesWithValues = (obj: Record<string, any>, values: any[]) => {
   for (const propName in obj) {
     if (values.includes(obj[propName])) {
       delete obj[propName];
@@ -656,11 +656,11 @@ export const lowerCaseFirstCharacterOfObjectKeys = (val: any, skipKeyFunction?: 
   return ret;
 };
 
-export const lowerCaseFirstCharacter = (str: string): string => {
+const lowerCaseFirstCharacter = (str: string): string => {
   return str.length > 0 ? `${str[0].toLowerCase()}${str.slice(1)}` : str;
 };
 
-export const getAllNumbersFromString = (str: string): number[] => {
+const getAllNumbersFromString = (str: string): number[] => {
   return str.match(/^\d+|\d+\b|\d+\B/g).map(Number);
 };
 
@@ -691,6 +691,6 @@ export const settleAllBeforeThrowing = async (promises: Promise<any>[]) => {
   });
 };
 
-export function notEmpty<TValue>(value: TValue | null | undefined): value is TValue {
+function notEmpty<TValue>(value: TValue | null | undefined): value is TValue {
   return value !== null && value !== undefined;
 }

@@ -76,7 +76,7 @@ const formatDuration = (ms: number) => {
   return `${days}d`;
 };
 
-export const handleDockerError = (err: Error, message?: string) => {
+const handleDockerError = (err: Error, message?: string) => {
   if (
     (err.message.includes('connect ENOENT') && err.message.includes('pipe/docker_engine')) ||
     err.message.includes('cannot connect to the Docker daemon.') ||
@@ -472,7 +472,7 @@ export const dockerRun = async ({
   });
 };
 
-export const buildDockerImageUsingDockerode = async ({
+const buildDockerImageUsingDockerode = async ({
   buildContextPath,
   dockerfilePath,
   imageTag,

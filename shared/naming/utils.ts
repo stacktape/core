@@ -11,11 +11,11 @@ import { arns } from './arns';
 export const getEcrImageTag = (taskName: string, version: string, digest: string) =>
   `${taskName}--${digest}--${version}`;
 
-export const getJobNameForSingleContainerWorkload = (workloadName: string) => {
+const getJobNameForSingleContainerWorkload = (workloadName: string) => {
   return `${workloadName}-default`.toLowerCase();
 };
 
-export const getJobNameForMultiContainerWorkload = (workloadName: string, containerName: string) => {
+const getJobNameForMultiContainerWorkload = (workloadName: string, containerName: string) => {
   return `${workloadName}-${containerName}`.toLowerCase();
 };
 

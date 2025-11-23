@@ -9,7 +9,7 @@ import { getError } from '@shared/utils/misc';
 import { readFile } from 'fs-extra';
 import { strip } from './strip-it';
 
-export type EsbuildDecoratorsOptions = {
+type EsbuildDecoratorsOptions = {
   // If empty, uses esbuild's tsconfig.json and falls back to the tsconfig.json in the $cwd
   tsconfig?: string;
   // If empty, uses the current working directory

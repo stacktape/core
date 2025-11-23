@@ -106,7 +106,7 @@ export const getInstallationScript = () => {
   return installationScripts[getPlatform()];
 };
 
-export const getDevModeBinPath = () => {
+const getDevModeBinPath = () => {
   const binPath = {
     win32: 'windows/stacktape.exe',
     darwin: 'macos/stacktape',

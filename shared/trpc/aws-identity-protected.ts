@@ -31,7 +31,7 @@ type DeleteDefaultDomainDnsRecordParams = {
   version: number;
 };
 
-export const createTrpcAwsIdentityProtectedClient = ({
+const createTrpcAwsIdentityProtectedClient = ({
   credentials,
   region,
   apiUrl

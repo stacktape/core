@@ -24,7 +24,7 @@ const getGitHubToken = (): string => {
 };
 
 // Get token for exports (for backward compatibility with github-file-manipulation.ts)
-export const GITHUB_AUTH_TOKEN = getGitHubToken();
+const GITHUB_AUTH_TOKEN = getGitHubToken();
 
 // Create enhanced Octokit with retry and throttling plugins
 const ThrottledOctokit = Octokit.plugin(retry, throttling);
@@ -66,7 +66,7 @@ const defaultParams = { owner: 'stacktape', repo: 'core' } as const;
  * Get all issues for Stacktape repository with proper pagination
  * GitHub API max per_page is 100, so we iterate through pages
  */
-export const getAllStacktapeIssues = async (): Promise<Array<any>> => {
+const getAllStacktapeIssues = async (): Promise<Array<any>> => {
   try {
     const allIssues: Array<any> = [];
     let page = 1;
@@ -99,7 +99,7 @@ export const getAllStacktapeIssues = async (): Promise<Array<any>> => {
 /**
  * Create a new issue in the Stacktape repository
  */
-export const createIssue = async ({
+const createIssue = async ({
   body,
   title,
   issueType,
@@ -171,7 +171,7 @@ export const getRepository = async ({ name }: { name: string }) => {
 /**
  * Delete a repository
  */
-export const deleteRepository = async ({ name }: { name: string }) => {
+const deleteRepository = async ({ name }: { name: string }) => {
   try {
     return await octokit.repos.delete({
       owner: 'stacktape',
@@ -232,7 +232,7 @@ export const createRelease = async ({ body, tag, prerelease }: { tag: string; bo
 /**
  * Delete a GitHub release by ID
  */
-export const deleteRelease = async ({ releaseId }: { releaseId: number }) => {
+const deleteRelease = async ({ releaseId }: { releaseId: number }) => {
   try {
     return await octokit.repos.deleteRelease({
       ...defaultParams,
