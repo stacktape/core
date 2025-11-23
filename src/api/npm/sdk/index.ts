@@ -3,9 +3,6 @@ import { sdkCommands } from '@cli-config';
 import { INVOKED_FROM_ENV_VAR_NAME } from '@config';
 import { getInstallationScript, isStacktapeInstalledOnSystem } from '@shared/utils/bin-executable';
 import { isFileAccessible } from '@shared/utils/fs-utils';
-import { homedir } from 'node:os';
-import { join } from 'node:path';
-import pkg from '../package.json';
 import { transformToCliArgs } from '@utils/cli';
 import { camelCase } from 'change-case';
 import execa from 'execa';
@@ -29,20 +26,6 @@ const getExecutable = ({ presetExecutablePath }: { presetExecutablePath?: string
     }
     return presetExecutablePath;
   }
-  const version = pkg.version;
-  const binName = process.platform === 'win32' ? 'stacktape.exe' : 'stacktape';
-
-  // Check local package binary (both root and nested to support dev/prod layouts)
-  const localPathRoot = join(__dirname, '.stacktape', 'bin', version, binName);
-  const localPathNested = join(__dirname, '..', '.stacktape', 'bin', version, binName);
-
-  if (isFileAccessible(localPathRoot)) return localPathRoot;
-  if (isFileAccessible(localPathNested)) return localPathNested;
-
-  // Check global fallback (explicit version)
-  const globalPath = join(homedir(), '.stacktape', 'bin', version, binName);
-  if (isFileAccessible(globalPath)) return globalPath;
-
   if (!isStacktapeInstalledOnSystem()) {
     throw new Error(`Stacktape is not installed on the system.\nTo install it, run:\n${getInstallationScript()}`);
   }

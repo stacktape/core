@@ -10,34 +10,36 @@ $Version = if ($env:STACKTAPE_VERSION) {
 }
 
 $BinDirPath = "$Home\.stacktape\bin"
-$VersionDirPath = "$BinDirPath\$Version"
-
 $CompletionsFilePath = "$BinDirPath\completions\powershell.ps1"
 $ExecutableFilePath = "$BinDirPath\stacktape.exe"
 $AltExecutableFilePath = "$BinDirPath\stp.exe"
-
-$ZipFilePath = "$VersionDirPath\stacktape.zip"
+$EsbuildExecutableFilePath = "$BinDirPath\esbuild\exec.exe"
+$PackExecutableFilePath = "$BinDirPath\pack\pack.exe"
+$NixpacksExecutableFilePath = "$BinDirPath\nixpacks\nixpacks.exe"
+$EsbuildRegisterFilePath = "$BinDirPath\esbuild\esbuild-register.js"
+$BridgeFilesFolderPath = "$BinDirPath\bridge-files"
+$ZipFilePath = "$BinDirPath\stacktape.zip"
 $ZipSourceUrl = "https://github.com/stacktape/core/releases/download/$Version/windows.zip"
 
 Write-Output "Installing version $Version from $ZipSourceUrl..."
 
-if (!(Test-Path $VersionDirPath)) {
-  New-Item $VersionDirPath -ItemType Directory | Out-Null
+if (!(Test-Path $BinDirPath)) {
+  New-Item $BinDirPath -ItemType Directory | Out-Null
 }
 
 Invoke-WebRequest $ZipSourceUrl -OutFile $ZipFilePath -UseBasicParsing
 
 if (Get-Command Expand-Archive -ErrorAction SilentlyContinue) {
-  Expand-Archive $ZipFilePath -Destination $VersionDirPath -Force
+  Expand-Archive $ZipFilePath -Destination $BinDirPath -Force
 } else {
+  Remove-Item $ExecutableFilePath -ErrorAction SilentlyContinue
+  Remove-Item $EsbuildExecutableFilePath -ErrorAction SilentlyContinue
+  Remove-Item $BridgeFilesFolderPath -ErrorAction SilentlyContinue
   Add-Type -AssemblyName System.IO.Compression.FileSystem
-  [IO.Compression.ZipFile]::ExtractToDirectory($ZipFilePath, $VersionDirPath)
+  [IO.Compression.ZipFile]::ExtractToDirectory($ZipFilePath, $BinDirPath)
 }
 
 Remove-Item $ZipFilePath
-
-# Copy contents to main bin directory (acting as current version)
-Copy-Item -Path "$VersionDirPath\*" -Destination $BinDirPath -Recurse -Force
 
 $User = [EnvironmentVariableTarget]::User
 $Path = [Environment]::GetEnvironmentVariable('Path', $User)

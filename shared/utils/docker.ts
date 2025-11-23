@@ -5,7 +5,7 @@ import { getByteSize, getError } from '@shared/utils/misc';
 import { validateEnvVariableValue } from '@shared/utils/validation';
 import Dockerode from 'dockerode';
 
-const dockerClient = new Dockerode();
+const dockerClient = new Dockerode({});
 
 export const handleDockerError = (err: Error, message?: string) => {
   if (
