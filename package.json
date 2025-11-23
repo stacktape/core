@@ -112,7 +112,6 @@
     "constructs": "^10.4.2",
     "cup-readdir": "^1.0.3",
     "dayjs": "^1.11.13",
-    "dockerode": "^4.0.9",
     "dotenv": "^16.4.7",
     "dotenv-stringify": "^3.0.1",
     "esbuild": "0.25.1",

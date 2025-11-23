@@ -1,11 +1,80 @@
+import type { ContainerInfo, ContainerInspectInfo, Port } from 'dockerode';
 import { isAbsolute, join } from 'node:path';
 import { exec } from '@shared/utils/exec';
-import { getAllFilesInDir } from '@shared/utils/fs-utils';
 import { getByteSize, getError } from '@shared/utils/misc';
 import { validateEnvVariableValue } from '@shared/utils/validation';
-import Dockerode from 'dockerode';
 
-const dockerClient = new Dockerode({});
+type ExecDockerOptions = {
+  cwd?: string;
+  skipHandleError?: boolean;
+};
+
+type DockerImageReference = {
+  id: string;
+  repository: string;
+  tag: string;
+};
+
+const splitLines = (value: string) =>
+  value
+    .split(/\r?\n/)
+    .map((line) => line.trim())
+    .filter(Boolean);
+
+const parseJsonArray = <T>(value: string): T[] => {
+  try {
+    return JSON.parse(value || '[]');
+  } catch {
+    return [];
+  }
+};
+
+const includesErrorMessage = (err: any, patterns: string[]) => {
+  return patterns.some((pattern) => {
+    return (
+      (typeof err?.stderr === 'string' && err.stderr.includes(pattern)) ||
+      (typeof err?.message === 'string' && err.message.includes(pattern)) ||
+      (typeof err?.shortMessage === 'string' && err.shortMessage.includes(pattern))
+    );
+  });
+};
+
+const isNoSuchImageError = (err: any) =>
+  includesErrorMessage(err, ['No such image', 'no such image', 'No such object']);
+
+const isNoSuchContainerError = (err: any) =>
+  includesErrorMessage(err, ['No such container', 'no such container', 'No such container: containers']);
+
+const toUnixSeconds = (value?: string | number) => {
+  if (!value) {
+    return 0;
+  }
+  if (typeof value === 'number') {
+    return value;
+  }
+  const parsed = Date.parse(value);
+  return Number.isNaN(parsed) ? 0 : Math.floor(parsed / 1000);
+};
+
+const formatDuration = (ms: number) => {
+  if (!Number.isFinite(ms) || ms <= 0) {
+    return '0s';
+  }
+  const seconds = Math.round(ms / 1000);
+  if (seconds < 60) {
+    return `${seconds}s`;
+  }
+  const minutes = Math.round(seconds / 60);
+  if (minutes < 60) {
+    return `${minutes}m`;
+  }
+  const hours = Math.round(minutes / 60);
+  if (hours < 24) {
+    return `${hours}h`;
+  }
+  const days = Math.round(hours / 24);
+  return `${days}d`;
+};
 
 export const handleDockerError = (err: Error, message?: string) => {
   if (
@@ -64,43 +133,213 @@ const buildDockerBuildArgs = (buildArgs: Record<string, string>) => {
     .flat();
 };
 
-export const getDockerImageDetails = async (tag: string) => {
-  const images = await dockerClient.listImages().catch(handleDockerError);
-  const image = images.find((img) => img.RepoTags?.some((repoTag) => repoTag.split(':')[0] === tag || repoTag === tag));
-
-  return { size: getByteSize(image.Size, 'MB', 2), id: image.Id, created: image.Created };
-};
-
-export const execDocker = (commands: string[], args?: { cwd?: string }) => {
-  const { cwd } = args || {};
-  return exec('docker', commands, {
+export const execDocker = (commands: string[], args?: ExecDockerOptions) => {
+  const { cwd, skipHandleError } = args || {};
+  const promise = exec('docker', commands, {
     disableStdout: true,
     disableStderr: true,
     env: { DOCKER_BUILDKIT: 1 },
     cwd: cwd || process.cwd()
-  }).catch(handleDockerError);
+  });
+  return skipHandleError ? promise : promise.catch(handleDockerError);
 };
 
-export const inspectDockerContainer = async (containerName: string): Promise<Dockerode.ContainerInspectInfo> => {
-  const container = dockerClient.getContainer(containerName);
-  return container
-    .inspect()
-    .catch((err) => {
-      if (err.message.includes('no such container') || err.message.includes('No such container')) {
-        return {} as any;
-      }
-      throw err;
-    })
-    .catch(handleDockerError);
+const listDockerImageReferences = async (): Promise<DockerImageReference[]> => {
+  const { stdout } = await execDocker(['image', 'ls', '--format', '{{json .}}']);
+  return splitLines(stdout).map((line) => {
+    const parsed = JSON.parse(line);
+    return { id: parsed.ID, repository: parsed.Repository, tag: parsed.Tag };
+  });
 };
 
-export const listDockerContainers = () => {
-  return dockerClient.listContainers().catch(handleDockerError);
+const inspectDockerImage = async (reference: string): Promise<any | null> => {
+  try {
+    const { stdout } = await execDocker(['image', 'inspect', reference], { skipHandleError: true });
+    const [image] = parseJsonArray<any>(stdout);
+    return image || null;
+  } catch (err) {
+    if (isNoSuchImageError(err)) {
+      return null;
+    }
+    handleDockerError(err as Error);
+    return null;
+  }
+};
+
+const resolveImageReference = async (tag: string) => {
+  const references = await listDockerImageReferences();
+  const match = references.find((ref) => ref.repository === tag || (ref.tag && `${ref.repository}:${ref.tag}` === tag));
+  if (!match) {
+    return null;
+  }
+  if (match.tag && match.tag !== '<none>' && match.repository && match.repository !== '<none>') {
+    return `${match.repository}:${match.tag}`;
+  }
+  return match.id;
+};
+
+export const getDockerImageDetails = async (tag: string) => {
+  const normalizedTag = tag.trim();
+  let image = await inspectDockerImage(normalizedTag);
+  if (!image) {
+    const fallbackReference = await resolveImageReference(normalizedTag);
+    if (!fallbackReference) {
+      throw getError({
+        type: 'DOCKER',
+        message: `Docker image "${tag}" not found.`
+      });
+    }
+    image = await inspectDockerImage(fallbackReference);
+  }
+  if (!image) {
+    throw getError({
+      type: 'DOCKER',
+      message: `Docker image "${tag}" not found.`
+    });
+  }
+  return {
+    size: getByteSize(image.Size, 'MB', 2),
+    id: image.Id,
+    created: toUnixSeconds(image.Created)
+  };
+};
+
+const inspectContainers = async (containerIds: string[]): Promise<ContainerInspectInfo[]> => {
+  if (!containerIds.length) {
+    return [];
+  }
+  const { stdout } = await execDocker(['container', 'inspect', ...containerIds]);
+  return parseJsonArray<ContainerInspectInfo>(stdout);
+};
+
+const inspectContainer = async (containerName: string): Promise<ContainerInspectInfo | null> => {
+  try {
+    const { stdout } = await execDocker(['container', 'inspect', containerName], { skipHandleError: true });
+    const [container] = parseJsonArray<ContainerInspectInfo>(stdout);
+    return container || null;
+  } catch (err) {
+    if (isNoSuchContainerError(err)) {
+      return null;
+    }
+    handleDockerError(err as Error);
+    return null;
+  }
+};
+
+const buildContainerCommand = (inspectInfo: ContainerInspectInfo) => {
+  if (inspectInfo.Config?.Cmd?.length) {
+    return inspectInfo.Config.Cmd.join(' ');
+  }
+  const args = inspectInfo.Args?.join(' ') || '';
+  return [inspectInfo.Path, args].filter(Boolean).join(' ').trim();
+};
+
+const buildContainerStatus = (inspectInfo: ContainerInspectInfo) => {
+  const state = inspectInfo.State;
+  if (!state) {
+    return '';
+  }
+  if (state.Status === 'running' && state.StartedAt) {
+    const startedAt = Date.parse(state.StartedAt);
+    if (!Number.isNaN(startedAt)) {
+      return `Up ${formatDuration(Date.now() - startedAt)}`;
+    }
+  }
+  if (state.Status === 'exited' && state.FinishedAt && typeof state.ExitCode === 'number') {
+    const finishedAt = Date.parse(state.FinishedAt);
+    if (!Number.isNaN(finishedAt)) {
+      return `Exited (${state.ExitCode}) ${new Date(finishedAt).toISOString()}`;
+    }
+  }
+  return state.Status || '';
+};
+
+const buildContainerNames = (inspectInfo: ContainerInspectInfo) => {
+  const names: string[] = [];
+  if (inspectInfo.Name) {
+    names.push(inspectInfo.Name.replace(/^\//, ''));
+  }
+  if (Array.isArray((inspectInfo as any).Names)) {
+    names.push(...(inspectInfo as any).Names.map((name: string) => name.replace(/^\//, '')));
+  }
+  return [...new Set(names)].filter(Boolean);
+};
+
+const buildContainerPortsFromInspect = (inspectInfo: ContainerInspectInfo): Port[] => {
+  const ports: Port[] = [];
+  const portMap = inspectInfo.NetworkSettings?.Ports || {};
+  Object.entries(portMap).forEach(([key, bindings]) => {
+    const [privatePortRaw, type] = key.split('/');
+    const privatePort = Number(privatePortRaw);
+    if (!bindings || !bindings.length) {
+      ports.push({
+        IP: '',
+        PrivatePort: privatePort,
+        PublicPort: privatePort,
+        Type: type
+      });
+      return;
+    }
+    bindings.forEach((binding) => {
+      ports.push({
+        IP: binding.HostIp || '',
+        PrivatePort: privatePort,
+        PublicPort: binding.HostPort ? Number(binding.HostPort) : privatePort,
+        Type: type
+      });
+    });
+  });
+  return ports;
+};
+
+const toContainerInfo = (inspectInfo: ContainerInspectInfo): ContainerInfo => {
+  return {
+    Id: inspectInfo.Id,
+    Names: buildContainerNames(inspectInfo),
+    Image: inspectInfo.Config?.Image || inspectInfo.Image || '',
+    ImageID: inspectInfo.Image || '',
+    Command: buildContainerCommand(inspectInfo),
+    Created: toUnixSeconds(inspectInfo.Created),
+    Ports: buildContainerPortsFromInspect(inspectInfo),
+    Labels: inspectInfo.Config?.Labels || {},
+    State: inspectInfo.State?.Status || '',
+    Status: buildContainerStatus(inspectInfo),
+    HostConfig: {
+      NetworkMode: inspectInfo.HostConfig?.NetworkMode || ''
+    },
+    NetworkSettings: {
+      Networks: inspectInfo.NetworkSettings?.Networks || {}
+    },
+    Mounts: (inspectInfo.Mounts || []).map((mount) => ({
+      Name: mount.Name,
+      Type: mount.Type,
+      Source: mount.Source,
+      Destination: mount.Destination,
+      Driver: mount.Driver,
+      Mode: mount.Mode,
+      RW: mount.RW,
+      Propagation: mount.Propagation
+    }))
+  };
+};
+
+export const inspectDockerContainer = async (containerName: string): Promise<ContainerInspectInfo> => {
+  const container = await inspectContainer(containerName);
+  return (container || {}) as ContainerInspectInfo;
+};
+
+export const listDockerContainers = async (): Promise<ContainerInfo[]> => {
+  const { stdout } = await execDocker(['container', 'ls', '-q']);
+  const containerIds = splitLines(stdout);
+  if (!containerIds.length) {
+    return [];
+  }
+  const inspectInfos = await inspectContainers(containerIds);
+  return inspectInfos.map(toContainerInfo);
 };
 
 export const stopDockerContainer = async (containerName: string, waitTime: number) => {
-  const container = dockerClient.getContainer(containerName);
-  await container.stop({ t: waitTime, signal: 'SIGTERM' }).catch(handleDockerError);
+  await execDocker(['container', 'stop', '--time', `${waitTime}`, containerName]);
 };
 
 export const dockerLogin = async ({
@@ -250,46 +489,18 @@ export const buildDockerImageUsingDockerode = async ({
       ? buildContextPath
       : join(process.cwd(), buildContextPath)
     : process.cwd();
-
-  // @note these will be copied into tarball and Dockerfile can then use them to 'COPY'
-  const srcFilesForBuild = await getAllFilesInDir(contextPath);
-  const stream = await dockerClient
-    .buildImage(
-      { src: srcFilesForBuild, context: contextPath },
-      { t: imageTag, dockerfile: dockerfilePath, buildargs: buildArgs || {} }
-    )
-    .catch(handleDockerError);
-
-  const buildResult: { duration: number; dockerOutput: any[] } = await new Promise((resolve, reject) => {
-    const dockerOutput: any[] = [];
-    let infoMessage = '';
-    stream.on('data', (data) => {
-      const lines = data.toString().split('\r\n').filter(Boolean);
-      lines.forEach((line) => {
-        const parsedLine = JSON.parse(line);
-        const errMessage = parsedLine.error || parsedLine?.errorDetail?.message;
-        if (errMessage) {
-          reject(
-            getError({
-              type: 'DOCKER',
-              message: `Error building docker image with tag ${imageTag}:\n${errMessage.trim()}. Build log:\n${infoMessage}`
-            })
-          );
-        }
-        if (parsedLine.stream) {
-          infoMessage += parsedLine.stream;
-        } else {
-          dockerOutput.push(parsedLine);
-        }
-      });
-    });
-    stream.on('end', () => {
-      dockerOutput.push({ message: infoMessage });
-      resolve({ dockerOutput, duration: Date.now() - start });
-    });
-  });
+  const command = [
+    'build',
+    '-t',
+    imageTag,
+    ...(dockerfilePath ? ['-f', join(buildContextPath, dockerfilePath)] : []),
+    ...buildDockerBuildArgs(buildArgs),
+    contextPath
+  ];
+  const { stdout, stderr } = await execDocker(command);
+  const dockerOutput = [...splitLines(stdout), ...splitLines(stderr)].map((message) => ({ message }));
   const imageDetails = await getDockerImageDetails(imageTag);
-  return { ...imageDetails, ...buildResult };
+  return { ...imageDetails, dockerOutput, duration: Date.now() - start };
 };
 
 export const buildDockerImage = async ({
@@ -365,7 +576,7 @@ export const getDockerBuildxSupportedPlatforms = async (): Promise<string[]> => 
 
 export const isDockerRunning = async (): Promise<boolean> => {
   try {
-    await dockerClient.info();
+    await execDocker(['info']);
     return true;
   } catch {
     return false;
