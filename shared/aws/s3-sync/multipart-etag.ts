@@ -1,5 +1,5 @@
-/* eslint-disable */
-// @ts-nocheck
+import type { Buffer } from 'node:buffer';
+import type { TransformCallback, TransformOptions } from 'node:stream';
 import crypto from 'node:crypto';
 import { Transform } from 'node:stream';
 
@@ -17,8 +17,26 @@ const commonUploadSize1 = 10 * 1024 * 1024;
 const commonUploadSize2 = 15 * 1024 * 1024;
 const minimumUploadSize = 5 * 1024 * 1024;
 
+interface MultipartETagOptions extends TransformOptions {
+  size?: number;
+  count?: number;
+}
+
+interface SumObject {
+  size: number;
+  hash: crypto.Hash;
+  amtWritten: number;
+  digests: Buffer[];
+  eTag: string | null;
+}
+
 export class MultipartETag extends Transform {
-  constructor(options = {}) {
+  public sums: SumObject[];
+  public bytes: number;
+  public digest: Buffer | null;
+  public done: boolean;
+
+  constructor(options: MultipartETagOptions = {}) {
     super(options);
     let sizes = [maximumUploadSize, minimumUploadSize, commonUploadSize1, commonUploadSize2];
     if (options.size != null && options.count != null) {
@@ -43,20 +61,20 @@ export class MultipartETag extends Transform {
     }
   }
 
-  _transform(chunk, encoding, callback) {
+  _transform(chunk: Buffer, encoding: BufferEncoding, callback: TransformCallback): void {
     this.bytes += chunk.length;
     for (let i = 0; i < this.sums.length; i += 1) {
       const sumObj = this.sums[i];
       const newAmtWritten = sumObj.amtWritten + chunk.length;
       if (newAmtWritten <= sumObj.size) {
         sumObj.amtWritten = newAmtWritten;
-        sumObj.hash.update(chunk, encoding);
+        sumObj.hash.update(chunk);
       } else {
         const finalBytes = sumObj.size - sumObj.amtWritten;
-        sumObj.hash.update(chunk.slice(0, finalBytes), encoding);
+        sumObj.hash.update(chunk.subarray(0, finalBytes));
         sumObj.digests.push(sumObj.hash.digest());
         sumObj.hash = crypto.createHash('md5');
-        sumObj.hash.update(chunk.slice(finalBytes), encoding);
+        sumObj.hash.update(chunk.subarray(finalBytes));
         sumObj.amtWritten = chunk.length - finalBytes;
       }
     }
@@ -64,7 +82,7 @@ export class MultipartETag extends Transform {
     callback(null, chunk);
   }
 
-  _flush(callback) {
+  _flush(callback: TransformCallback): void {
     for (let i = 0; i < this.sums.length; i += 1) {
       const sumObj = this.sums[i];
       let digest = sumObj.hash.digest();
@@ -84,7 +102,7 @@ export class MultipartETag extends Transform {
     callback();
   }
 
-  anyMatch(eTag) {
+  anyMatch(eTag: string): boolean {
     if (this.digest && this.digest.toString('hex') === eTag) {
       return true;
     }
@@ -97,8 +115,8 @@ export class MultipartETag extends Transform {
   }
 }
 
-const guessPartSizeFromSizeAndCount = (size, count) => {
+function guessPartSizeFromSizeAndCount(size: number, count: number): number {
   const divided = size / count;
   const floored = Math.floor(divided);
   return divided === floored ? divided : floored + 1;
-};
+}

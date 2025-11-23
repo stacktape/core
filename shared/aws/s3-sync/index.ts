@@ -1,17 +1,16 @@
-/* eslint-disable */
-// @ts-nocheck
 // ORIGINALLY this repo https://github.com/auth0/node-s3-client
+// Refactored to TypeScript and modernized for Bun compatibility
+import type { Stats } from 'node:fs';
 import assert from 'node:assert';
 import { EventEmitter } from 'node:events';
+import fs from 'node:fs';
 import path from 'node:path';
-import { PassThrough } from 'node:stream';
+import { PassThrough, Readable } from 'node:stream';
 import url from 'node:url';
 import { S3 } from '@aws-sdk/client-s3';
+import { Upload } from '@aws-sdk/lib-storage';
 import { Pend, stringMatchesGlob } from '@shared/utils/misc';
-import fdSlicer from 'fd-slicer';
-import findit from 'findit2';
 import fsExtra from 'fs-extra';
-import fs from 'graceful-fs';
 import mime from 'mime';
 import StreamSink from 'streamsink';
 import { MultipartETag } from './multipart-etag';
@@ -19,550 +18,310 @@ import { MultipartETag } from './multipart-etag';
 const { mkdirp, remove } = fsExtra;
 const MAX_PUTOBJECT_SIZE = 5 * 1024 * 1024 * 1024;
 const MAX_DELETE_COUNT = 1000;
-const MAX_MULTIPART_COUNT = 10000;
 const MIN_MULTIPART_SIZE = 5 * 1024 * 1024;
-
 const TO_UNIX_RE = new RegExp(quotemeta(path.sep), 'g');
 
-type ClientType = {
-  s3: S3;
-  s3Pend: Pend;
-  s3RetryCount: number;
-  s3RetryDelay: number;
-  multipartUploadThreshold: number;
-  multipartUploadSize: number;
-  multipartDownloadThreshold: number;
-  multipartDownloadSize: number;
-};
-
-export function S3Sync(options) {
-  this.s3 = new S3(options.clientArgs);
-  options.s3Plugins.forEach((plugin) => {
-    this.s3.middlewareStack.use(plugin);
-  });
-  // this.s3.middlewareStack.add(
-  //   (next) => async (args) => {
-  //     delete args.request.headers['content-type'];
-  //     return next(args);
-  //   },
-  //   { step: 'build' }
-  // );
-  this.s3Pend = new Pend({ max: 20 });
-  this.s3RetryCount = options.s3RetryCount || 3;
-  this.s3RetryDelay = options.s3RetryDelay || 1000;
-  this.multipartUploadThreshold = options.multipartUploadThreshold || 20 * 1024 * 1024;
-  this.multipartUploadSize = options.multipartUploadSize || 15 * 1024 * 1024;
-  this.multipartDownloadThreshold = options.multipartDownloadThreshold || 20 * 1024 * 1024;
-  this.multipartDownloadSize = options.multipartDownloadSize || 15 * 1024 * 1024;
-
-  if (this.multipartUploadThreshold < MIN_MULTIPART_SIZE) {
-    throw new Error('Minimum multipartUploadThreshold is 5MB.');
-  }
-  if (this.multipartUploadThreshold > MAX_PUTOBJECT_SIZE) {
-    throw new Error('Maximum multipartUploadThreshold is 5GB.');
-  }
-  if (this.multipartUploadSize < MIN_MULTIPART_SIZE) {
-    throw new Error('Minimum multipartUploadSize is 5MB.');
-  }
-  if (this.multipartUploadSize > MAX_PUTOBJECT_SIZE) {
-    throw new Error('Maximum multipartUploadSize is 5GB.');
-  }
+interface S3SyncOptions {
+  clientArgs: any;
+  s3Plugins: any[];
+  s3RetryCount?: number;
+  s3RetryDelay?: number;
+  multipartUploadThreshold?: number;
+  multipartUploadSize?: number;
+  multipartDownloadThreshold?: number;
+  multipartDownloadSize?: number;
 }
 
-S3Sync.prototype.deleteObjects = function (s3Params) {
-  const self: ClientType = this;
-  const ee = new EventEmitter();
+interface UploadFileParams {
+  localFile: string;
+  s3Params: any;
+  defaultContentType?: string;
+}
 
-  const params = {
-    Bucket: s3Params.Bucket,
-    Delete: extend({}, s3Params.Delete),
-    MFA: s3Params.MFA
-  };
-  const slices = chunkArray(params.Delete.Objects, MAX_DELETE_COUNT);
-  const pend = new Pend();
+interface DownloadFileParams {
+  localFile: string;
+  s3Params: any;
+}
 
-  ee.progressAmount = 0;
-  ee.progressTotal = params.Delete.Objects.length;
+interface ListObjectsParams {
+  recursive?: boolean;
+  s3Params: any;
+}
 
-  slices.forEach(uploadSlice);
-  pend.wait((err) => {
-    if (err) {
-      ee.emit('error', err);
-      return;
-    }
-    ee.emit('end');
-  });
-  return ee;
+interface DeleteObjectsParams {
+  Bucket: string;
+  Delete: any;
+  MFA?: string;
+}
 
-  function uploadSlice(slice) {
-    pend.go((cb) => {
-      doWithRetry(tryDeletingObjects, self.s3RetryCount, self.s3RetryDelay, (err, data) => {
-        if (err) {
-          cb(err);
-        } else {
-          ee.progressAmount += slice.length;
-          ee.emit('progress');
-          ee.emit('data', data);
-          cb();
-        }
-      });
+interface SyncDirParams {
+  localDir: string;
+  deleteRemoved?: boolean;
+  followSymlinks?: boolean;
+  s3Params: any;
+  getS3Params?: (filePath: string, stat: any, callback: (err: any, s3Params?: any) => void) => void;
+  defaultContentType?: string;
+  skipFiles?: string[];
+}
+
+interface LocalFileStat extends Stats {
+  path: string;
+  s3Path: string;
+  multipartETag?: MultipartETag;
+}
+
+export class S3Sync {
+  public s3: S3;
+  public s3Pend: Pend;
+  public s3RetryCount: number;
+  public s3RetryDelay: number;
+  public multipartUploadThreshold: number;
+  public multipartUploadSize: number;
+  public multipartDownloadThreshold: number;
+  public multipartDownloadSize: number;
+
+  constructor(options: S3SyncOptions) {
+    this.s3 = new S3(options.clientArgs);
+    options.s3Plugins.forEach((plugin) => {
+      this.s3.middlewareStack.use(plugin);
     });
+    this.s3Pend = new Pend({ max: 20 });
+    this.s3RetryCount = options.s3RetryCount || 3;
+    this.s3RetryDelay = options.s3RetryDelay || 1000;
+    this.multipartUploadThreshold = options.multipartUploadThreshold || 20 * 1024 * 1024;
+    this.multipartUploadSize = options.multipartUploadSize || 15 * 1024 * 1024;
+    this.multipartDownloadThreshold = options.multipartDownloadThreshold || 20 * 1024 * 1024;
+    this.multipartDownloadSize = options.multipartDownloadSize || 15 * 1024 * 1024;
 
-    function tryDeletingObjects(cb) {
-      self.s3Pend.go((pendCb) => {
-        params.Delete.Objects = slice;
-        self.s3.deleteObjects(params, (err, data) => {
-          pendCb();
-          cb(err, data);
-        });
-      });
-    }
-  }
-};
+    if (this.multipartUploadThreshold < MIN_MULTIPART_SIZE) throw new Error('Minimum multipartUploadThreshold is 5MB.');
 
-S3Sync.prototype.uploadFile = function (params) {
-  const self: { s3: S3 } = this;
-  const uploader = new EventEmitter();
-  uploader.progressMd5Amount = 0;
-  uploader.progressAmount = 0;
-  uploader.progressTotal = 0;
-  uploader.abort = handleAbort;
-  uploader.getPublicUrl = function () {
-    return getPublicUrl(s3Params.Bucket, s3Params.Key, self.s3.config.region, self.s3.config.endpoint);
-  };
-  uploader.getPublicUrlHttp = function () {
-    return getPublicUrlHttp(s3Params.Bucket, s3Params.Key, self.s3.config.endpoint);
-  };
+    if (this.multipartUploadThreshold > MAX_PUTOBJECT_SIZE) throw new Error('Maximum multipartUploadThreshold is 5GB.');
 
-  const localFile = params.localFile;
-  let localFileStat = null;
-  var s3Params = extend({}, params.s3Params);
-  if (s3Params.ContentType === undefined) {
-    // const defaultContentType = params.defaultContentType || 'application/octet-stream';
-    s3Params.ContentType = mime.getType(localFile);
+    if (this.multipartUploadSize < MIN_MULTIPART_SIZE) throw new Error('Minimum multipartUploadSize is 5MB.');
+
+    if (this.multipartUploadSize > MAX_PUTOBJECT_SIZE) throw new Error('Maximum multipartUploadSize is 5GB.');
   }
 
-  let fatalError = false;
-  let localFileSlicer = null;
-  const parts = [];
+  deleteObjects(s3Params: DeleteObjectsParams): EventEmitter {
+    const ee = new EventEmitter();
 
-  openFile();
-
-  return uploader;
-
-  function handleError(err) {
-    if (localFileSlicer) {
-      localFileSlicer.unref();
-      localFileSlicer = null;
-    }
-    if (fatalError) {
-      return;
-    }
-    fatalError = true;
-    uploader.emit('error', err);
-  }
-
-  function handleAbort() {
-    fatalError = true;
-  }
-
-  function openFile() {
-    fs.open(localFile, 'r', (err, fd) => {
-      if (err) {
-        return handleError(err);
-      }
-      localFileSlicer = fdSlicer.createFromFd(fd, { autoClose: true });
-      localFileSlicer.on('error', handleError);
-      localFileSlicer.on('close', () => {
-        uploader.emit('fileClosed');
-      });
-
-      // keep an extra reference alive until we decide that we're completely
-      // done with the file
-      localFileSlicer.ref();
-
-      uploader.emit('fileOpened', localFileSlicer);
-
-      fs.fstat(fd, (e, stat) => {
-        if (e) {
-          return handleError(e);
-        }
-        localFileStat = stat;
-        uploader.progressTotal = stat.size;
-        startPuttingObject();
-      });
-    });
-  }
-
-  function startPuttingObject() {
-    if (localFileStat.size >= self.multipartUploadThreshold) {
-      let multipartUploadSize = self.multipartUploadSize;
-      const partsRequiredCount = Math.ceil(localFileStat.size / multipartUploadSize);
-      if (partsRequiredCount > MAX_MULTIPART_COUNT) {
-        multipartUploadSize = smallestPartSizeFromFileSize(localFileStat.size);
-      }
-      if (multipartUploadSize > MAX_PUTOBJECT_SIZE) {
-        const err = new Error(`File size exceeds maximum object size: ${localFile}`);
-        err.retryable = false;
-        handleError(err);
-        return;
-      }
-      startMultipartUpload(multipartUploadSize);
-    } else {
-      doWithRetry(tryPuttingObject, self.s3RetryCount, self.s3RetryDelay, onPutObjectDone);
-    }
-
-    function onPutObjectDone(err, data) {
-      if (fatalError) {
-        return;
-      }
-      if (err) {
-        return handleError(err);
-      }
-      if (localFileSlicer) {
-        localFileSlicer.unref();
-        localFileSlicer = null;
-      }
-      uploader.emit('end', data);
-    }
-  }
-
-  function startMultipartUpload(multipartUploadSize) {
-    doWithRetry(tryCreateMultipartUpload, self.s3RetryCount, self.s3RetryDelay, (err, data) => {
-      if (fatalError) {
-        return;
-      }
-      if (err) {
-        return handleError(err);
-      }
-      uploader.emit('data', data);
-      s3Params = {
-        Bucket: s3Params.Bucket,
-        Key: encodeSpecialCharacters(s3Params.Key),
-        SSECustomerAlgorithm: s3Params.SSECustomerAlgorithm,
-        SSECustomerKey: s3Params.SSECustomerKey,
-        SSECustomerKeyMD5: s3Params.SSECustomerKeyMD5
-      };
-      queueAllParts(data.UploadId, multipartUploadSize);
-    });
-  }
-
-  function queueAllParts(uploadId, multipartUploadSize) {
-    let cursor = 0;
-    let nextPartNumber = 1;
+    const params = {
+      Bucket: s3Params.Bucket,
+      Delete: extend({}, s3Params.Delete),
+      MFA: s3Params.MFA
+    };
+    const slices = chunkArray(params.Delete.Objects, MAX_DELETE_COUNT);
     const pend = new Pend();
-    while (cursor < localFileStat.size) {
-      const start = cursor;
-      let end = cursor + multipartUploadSize;
-      if (end > localFileStat.size) {
-        end = localFileStat.size;
-      }
-      cursor = end;
-      const part = { PartNumber: nextPartNumber++ };
-      parts.push(part);
-      pend.go(makeUploadPartFn(start, end, part, uploadId));
-    }
+
+    (ee as any).progressAmount = 0;
+    (ee as any).progressTotal = params.Delete.Objects.length;
+
+    slices.forEach((slice) => {
+      pend.go((cb) => {
+        doWithRetry(
+          (innerCb) => {
+            this.s3Pend.go(async (pendCb) => {
+              params.Delete.Objects = slice;
+              try {
+                const data = await this.s3.deleteObjects(params);
+                pendCb();
+                innerCb(null, data);
+              } catch (err) {
+                pendCb();
+                innerCb(err);
+              }
+            });
+          },
+          this.s3RetryCount,
+          this.s3RetryDelay,
+          (err, data) => {
+            if (err) {
+              cb(err);
+            } else {
+              (ee as any).progressAmount += slice.length;
+              ee.emit('progress');
+              ee.emit('data', data);
+              cb();
+            }
+          }
+        );
+      });
+    });
+
     pend.wait((err) => {
-      if (fatalError) {
+      if (err) {
+        ee.emit('error', err);
         return;
       }
-      if (err) {
-        return handleError(err);
-      }
-      completeMultipartUpload();
+      ee.emit('end');
     });
+
+    return ee;
   }
 
-  function makeUploadPartFn(start, end, part, uploadId) {
-    return function (cb) {
-      doWithRetry(tryUploadPart, self.s3RetryCount, self.s3RetryDelay, (err, data) => {
-        if (fatalError) {
-          return;
-        }
-        if (err) {
-          return handleError(err);
-        }
-        uploader.emit('part', data);
-        cb();
-      });
+  uploadFile(params: UploadFileParams): EventEmitter {
+    const uploader = new EventEmitter();
+    (uploader as any).progressMd5Amount = 0;
+    (uploader as any).progressAmount = 0;
+    (uploader as any).progressTotal = 0;
+
+    const localFile = params.localFile;
+    const s3Params = extend({}, params.s3Params);
+
+    if (s3Params.ContentType === undefined) {
+      s3Params.ContentType = mime.getType(localFile);
+    }
+
+    (uploader as any).abort = () => {
+      fatalError = true;
     };
 
-    function tryUploadPart(cb) {
+    (uploader as any).getPublicUrl = () => {
+      return getPublicUrl(s3Params.Bucket, s3Params.Key, this.s3.config.region, this.s3.config.endpoint);
+    };
+
+    (uploader as any).getPublicUrlHttp = () => {
+      return getPublicUrlHttp(s3Params.Bucket, s3Params.Key, this.s3.config.endpoint);
+    };
+
+    let fatalError = false;
+
+    const handleError = (err: any) => {
       if (fatalError) {
         return;
       }
-      self.s3Pend.go((pendCb) => {
-        if (fatalError) {
-          pendCb();
-          return;
-        }
-        const inStream = localFileSlicer.createReadStream({ start, end });
-        let errorOccurred = false;
-        inStream.on('error', (err) => {
-          if (fatalError || errorOccurred) {
-            return;
-          }
-          handleError(err);
-        });
-        s3Params.ContentLength = end - start;
-        s3Params.PartNumber = part.PartNumber;
-        s3Params.UploadId = uploadId;
+      fatalError = true;
+      uploader.emit('error', err);
+    };
 
-        const multipartETag = new MultipartETag({ size: s3Params.ContentLength, count: 1 });
-        let prevBytes = 0;
-        let overallDelta = 0;
-        const pend = new Pend();
-        const haveETag = pend.hold();
-        multipartETag.on('progress', () => {
-          if (fatalError || errorOccurred) {
-            return;
-          }
-          const delta = multipartETag.bytes - prevBytes;
-          prevBytes = multipartETag.bytes;
-          uploader.progressAmount += delta;
-          overallDelta += delta;
-          uploader.emit('progress');
-        });
-        multipartETag.on('end', () => {
-          if (fatalError || errorOccurred) {
-            return;
-          }
-          const delta = multipartETag.bytes - prevBytes;
-          uploader.progressAmount += delta;
-          uploader.progressTotal += end - start - multipartETag.bytes;
-          uploader.emit('progress');
-          haveETag();
-        });
-        inStream.pipe(multipartETag);
-        s3Params.Body = multipartETag;
-
-        self.s3.uploadPart(extend({}, s3Params), (err, data) => {
-          pendCb();
-          if (fatalError || errorOccurred) {
-            return;
-          }
-          if (err) {
-            errorOccurred = true;
-            uploader.progressAmount -= overallDelta;
-            cb(err);
-            return;
-          }
-          pend.wait(() => {
-            if (fatalError) {
-              return;
-            }
-            if (!compareMultipartETag(data.ETag, multipartETag)) {
-              errorOccurred = true;
-              uploader.progressAmount -= overallDelta;
-              cb(new Error('ETag does not match MD5 checksum'));
-              return;
-            }
-            part.ETag = data.ETag;
-            cb(null, data);
-          });
-        });
-      });
-    }
-  }
-
-  function completeMultipartUpload() {
-    localFileSlicer.unref();
-    localFileSlicer = null;
-    doWithRetry(tryCompleteMultipartUpload, self.s3RetryCount, self.s3RetryDelay, (err, data) => {
-      if (fatalError) {
-        return;
-      }
+    // Start the upload process
+    fs.stat(localFile, async (err, stat) => {
       if (err) {
         return handleError(err);
       }
-      uploader.emit('end', data);
-    });
-  }
 
-  function tryCompleteMultipartUpload(cb) {
-    if (fatalError) {
-      return;
-    }
-    self.s3Pend.go((pendCb) => {
-      if (fatalError) {
-        pendCb();
-        return;
-      }
-      s3Params = {
-        Bucket: s3Params.Bucket,
-        Key: s3Params.Key,
-        UploadId: s3Params.UploadId,
-        MultipartUpload: {
-          Parts: parts
-        }
-      };
-      self.s3.completeMultipartUpload(s3Params, (err, data) => {
-        pendCb();
-        if (fatalError) {
-          return;
-        }
-        cb(err, data);
-      });
-    });
-  }
+      (uploader as any).progressTotal = stat.size;
 
-  function tryCreateMultipartUpload(cb) {
-    if (fatalError) {
-      return;
-    }
-    self.s3Pend.go((pendCb) => {
-      if (fatalError) {
-        return pendCb();
-      }
-      self.s3.createMultipartUpload(s3Params, (err, data) => {
-        pendCb();
-        if (fatalError) {
-          return;
-        }
-        cb(err, data);
-      });
-    });
-  }
+      try {
+        // Use @aws-sdk/lib-storage for better Bun compatibility
+        const fileStream = fs.createReadStream(localFile);
 
-  function tryPuttingObject(cb) {
-    self.s3Pend.go((pendCb) => {
-      if (fatalError) {
-        return pendCb();
-      }
-      const inStream = localFileSlicer.createReadStream();
-      inStream.on('error', handleError);
-      const pend = new Pend();
-      const multipartETag = new MultipartETag({ size: localFileStat.size, count: 1 });
-      pend.go((innerCb) => {
-        multipartETag.on('end', () => {
+        uploader.emit('fileOpened', fileStream);
+
+        const upload = new Upload({
+          client: this.s3,
+          params: {
+            ...s3Params,
+            Body: fileStream,
+            ContentLength: stat.size
+          },
+          partSize: this.multipartUploadSize,
+          queueSize: 4
+        });
+
+        // Only use Upload's progress tracking to avoid conflicts
+        upload.on('httpUploadProgress', (progress) => {
           if (fatalError) {
             return;
           }
-          uploader.progressAmount = multipartETag.bytes;
-          uploader.progressTotal = multipartETag.bytes;
-          uploader.emit('progress');
-          localFileStat.size = multipartETag.bytes;
-          localFileStat.multipartETag = multipartETag;
-          innerCb();
+          if (progress.loaded !== undefined && progress.total !== undefined) {
+            (uploader as any).progressAmount = progress.loaded;
+            (uploader as any).progressTotal = progress.total;
+            uploader.emit('progress');
+          }
         });
-      });
-      multipartETag.on('progress', () => {
+
+        const result = await upload.done();
+
         if (fatalError) {
           return;
         }
-        uploader.progressAmount = multipartETag.bytes;
-        uploader.emit('progress');
-      });
-      s3Params.ContentLength = localFileStat.size;
-      uploader.progressAmount = 0;
-      inStream.pipe(multipartETag);
-      s3Params.Body = multipartETag;
-      self.s3.putObject(s3Params, (err, data) => {
-        pendCb();
-        if (fatalError) {
-          return;
-        }
-        if (err) {
-          cb(err);
-          return;
-        }
-        pend.wait(() => {
-          if (fatalError) {
-            return;
-          }
-          if (!compareMultipartETag(data.ETag, localFileStat.multipartETag)) {
-            cb(new Error('ETag does not match MD5 checksum'));
-            return;
-          }
-          cb(null, data);
-        });
-      });
+
+        uploader.emit('fileClosed');
+        uploader.emit('end', result);
+      } catch (error) {
+        handleError(error);
+      }
     });
+
+    return uploader;
   }
-};
 
-S3Sync.prototype.downloadFile = function (params) {
-  const self: ClientType = this;
-  const downloader = new EventEmitter();
-  const localFile = params.localFile;
-  const s3Params = extend({}, params.s3Params);
+  downloadFile(params: DownloadFileParams): EventEmitter {
+    const downloader = new EventEmitter();
+    const localFile = params.localFile;
+    const s3Params = extend({}, params.s3Params);
 
-  const dirPath = path.dirname(localFile);
-  downloader.progressAmount = 0;
-  mkdirp(dirPath, (err) => {
-    if (err) {
-      downloader.emit('error', err);
-      return;
-    }
+    const dirPath = path.dirname(localFile);
+    (downloader as any).progressAmount = 0;
 
-    doWithRetry(doDownloadWithPend, self.s3RetryCount, self.s3RetryDelay, (err) => {
+    mkdirp(dirPath, (err) => {
       if (err) {
         downloader.emit('error', err);
         return;
       }
-      downloader.emit('end');
-    });
-  });
 
-  return downloader;
-
-  function doDownloadWithPend(cb) {
-    self.s3Pend.go((pendCb) => {
-      doTheDownload((err) => {
-        pendCb();
-        cb(err);
-      });
-    });
-  }
-
-  function doTheDownload(cb) {
-    const request = self.s3.getObject(s3Params);
-    let errorOccurred = false;
-    const hashCheckPend = new Pend();
-
-    request.on('httpHeaders', (statusCode, headers, resp) => {
-      if (statusCode >= 300) {
-        handleError(new Error(`http status code ${statusCode}`));
-        return;
-      }
-      if (headers['content-length'] === undefined) {
-        var outStream = fs.createWriteStream(localFile);
-        outStream.on('error', handleError);
-        downloader.progressTotal = 0;
-        downloader.progressAmount = -1;
-        request.on('httpData', (chunk) => {
-          downloader.progressTotal += chunk.length;
-          downloader.progressAmount += chunk.length;
-          downloader.emit('progress');
-          outStream.write(chunk);
-        });
-
-        request.on('httpDone', () => {
-          if (errorOccurred) {
+      doWithRetry(
+        (cb) => {
+          this.s3Pend.go(async (pendCb) => {
+            try {
+              await this.doDownload(localFile, s3Params, downloader);
+              pendCb();
+              cb(null);
+            } catch (error) {
+              pendCb();
+              cb(error);
+            }
+          });
+        },
+        this.s3RetryCount,
+        this.s3RetryDelay,
+        (err) => {
+          if (err) {
+            downloader.emit('error', err);
             return;
           }
-          downloader.progressAmount += 1;
+          downloader.emit('end');
+        }
+      );
+    });
+
+    return downloader;
+  }
+
+  private async doDownload(localFile: string, s3Params: any, downloader: EventEmitter): Promise<void> {
+    return new Promise((resolve, reject) => {
+      let errorOccurred = false;
+
+      const handleError = (err: any) => {
+        if (!err || errorOccurred) {
+          return;
+        }
+        errorOccurred = true;
+        reject(err);
+      };
+
+      this.s3
+        .getObject(s3Params)
+        .then((response) => {
+          const contentLength = response.ContentLength || 0;
+          const eTag = cleanETag(response.ETag);
+          const eTagCount = getETagCount(eTag);
+
+          (downloader as any).progressTotal = contentLength;
+          (downloader as any).progressAmount = 0;
           downloader.emit('progress');
-          outStream.end();
-          cb();
-        });
-      } else {
-        const contentLength = Number.parseInt(headers['content-length'], 10);
-        downloader.progressTotal = contentLength;
-        downloader.progressAmount = 0;
-        downloader.emit('progress');
-        downloader.emit('httpHeaders', statusCode, headers, resp);
-        const eTag = cleanETag(headers.etag);
-        const eTagCount = getETagCount(eTag);
 
-        var outStream = fs.createWriteStream(localFile);
-        const multipartETag = new MultipartETag({ size: contentLength, count: eTagCount });
-        const httpStream = resp.httpResponse.createUnbufferedStream();
+          const outStream = fs.createWriteStream(localFile);
+          const multipartETag = new MultipartETag({ size: contentLength, count: eTagCount });
 
-        httpStream.on('error', handleError);
-        outStream.on('error', handleError);
+          outStream.on('error', handleError);
 
-        hashCheckPend.go((cb) => {
+          multipartETag.on('progress', () => {
+            (downloader as any).progressAmount = multipartETag.bytes;
+            downloader.emit('progress');
+          });
+
           multipartETag.on('end', () => {
             if (multipartETag.bytes !== contentLength) {
               handleError(new Error('Downloaded size does not match Content-Length'));
@@ -570,449 +329,384 @@ S3Sync.prototype.downloadFile = function (params) {
             }
             if (eTagCount === 1 && !multipartETag.anyMatch(eTag)) {
               handleError(new Error('ETag does not match MD5 checksum'));
+            }
+          });
+
+          outStream.on('close', () => {
+            if (!errorOccurred) {
+              resolve();
+            }
+          });
+
+          if (response.Body instanceof Readable) {
+            response.Body.pipe(multipartETag);
+            multipartETag.pipe(outStream);
+          } else {
+            handleError(new Error('Response body is not a readable stream'));
+          }
+        })
+        .catch(handleError);
+    });
+  }
+
+  /**
+   * Lists objects in S3 bucket
+   * @param params.recursive - whether to list recursively
+   * @param params.s3Params - S3 parameters (Bucket, Delimiter, Marker, MaxKeys, Prefix)
+   */
+  listObjects(params: ListObjectsParams): EventEmitter {
+    const ee = new EventEmitter();
+    const s3Details = extend({}, params.s3Params);
+    const recursive = !!params.recursive;
+    let abort = false;
+
+    (ee as any).progressAmount = 0;
+    (ee as any).objectsFound = 0;
+    (ee as any).dirsFound = 0;
+
+    (ee as any).abort = () => {
+      abort = true;
+    };
+
+    const findAllS3Objects = (marker: string | null, prefix: string, cb: (err?: any) => void) => {
+      if (abort) {
+        return;
+      }
+
+      const listObjectsInternal = (innerCb: (err: any, data?: any) => void) => {
+        if (abort) {
+          return;
+        }
+        this.s3Pend.go(async (pendCb) => {
+          if (abort) {
+            pendCb();
+            return;
+          }
+          s3Details.Marker = marker;
+          s3Details.Prefix = prefix;
+
+          try {
+            const data = await this.s3.listObjects(s3Details);
+            pendCb();
+            if (abort) {
               return;
             }
+            innerCb(null, data);
+          } catch (err) {
+            pendCb();
+            if (abort) {
+              return;
+            }
+            innerCb(err);
+          }
+        });
+      };
+
+      doWithRetry(listObjectsInternal, this.s3RetryCount, this.s3RetryDelay, (err, data) => {
+        if (abort) {
+          return;
+        }
+        if (err) {
+          return cb(err);
+        }
+
+        if (!data.Contents) {
+          data.Contents = [];
+        }
+        if (!data.CommonPrefixes) {
+          data.CommonPrefixes = [];
+        }
+        (ee as any).progressAmount += 1;
+        (ee as any).objectsFound += data.Contents.length;
+        (ee as any).dirsFound += data.CommonPrefixes.length;
+        ee.emit('progress');
+        ee.emit('data', data);
+
+        const pend = new Pend();
+
+        if (recursive) {
+          data.CommonPrefixes.forEach((dirObj: any) => {
+            const prefix = dirObj.Prefix;
+            pend.go((cb) => {
+              findAllS3Objects(null, prefix, cb);
+            });
+          });
+          data.CommonPrefixes = [];
+        }
+
+        if (data.IsTruncated) {
+          pend.go((cb) => {
+            const nextMarker = data.NextMarker || data.Contents[data.Contents.length - 1].Key;
+            findAllS3Objects(nextMarker, prefix, cb);
+          });
+        }
+
+        pend.wait((err) => {
+          cb(err);
+        });
+      });
+    };
+
+    findAllS3Objects(s3Details.Marker, s3Details.Prefix, (err) => {
+      if (err) {
+        ee.emit('error', err);
+        return;
+      }
+      ee.emit('end');
+    });
+
+    return ee;
+  }
+
+  /**
+   * Uploads a directory to S3 bucket
+   * @param params.deleteRemoved - delete s3 objects with no corresponding local file (default: false)
+   * @param params.localDir - path on local file system to sync
+   * @param params.s3Params - S3 parameters (Bucket, Key required)
+   */
+  uploadDir(params: SyncDirParams): EventEmitter {
+    return syncDir(this, params, true);
+  }
+
+  downloadDir(params: SyncDirParams): EventEmitter {
+    return syncDir(this, params, false);
+  }
+
+  deleteDir(s3Params: any): EventEmitter {
+    const ee = new EventEmitter();
+    const bucket = s3Params.Bucket;
+    const mfa = s3Params.MFA;
+    const listObjectsParams = {
+      recursive: true,
+      s3Params: {
+        Bucket: bucket,
+        Prefix: s3Params.Prefix
+      }
+    };
+    const finder = this.listObjects(listObjectsParams);
+    const pend = new Pend();
+    (ee as any).progressAmount = 0;
+    (ee as any).progressTotal = 0;
+
+    finder.on('error', (err) => {
+      ee.emit('error', err);
+    });
+
+    finder.on('data', (objects: any) => {
+      (ee as any).progressTotal += objects.Contents.length;
+      ee.emit('progress');
+      if (objects.Contents.length > 0) {
+        pend.go((cb) => {
+          const params = {
+            Bucket: bucket,
+            Delete: {
+              Objects: objects.Contents.map(keyOnly),
+              Quiet: true
+            },
+            MFA: mfa
+          };
+          const deleter = this.deleteObjects(params);
+          deleter.on('error', (err) => {
+            (finder as any).abort();
+            ee.emit('error', err);
+          });
+          deleter.on('end', () => {
+            (ee as any).progressAmount += objects.Contents.length;
+            ee.emit('progress');
             cb();
           });
         });
-        multipartETag.on('progress', () => {
-          downloader.progressAmount = multipartETag.bytes;
-          downloader.emit('progress');
-        });
-        outStream.on('close', () => {
-          if (errorOccurred) {
-            return;
-          }
-          hashCheckPend.wait(cb);
-        });
-
-        httpStream.pipe(multipartETag);
-        httpStream.pipe(outStream);
-        multipartETag.resume();
       }
     });
 
-    request.send(handleError);
-
-    function handleError(err) {
-      if (!err) {
-        return;
-      }
-      if (errorOccurred) {
-        return;
-      }
-      errorOccurred = true;
-      cb(err);
-    }
-  }
-};
-
-/* params:
- *  - recursive: false
- *  - s3Params:
- *    - Bucket: params.s3Params.Bucket,
- *    - Delimiter: null,
- *    - Marker: null,
- *    - MaxKeys: null,
- *    - Prefix: prefix,
- */
-S3Sync.prototype.listObjects = function (params) {
-  const self: ClientType = this;
-  const ee = new EventEmitter();
-  const s3Details = extend({}, params.s3Params);
-  const recursive = !!params.recursive;
-  let abort = false;
-
-  ee.progressAmount = 0;
-  ee.objectsFound = 0;
-  ee.dirsFound = 0;
-  findAllS3Objects(s3Details.Marker, s3Details.Prefix, (err) => {
-    if (err) {
-      ee.emit('error', err);
-      return;
-    }
-    ee.emit('end');
-  });
-
-  ee.abort = function () {
-    abort = true;
-  };
-
-  return ee;
-
-  function findAllS3Objects(marker, prefix, cb) {
-    if (abort) {
-      return;
-    }
-    doWithRetry(listObjects, self.s3RetryCount, self.s3RetryDelay, (err, data) => {
-      if (abort) {
-        return;
-      }
-      if (err) {
-        return cb(err);
-      }
-
-      if (!data.Contents) {
-        data.Contents = [];
-      }
-      if (!data.CommonPrefixes) {
-        data.CommonPrefixes = [];
-      }
-      ee.progressAmount += 1;
-      ee.objectsFound += data.Contents.length;
-      ee.dirsFound += data.CommonPrefixes.length;
-      ee.emit('progress');
-      ee.emit('data', data);
-
-      const pend = new Pend();
-
-      if (recursive) {
-        data.CommonPrefixes.forEach(recurse);
-        data.CommonPrefixes = [];
-      }
-
-      if (data.IsTruncated) {
-        pend.go(findNext1000);
-      }
-
-      pend.wait((err) => {
-        cb(err);
+    finder.on('end', () => {
+      pend.wait(() => {
+        ee.emit('end');
       });
-
-      function findNext1000(cb) {
-        const nextMarker = data.NextMarker || data.Contents[data.Contents.length - 1].Key;
-        findAllS3Objects(nextMarker, prefix, cb);
-      }
-
-      function recurse(dirObj) {
-        const prefix = dirObj.Prefix;
-        pend.go((cb) => {
-          findAllS3Objects(null, prefix, cb);
-        });
-      }
     });
 
-    function listObjects(cb) {
-      if (abort) {
-        return;
-      }
-      self.s3Pend.go((pendCb) => {
-        if (abort) {
-          pendCb();
-          return;
+    return ee;
+  }
+
+  copyObject(s3Params: any): EventEmitter {
+    const ee = new EventEmitter();
+    const params = extend({}, s3Params);
+    delete params.MFA;
+
+    doWithRetry(
+      (cb) => {
+        this.s3Pend.go(async (pendCb) => {
+          try {
+            const data = await this.s3.copyObject(params);
+            pendCb();
+            cb(null, data);
+          } catch (err) {
+            pendCb();
+            cb(err);
+          }
+        });
+      },
+      this.s3RetryCount,
+      this.s3RetryDelay,
+      (err, data) => {
+        if (err) {
+          ee.emit('error', err);
+        } else {
+          ee.emit('end', data);
         }
-        s3Details.Marker = marker;
-        s3Details.Prefix = prefix;
-        self.s3.listObjects(s3Details, (err, data) => {
-          pendCb();
-          if (abort) {
-            return;
-          }
-          cb(err, data);
-        });
-      });
-    }
+      }
+    );
+
+    return ee;
   }
-};
 
-/* params:
- * - deleteRemoved - delete s3 objects with no corresponding local file. default false
- * - localDir - path on local file system to sync
- * - s3Params:
- *   - Bucket (required)
- *   - Key (required)
- */
-S3Sync.prototype.uploadDir = function (params) {
-  return syncDir(this, params, true);
-};
+  moveObject(s3Params: any): EventEmitter {
+    const ee = new EventEmitter();
+    const copier = this.copyObject(s3Params);
+    const copySource = s3Params.CopySource;
+    const mfa = s3Params.MFA;
 
-S3Sync.prototype.downloadDir = function (params) {
-  return syncDir(this, params, false);
-};
+    copier.on('error', (err) => {
+      ee.emit('error', err);
+    });
 
-S3Sync.prototype.deleteDir = function (s3Params) {
-  const self: ClientType = this;
-  const ee = new EventEmitter();
-  const bucket = s3Params.Bucket;
-  const mfa = s3Params.MFA;
-  const listObjectsParams = {
-    recursive: true,
-    s3Params: {
-      Bucket: bucket,
-      Prefix: s3Params.Prefix
-    }
-  };
-  const finder = self.listObjects(listObjectsParams);
-  const pend = new Pend();
-  ee.progressAmount = 0;
-  ee.progressTotal = 0;
-  finder.on('error', (err) => {
-    ee.emit('error', err);
-  });
-  finder.on('data', (objects) => {
-    ee.progressTotal += objects.Contents.length;
-    ee.emit('progress');
-    if (objects.Contents.length > 0) {
-      pend.go(deleteThem);
-    }
-
-    function deleteThem(cb) {
-      const params = {
-        Bucket: bucket,
+    copier.on('end', (data) => {
+      ee.emit('copySuccess', data);
+      const slashIndex = copySource.indexOf('/');
+      const sourceBucket = copySource.substring(0, slashIndex);
+      const sourceKey = copySource.substring(slashIndex + 1);
+      const deleteS3Params = {
+        Bucket: sourceBucket,
         Delete: {
-          Objects: objects.Contents.map(keyOnly),
+          Objects: [
+            {
+              Key: sourceKey
+            }
+          ],
           Quiet: true
         },
         MFA: mfa
       };
-      const deleter = self.deleteObjects(params);
+      const deleter = this.deleteObjects(deleteS3Params);
       deleter.on('error', (err) => {
-        finder.abort();
         ee.emit('error', err);
       });
+      let deleteData: any;
+      deleter.on('data', (data) => {
+        deleteData = data;
+      });
       deleter.on('end', () => {
-        ee.progressAmount += objects.Contents.length;
-        ee.emit('progress');
-        cb();
-      });
-    }
-  });
-  finder.on('end', () => {
-    pend.wait(() => {
-      ee.emit('end');
-    });
-  });
-  return ee;
-};
-
-S3Sync.prototype.copyObject = function (_s3Params) {
-  const self: ClientType = this;
-  const ee = new EventEmitter();
-  const s3Params = extend({}, _s3Params);
-  delete s3Params.MFA;
-  doWithRetry(doCopyWithPend, self.s3RetryCount, self.s3RetryDelay, (err, data) => {
-    if (err) {
-      ee.emit('error', err);
-    } else {
-      ee.emit('end', data);
-    }
-  });
-  function doCopyWithPend(cb) {
-    self.s3Pend.go((pendCb) => {
-      doTheCopy((err, data) => {
-        pendCb();
-        cb(err, data);
+        ee.emit('end', deleteData);
       });
     });
-  }
-  function doTheCopy(cb) {
-    self.s3.copyObject(s3Params, cb);
-  }
-  return ee;
-};
 
-S3Sync.prototype.moveObject = function (s3Params) {
-  const self: ClientType = this;
-  const ee = new EventEmitter();
-  const copier = self.copyObject(s3Params);
-  const copySource = s3Params.CopySource;
-  const mfa = s3Params.MFA;
-  copier.on('error', (err) => {
-    ee.emit('error', err);
-  });
-  copier.on('end', (data) => {
-    ee.emit('copySuccess', data);
-    const slashIndex = copySource.indexOf('/');
-    const sourceBucket = copySource.substring(0, slashIndex);
-    const sourceKey = copySource.substring(slashIndex + 1);
-    const deleteS3Params = {
-      Bucket: sourceBucket,
-      Delete: {
-        Objects: [
-          {
-            Key: sourceKey
+    return ee;
+  }
+
+  downloadBuffer(s3Params: any): EventEmitter {
+    const downloader = new EventEmitter();
+    const params = extend({}, s3Params);
+
+    (downloader as any).progressAmount = 0;
+
+    doWithRetry(
+      (cb) => {
+        this.s3Pend.go(async (pendCb) => {
+          try {
+            const response = await this.s3.getObject(params);
+            const contentLength = response.ContentLength || 0;
+            const eTag = cleanETag(response.ETag);
+            const eTagCount = getETagCount(eTag);
+
+            (downloader as any).progressTotal = contentLength;
+            (downloader as any).progressAmount = 0;
+            downloader.emit('progress');
+
+            const outStream = new StreamSink();
+            const multipartETag = new MultipartETag({ size: contentLength, count: eTagCount });
+
+            multipartETag.on('progress', () => {
+              (downloader as any).progressAmount = multipartETag.bytes;
+              downloader.emit('progress');
+            });
+
+            if (response.Body instanceof Readable) {
+              response.Body.pipe(multipartETag);
+              multipartETag.pipe(outStream);
+
+              outStream.on('finish', () => {
+                if (multipartETag.bytes !== contentLength) {
+                  pendCb();
+                  cb(new Error('Downloaded size does not match Content-Length'));
+                  return;
+                }
+                if (eTagCount === 1 && !multipartETag.anyMatch(eTag)) {
+                  pendCb();
+                  cb(new Error('ETag does not match MD5 checksum'));
+                  return;
+                }
+                pendCb();
+                cb(null, outStream.toBuffer());
+              });
+
+              outStream.on('error', (err) => {
+                pendCb();
+                cb(err);
+              });
+            } else {
+              pendCb();
+              cb(new Error('Response body is not a readable stream'));
+            }
+          } catch (err) {
+            pendCb();
+            cb(err);
           }
-        ],
-        Quiet: true
+        });
       },
-      MFA: mfa
-    };
-    const deleter = self.deleteObjects(deleteS3Params);
-    deleter.on('error', (err) => {
-      ee.emit('error', err);
-    });
-    let deleteData;
-    deleter.on('data', (data) => {
-      deleteData = data;
-    });
-    deleter.on('end', () => {
-      ee.emit('end', deleteData);
-    });
-  });
-  return ee;
-};
-
-S3Sync.prototype.downloadBuffer = function (s3Params) {
-  const self: ClientType = this;
-  const downloader = new EventEmitter();
-  s3Params = extend({}, s3Params);
-
-  downloader.progressAmount = 0;
-
-  doWithRetry(doDownloadWithPend, self.s3RetryCount, self.s3RetryDelay, (err, buffer) => {
-    if (err) {
-      downloader.emit('error', err);
-      return;
-    }
-    downloader.emit('end', buffer);
-  });
-
-  return downloader;
-
-  function doDownloadWithPend(cb) {
-    self.s3Pend.go((pendCb) => {
-      doTheDownload((err, buffer) => {
-        pendCb();
-        cb(err, buffer);
-      });
-    });
-  }
-
-  function doTheDownload(cb) {
-    let errorOccurred = false;
-    const request = self.s3.getObject(s3Params);
-    const hashCheckPend = new Pend();
-    request.on('httpHeaders', (statusCode, headers, resp) => {
-      if (statusCode >= 300) {
-        handleError(new Error(`http status code ${statusCode}`));
-        return;
-      }
-      const contentLength = Number.parseInt(headers['content-length'], 10);
-      downloader.progressTotal = contentLength;
-      downloader.progressAmount = 0;
-      downloader.emit('progress');
-      downloader.emit('httpHeaders', statusCode, headers, resp);
-      const eTag = cleanETag(headers.etag);
-      const eTagCount = getETagCount(eTag);
-
-      const outStream = new StreamSink();
-      const multipartETag = new MultipartETag({ size: contentLength, count: eTagCount });
-      const httpStream = resp.httpResponse.createUnbufferedStream();
-
-      httpStream.on('error', handleError);
-      outStream.on('error', handleError);
-
-      hashCheckPend.go((cb) => {
-        multipartETag.on('end', () => {
-          if (multipartETag.bytes !== contentLength) {
-            handleError(new Error('Downloaded size does not match Content-Length'));
-            return;
-          }
-          if (eTagCount === 1 && !multipartETag.anyMatch(eTag)) {
-            handleError(new Error('ETag does not match MD5 checksum'));
-            return;
-          }
-          cb();
-        });
-      });
-      multipartETag.on('progress', () => {
-        downloader.progressAmount = multipartETag.bytes;
-        downloader.emit('progress');
-      });
-      outStream.on('finish', () => {
-        if (errorOccurred) {
+      this.s3RetryCount,
+      this.s3RetryDelay,
+      (err, buffer) => {
+        if (err) {
+          downloader.emit('error', err);
           return;
         }
-        hashCheckPend.wait(() => {
-          cb(null, outStream.toBuffer());
-        });
-      });
-
-      httpStream.pipe(multipartETag);
-      httpStream.pipe(outStream);
-      multipartETag.resume();
-    });
-
-    request.send(handleError);
-
-    function handleError(err) {
-      if (!err) {
-        return;
+        downloader.emit('end', buffer);
       }
-      if (errorOccurred) {
-        return;
-      }
-      errorOccurred = true;
-      cb(err);
-    }
-  }
-};
+    );
 
-S3Sync.prototype.downloadStream = function (s3Params) {
-  const self: ClientType = this;
-  const downloadStream = new PassThrough();
-  s3Params = extend({}, s3Params);
-
-  doDownloadWithPend((err) => {
-    if (err) {
-      downloadStream.emit('error', err);
-    }
-  });
-  return downloadStream;
-
-  function doDownloadWithPend(cb) {
-    self.s3Pend.go((pendCb) => {
-      doTheDownload((err) => {
-        pendCb();
-        cb(err);
-      });
-    });
+    return downloader;
   }
 
-  function doTheDownload(cb) {
-    let errorOccurred = false;
-    const request = self.s3.getObject(s3Params);
-    request.on('httpHeaders', (statusCode, headers, resp) => {
-      if (statusCode >= 300) {
-        handleError(new Error(`http status code ${statusCode}`));
-        return;
-      }
-      downloadStream.emit('httpHeaders', statusCode, headers, resp);
-      const httpStream = resp.httpResponse.createUnbufferedStream();
+  downloadStream(s3Params: any): PassThrough {
+    const downloadStream = new PassThrough();
+    const params = extend({}, s3Params);
 
-      httpStream.on('error', handleError);
+    this.s3Pend.go(async (pendCb) => {
+      try {
+        const response = await this.s3.getObject(params);
 
-      downloadStream.on('finish', () => {
-        if (errorOccurred) {
-          return;
+        if (response.Body instanceof Readable) {
+          response.Body.pipe(downloadStream);
+          response.Body.on('error', (err) => {
+            downloadStream.emit('error', err);
+          });
+        } else {
+          downloadStream.emit('error', new Error('Response body is not a readable stream'));
         }
-        cb();
-      });
-
-      httpStream.pipe(downloadStream);
+        pendCb();
+      } catch (err) {
+        downloadStream.emit('error', err);
+        pendCb();
+      }
     });
 
-    request.send(handleError);
-
-    function handleError(err) {
-      if (!err) {
-        return;
-      }
-      if (errorOccurred) {
-        return;
-      }
-      errorOccurred = true;
-      cb(err);
-    }
+    return downloadStream;
   }
-};
+}
 
-function syncDir(self, params, directionIsToS3: boolean) {
+function syncDir(self: S3Sync, params: SyncDirParams, directionIsToS3: boolean): EventEmitter {
   const ee = new EventEmitter();
-  const finditOpts = {
-    fs,
-    followSymlinks: params.followSymlinks == null ? true : !!params.followSymlinks
-  };
+  const followSymlinks = params.followSymlinks == null ? true : !!params.followSymlinks;
   const localDir = params.localDir;
   const deleteRemoved = params.deleteRemoved === true;
   let fatalError = false;
@@ -1027,7 +721,7 @@ function syncDir(self, params, directionIsToS3: boolean) {
   };
   const getS3Params = params.getS3Params;
   const baseUpDownS3Params = extend({}, params.s3Params);
-  const upDownFileParams = {
+  const upDownFileParams: any = {
     s3Params: baseUpDownS3Params,
     defaultContentType: params.defaultContentType
   };
@@ -1037,24 +731,24 @@ function syncDir(self, params, directionIsToS3: boolean) {
   // this only works when direction is to S3
   const skipFiles: string[] = params.skipFiles || [];
 
-  ee.activeTransfers = 0;
-  ee.progressAmount = 0;
-  ee.progressTotal = 0;
-  ee.progressMd5Amount = 0;
-  ee.progressMd5Total = 0;
-  ee.objectsFound = 0;
-  ee.filesFound = 0;
-  ee.deleteAmount = 0;
-  ee.deleteTotal = 0;
-  ee.doneFindingFiles = false;
-  ee.doneFindingObjects = false;
-  ee.doneMd5 = false;
+  (ee as any).activeTransfers = 0;
+  (ee as any).progressAmount = 0;
+  (ee as any).progressTotal = 0;
+  (ee as any).progressMd5Amount = 0;
+  (ee as any).progressMd5Total = 0;
+  (ee as any).objectsFound = 0;
+  (ee as any).filesFound = 0;
+  (ee as any).deleteAmount = 0;
+  (ee as any).deleteTotal = 0;
+  (ee as any).doneFindingFiles = false;
+  (ee as any).doneFindingObjects = false;
+  (ee as any).doneMd5 = false;
 
-  const allLocalFiles = [];
-  const allS3Objects = [];
+  const allLocalFiles: LocalFileStat[] = [];
+  const allS3Objects: any[] = [];
   let localFileCursor = 0;
   let s3ObjectCursor = 0;
-  let objectsToDelete = [];
+  let objectsToDelete: any[] = [];
 
   findAllS3Objects();
   startFindAllFiles();
@@ -1080,7 +774,7 @@ function syncDir(self, params, directionIsToS3: boolean) {
       if (fatalError) {
         return;
       }
-      ee.deleteAmount += thisObjectsToDelete.length;
+      (ee as any).deleteAmount += thisObjectsToDelete.length;
       ee.emit('progress');
       checkDoMoreWork();
     });
@@ -1096,10 +790,10 @@ function syncDir(self, params, directionIsToS3: boolean) {
 
     // need to wait for a file or object. checkDoMoreWork will get called
     // again when that happens.
-    if (!localFileStat && !ee.doneMd5) {
+    if (!localFileStat && !(ee as any).doneMd5) {
       return;
     }
-    if (!s3Object && !ee.doneFindingObjects) {
+    if (!s3Object && !(ee as any).doneFindingObjects) {
       return;
     }
 
@@ -1115,7 +809,11 @@ function syncDir(self, params, directionIsToS3: boolean) {
     if (!localFileStat && !s3Object) {
       // if we don't have any pending deletes or uploads, we're actually done
       flushDeletes();
-      if (ee.deleteAmount >= ee.deleteTotal && ee.progressAmount >= ee.progressTotal && ee.activeTransfers === 0) {
+      if (
+        (ee as any).deleteAmount >= (ee as any).deleteTotal &&
+        (ee as any).progressAmount >= (ee as any).progressTotal &&
+        (ee as any).activeTransfers === 0
+      ) {
         ee.emit('end');
         // prevent checkDoMoreWork from doing any more work
         fatalError = true;
@@ -1179,16 +877,16 @@ function syncDir(self, params, directionIsToS3: boolean) {
     }
 
     function deleteLocalDir() {
-      const fullPath = path.join(localDir, localFileStat.path);
-      ee.deleteTotal += 1;
+      const fullPath = path.join(localDir, localFileStat!.path);
+      (ee as any).deleteTotal += 1;
       remove(fullPath, (err) => {
         if (fatalError) {
           return;
         }
-        if (err && err.code !== 'ENOENT') {
+        if (err && (err as any).code !== 'ENOENT') {
           return handleError(err);
         }
-        ee.deleteAmount += 1;
+        (ee as any).deleteAmount += 1;
         ee.emit('progress');
         checkDoMoreWork();
       });
@@ -1200,16 +898,16 @@ function syncDir(self, params, directionIsToS3: boolean) {
       if (!deleteRemoved) {
         return;
       }
-      ee.deleteTotal += 1;
-      const fullPath = path.join(localDir, localFileStat.path);
+      (ee as any).deleteTotal += 1;
+      const fullPath = path.join(localDir, localFileStat!.path);
       fs.unlink(fullPath, (err) => {
         if (fatalError) {
           return;
         }
-        if (err && err.code !== 'ENOENT') {
+        if (err && (err as any).code !== 'ENOENT') {
           return handleError(err);
         }
-        ee.deleteAmount += 1;
+        (ee as any).deleteAmount += 1;
         ee.emit('progress');
         checkDoMoreWork();
       });
@@ -1244,26 +942,26 @@ function syncDir(self, params, directionIsToS3: boolean) {
       }
 
       function startDownload() {
-        ee.progressTotal += s3Object.Size;
+        (ee as any).progressTotal += s3Object.Size;
         const fullKey = s3Object.Key;
         upDownFileParams.s3Params.Key = fullKey;
         upDownFileParams.localFile = fullPath;
         const downloader = self.downloadFile(upDownFileParams);
         let prevAmountDone = 0;
-        ee.activeTransfers++;
+        (ee as any).activeTransfers++;
         ee.emit('fileDownloadStart', fullPath, fullKey);
         downloader.on('error', handleError);
         downloader.on('progress', () => {
           if (fatalError) {
             return;
           }
-          const delta = downloader.progressAmount - prevAmountDone;
-          prevAmountDone = downloader.progressAmount;
-          ee.progressAmount += delta;
+          const delta = (downloader as any).progressAmount - prevAmountDone;
+          prevAmountDone = (downloader as any).progressAmount;
+          (ee as any).progressAmount += delta;
           ee.emit('progress');
         });
         downloader.on('end', () => {
-          ee.activeTransfers--;
+          (ee as any).activeTransfers--;
           ee.emit('fileDownloadEnd', fullPath, fullKey);
           ee.emit('progress');
           checkDoMoreWork();
@@ -1306,7 +1004,7 @@ function syncDir(self, params, directionIsToS3: boolean) {
       }
 
       function startCopy() {
-        const fullKey = prefix + localFileStat.s3Path;
+        const fullKey = prefix + localFileStat!.s3Path;
         upDownFileParams.s3Params.Key = fullKey;
         const copier = self.copyObject({
           CopySource: `${upDownFileParams.s3Params.Bucket}/${upDownFileParams.s3Params.Key}`,
@@ -1315,7 +1013,7 @@ function syncDir(self, params, directionIsToS3: boolean) {
           ContentType: mime.getType(fullPath),
           ...upDownFileParams.s3Params
         });
-        ee.activeTransfers++;
+        (ee as any).activeTransfers++;
         ee.emit('copyStart', fullKey);
         copier.on('error', (err) => {
           handleError(err);
@@ -1327,7 +1025,7 @@ function syncDir(self, params, directionIsToS3: boolean) {
           ee.emit('progress');
         });
         copier.on('end', () => {
-          ee.activeTransfers--;
+          (ee as any).activeTransfers--;
           ee.emit('copySuccess', fullKey);
           ee.emit('progress');
           checkDoMoreWork();
@@ -1365,32 +1063,32 @@ function syncDir(self, params, directionIsToS3: boolean) {
       }
 
       function startUpload() {
-        ee.progressTotal += localFileStat.size;
-        const fullKey = prefix + localFileStat.s3Path;
+        (ee as any).progressTotal += localFileStat!.size;
+        const fullKey = prefix + localFileStat!.s3Path;
         upDownFileParams.s3Params.Key = fullKey;
         upDownFileParams.localFile = fullPath;
         const uploader = self.uploadFile(upDownFileParams);
         let prevAmountDone = 0;
-        let prevAmountTotal = localFileStat.size;
-        ee.activeTransfers++;
+        let prevAmountTotal = localFileStat!.size;
+        (ee as any).activeTransfers++;
         ee.emit('fileUploadStart', fullPath, fullKey);
         uploader.on('error', handleError);
         uploader.on('progress', () => {
           if (fatalError) {
             return;
           }
-          const amountDelta = uploader.progressAmount - prevAmountDone;
-          prevAmountDone = uploader.progressAmount;
-          ee.progressAmount += amountDelta;
+          const amountDelta = (uploader as any).progressAmount - prevAmountDone;
+          prevAmountDone = (uploader as any).progressAmount;
+          (ee as any).progressAmount += amountDelta;
 
-          const totalDelta = uploader.progressTotal - prevAmountTotal;
-          prevAmountTotal = uploader.progressTotal;
-          ee.progressTotal += totalDelta;
+          const totalDelta = (uploader as any).progressTotal - prevAmountTotal;
+          prevAmountTotal = (uploader as any).progressTotal;
+          (ee as any).progressTotal += totalDelta;
 
           ee.emit('progress');
         });
         uploader.on('end', () => {
-          ee.activeTransfers--;
+          (ee as any).activeTransfers--;
           ee.emit('fileUploadEnd', fullPath, fullKey);
           ee.emit('progress');
           checkDoMoreWork();
@@ -1405,7 +1103,7 @@ function syncDir(self, params, directionIsToS3: boolean) {
         return;
       }
       objectsToDelete.push({ Key: s3Object.Key });
-      ee.deleteTotal += 1;
+      (ee as any).deleteTotal += 1;
       ee.emit('progress');
       assert.ok(objectsToDelete.length <= 1000);
       if (objectsToDelete.length === 1000) {
@@ -1425,14 +1123,14 @@ function syncDir(self, params, directionIsToS3: boolean) {
   function findAllS3Objects() {
     const finder = self.listObjects(listObjectsParams);
     finder.on('error', handleError);
-    finder.on('data', (data) => {
+    finder.on('data', (data: any) => {
       if (fatalError) {
         return;
       }
-      ee.objectsFound += data.Contents.length;
+      (ee as any).objectsFound += data.Contents.length;
       ee.emit('progress');
 
-      data.Contents.forEach((object) => {
+      data.Contents.forEach((object: any) => {
         object.key = object.Key.substring(prefix.length);
         allS3Objects.push(object);
       });
@@ -1442,7 +1140,7 @@ function syncDir(self, params, directionIsToS3: boolean) {
       if (fatalError) {
         return;
       }
-      ee.doneFindingObjects = true;
+      (ee as any).doneFindingObjects = true;
       ee.emit('progress');
       checkDoMoreWork();
     });
@@ -1457,7 +1155,7 @@ function syncDir(self, params, directionIsToS3: boolean) {
         return handleError(err);
       }
 
-      ee.doneFindingFiles = true;
+      (ee as any).doneFindingFiles = true;
       ee.emit('progress');
 
       allLocalFiles.sort((a, b) => {
@@ -1483,7 +1181,7 @@ function syncDir(self, params, directionIsToS3: boolean) {
       }
       const localFileStat = allLocalFiles[index];
       if (!localFileStat) {
-        ee.doneMd5 = true;
+        (ee as any).doneMd5 = true;
         ee.emit('progress');
         checkDoMoreWork();
         return;
@@ -1501,7 +1199,7 @@ function syncDir(self, params, directionIsToS3: boolean) {
       multipartETag.on('progress', () => {
         const delta = multipartETag.bytes - prevBytes;
         prevBytes = multipartETag.bytes;
-        ee.progressMd5Amount += delta;
+        (ee as any).progressMd5Amount += delta;
       });
       multipartETag.on('end', () => {
         if (fatalError) {
@@ -1518,57 +1216,89 @@ function syncDir(self, params, directionIsToS3: boolean) {
     }
   }
 
-  function findAllFiles(cb) {
+  function findAllFiles(cb: (err?: any) => void) {
     const dirWithSlash = ensureSep(localDir);
-    const walker = findit(dirWithSlash, finditOpts);
-    walker.on('error', (err) => {
-      walker.stop();
+
+    // Check if directory exists
+    if (!fsExtra.existsSync(dirWithSlash)) {
       // when uploading, we don't want to delete based on a nonexistent source directory
       // but when downloading, the destination directory does not have to exist.
-      if (!directionIsToS3 && err.path === dirWithSlash && err.code === 'ENOENT') {
-        cb();
-      } else {
-        cb(err);
+      if (!directionIsToS3) {
+        return cb();
       }
-    });
-    walker.on('directory', (dir, stat, stop, linkPath) => {
+      return cb(new Error(`ENOENT: Directory not found: ${dirWithSlash}`));
+    }
+
+    const walkDirectory = async (dir: string) => {
       if (fatalError) {
-        return walker.stop();
-      }
-      // we only need to save directories when deleteRemoved is true
-      // and we're syncing to disk from s3
-      if (!deleteRemoved || directionIsToS3) {
         return;
       }
-      const relPath = path.relative(localDir, linkPath || dir);
-      if (relPath === '') {
-        return;
+
+      const entries = await fsExtra.readdir(dir, { withFileTypes: true });
+
+      for (const entry of entries) {
+        if (fatalError) {
+          return;
+        }
+
+        const fullPath = path.join(dir, entry.name);
+        let stat: Stats;
+        let actualPath = fullPath;
+
+        // Handle symlinks if followSymlinks is enabled
+        if (entry.isSymbolicLink() && followSymlinks) {
+          try {
+            actualPath = await fsExtra.realpath(fullPath);
+            stat = await fsExtra.stat(actualPath);
+          } catch {
+            // Skip broken symlinks
+            continue;
+          }
+        } else if (entry.isSymbolicLink()) {
+          // Skip symlinks if not following
+          continue;
+        } else {
+          stat = await fsExtra.stat(fullPath);
+        }
+
+        if (stat.isDirectory()) {
+          // we only need to save directories when deleteRemoved is true
+          // and we're syncing to disk from s3
+          if (deleteRemoved && !directionIsToS3) {
+            const relPath = path.relative(localDir, fullPath);
+            if (relPath !== '') {
+              const fileStat = stat as LocalFileStat;
+              fileStat.path = relPath;
+              fileStat.s3Path = `${toUnixSep(relPath)}/`;
+              fileStat.multipartETag = new MultipartETag();
+              allLocalFiles.push(fileStat);
+            }
+          }
+          // Recurse into directory
+          await walkDirectory(fullPath);
+        } else if (stat.isFile()) {
+          const relPath = path.relative(localDir, actualPath !== fullPath ? actualPath : fullPath);
+
+          // ignoring local files (considering them non-existent)
+          // works only for directionToS3=true
+          if (directionIsToS3 && skipFiles?.some((globPattern) => stringMatchesGlob(relPath, globPattern))) {
+            continue;
+          }
+
+          const fileStat = stat as LocalFileStat;
+          fileStat.path = relPath;
+          fileStat.s3Path = toUnixSep(relPath);
+          (ee as any).filesFound += 1;
+          (ee as any).progressMd5Total += stat.size;
+          ee.emit('progress');
+          allLocalFiles.push(fileStat);
+        }
       }
-      stat.path = relPath;
-      stat.s3Path = `${toUnixSep(relPath)}/`;
-      stat.multipartETag = new MultipartETag();
-      allLocalFiles.push(stat);
-    });
-    walker.on('file', (file, stat, linkPath) => {
-      if (fatalError) {
-        return walker.stop();
-      }
-      const relPath = path.relative(localDir, linkPath || file);
-      // ignoring local files (considering them non-existent)
-      // works only for directionToS3=true
-      if (directionIsToS3 && skipFiles?.some((globPattern) => stringMatchesGlob(relPath, globPattern))) {
-        return;
-      }
-      stat.path = relPath;
-      stat.s3Path = toUnixSep(relPath);
-      ee.filesFound += 1;
-      ee.progressMd5Total += stat.size;
-      ee.emit('progress');
-      allLocalFiles.push(stat);
-    });
-    walker.on('end', () => {
-      cb();
-    });
+    };
+
+    walkDirectory(dirWithSlash)
+      .then(() => cb())
+      .catch((err) => cb(err));
   }
 }
 
@@ -1625,7 +1355,9 @@ function chunkArray(array, maxLength) {
 }
 
 function cleanETag(eTag) {
-  return eTag ? eTag.replace(/^\s*(?:'\s*)?"?\s*(.*?)\s*(?:"\s*)?'?\s*$/, '$1') : '';
+  if (!eTag) return '';
+  // Remove quotes, apostrophes, and whitespace
+  return eTag.replace(/^['"\s]+|['"\s]+$/g, '');
 }
 
 function compareMultipartETag(eTag, multipartETag) {
@@ -1682,9 +1414,4 @@ function toNativeSep(str) {
 
 function quotemeta(str) {
   return String(str).replace(/(\W)/g, '\\$1');
-}
-
-function smallestPartSizeFromFileSize(fileSize) {
-  const partSize = Math.ceil(fileSize / MAX_MULTIPART_COUNT);
-  return partSize < MIN_MULTIPART_SIZE ? MIN_MULTIPART_SIZE : partSize;
 }
