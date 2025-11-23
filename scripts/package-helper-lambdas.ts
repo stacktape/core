@@ -35,6 +35,7 @@ export const packageHelperLambdas = async ({ distFolderPath }: { isDev?: boolean
   await fsExtra.ensureDir(HELPER_LAMBDAS_DIST_FOLDER_PATH);
 
   const lambdasDistFolderPath = join(distFolderPath, HELPER_LAMBDAS_FOLDER_NAME);
+  await fsExtra.ensureDir(lambdasDistFolderPath);
 
   await Promise.all(
     Object.entries(helperLambdas).map(async ([name, { filePath, bundleSizeLimit }]) => {
