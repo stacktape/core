@@ -12,10 +12,6 @@ const dashes = {
   frames: ['-', '_']
 };
 const VALID_STATUSES = ['succeed', 'fail', 'spinning'] as const;
-const envFlagEnabled = (value?: string) => ['1', 'true', 'yes'].includes((value || '').toLowerCase());
-const RUNNING_IN_CI = envFlagEnabled(process.env.CI);
-const FORCE_SIMPLE_MODE = envFlagEnabled(process.env.STACKTAPE_SIMPLE_SPINNER);
-const FORCE_DISABLE_MODE = envFlagEnabled(process.env.STACKTAPE_DISABLE_SPINNER);
 
 function purgeSpinnerOptions(options) {
   const opts = { ...options };
@@ -86,19 +82,11 @@ function getLinesLength(text, prefixLength) {
 }
 
 function writeStream(stream, output, rawLines) {
-  if (!output) {
-    return;
-  }
   stream.write(output);
-  if (rawLines.length) {
-    readline.moveCursor(stream, 0, -rawLines.length);
-  }
+  readline.moveCursor(stream, 0, -rawLines.length);
 }
 
 function cleanStream(stream, rawLines) {
-  if (!rawLines.length) {
-    return;
-  }
   rawLines.forEach((lineLength, index) => {
     readline.moveCursor(stream, lineLength, index);
     readline.clearLine(stream, 1);
@@ -116,27 +104,19 @@ function terminalSupportsUnicode() {
 }
 
 type SpinnerStatus = (typeof VALID_STATUSES)[number];
-type SpinnerState = {
-  status: SpinnerStatus;
-  text: string;
-  succeedPrefix: string;
-  failPrefix: string;
-  indent?: number;
-};
 
 export class Spinnies {
   options: any;
-  spinners: Record<string, SpinnerState> = {};
+  spinners: {
+    [spinnerName: string]: { status: SpinnerStatus; text; succeedPrefix; failPrefix; indent };
+  } = {};
 
   isCursorHidden = false;
   isStopped = false;
-  currentInterval: NodeJS.Timeout | null = null;
-  stream: NodeJS.WriteStream = process.stderr;
+  currentInterval: NodeJS.Timeout;
+  stream = process.stderr;
   lineCount = 0;
   currentFrameIndex = 0;
-  lastFrameTimestamp = 0;
-  renderMode: 'interactive' | 'basic';
-  basicModeLastPrintedText: Record<string, string> = {};
   colorizeFail: (text: string) => string;
   colorizeProgress: (text: string) => string;
   succeedPrefix: string;
@@ -155,8 +135,6 @@ export class Spinnies {
       disableSpins: false,
       ...options
     };
-    this.renderMode = this.shouldUseInteractiveMode() ? 'interactive' : 'basic';
-    this.options.disableSpins = this.renderMode === 'basic';
     this.succeedPrefix = options.succeedPrefix;
   }
 
@@ -171,7 +149,7 @@ export class Spinnies {
     if (!options.text) {
       options.text = name;
     }
-    const spinnerProperties: SpinnerState = {
+    const spinnerProperties = {
       succeedPrefix: this.options.succeedPrefix,
       failPrefix: this.options.failPrefix,
       status: 'spinning',
@@ -179,11 +157,6 @@ export class Spinnies {
     };
 
     this.spinners[name] = spinnerProperties;
-    this.isStopped = false;
-    if (this.renderMode === 'basic') {
-      this.logBasicStatus(name, 'start');
-      return spinnerProperties;
-    }
     this.updateSpinnerState();
 
     return spinnerProperties;
@@ -192,34 +165,22 @@ export class Spinnies {
   update(name, options: any = {}) {
     const { status } = options;
     this.setSpinnerProperties(name, options, status);
-    if (this.renderMode === 'basic') {
-      this.logBasicStatus(name, 'update');
-      return this.spinners[name];
-    }
     this.updateSpinnerState();
 
     return this.spinners[name];
   }
 
   succeed(name, options: { text?: string } = {}) {
-    const text = options.text || this.spinners[name]?.text || name;
     delete this.spinners[name];
-    delete this.basicModeLastPrintedText[name];
-    if (this.renderMode === 'interactive') {
-      this.updateSpinnerState();
-      readline.cursorTo(this.stream, 0);
-      readline.clearLine(this.stream, 1);
-    }
-    console.info(`${this.succeedPrefix} ${text}`);
+    // this.setSpinnerProperties(name, options, 'succeed');
+    this.updateSpinnerState();
+    readline.cursorTo(this.stream, 0);
+    readline.clearLine(this.stream, 1);
+    console.info(`${this.succeedPrefix} ${options.text}`);
   }
 
   fail(name, options = {}) {
     this.setSpinnerProperties(name, options, 'fail');
-    if (this.renderMode === 'basic') {
-      this.logBasicStatus(name, 'fail');
-      delete this.spinners[name];
-      return null;
-    }
     this.updateSpinnerState();
     return this.spinners[name];
   }
@@ -227,13 +188,9 @@ export class Spinnies {
   stopAllSpinners = () => {
     Object.keys(this.spinners).forEach((name) => {
       delete this.spinners[name];
-      delete this.basicModeLastPrintedText[name];
     });
     this.isStopped = true;
-    if (this.renderMode === 'interactive') {
-      this.stopRenderLoop();
-      readline.clearScreenDown(this.stream);
-    }
+    this.updateSpinnerState();
   };
 
   hasActiveSpinners() {
@@ -253,160 +210,66 @@ export class Spinnies {
   }
 
   updateSpinnerState() {
-    if (this.renderMode === 'basic' || this.isStopped) {
-      return;
+    clearInterval(this.currentInterval);
+    if (!this.isStopped) {
+      this.currentInterval = this.loopStream();
     }
-    if (!this.hasActiveSpinners()) {
-      this.handleNoActiveSpinners();
-      return;
+    if (!this.isCursorHidden) {
+      cliCursor.hide();
     }
-    this.ensureRenderLoop();
+    this.isCursorHidden = true;
+    this.checkIfActiveSpinners();
   }
 
   loopStream() {
     const { frames, interval } = this.options.spinner;
     return setInterval(() => {
-      if (this.renderMode !== 'interactive') {
-        return;
-      }
-      const now = Date.now();
-      if (this.lastFrameTimestamp && now - this.lastFrameTimestamp > interval * 20) {
-        this.fallbackToBasicMode('event-loop-blocked');
-        return;
-      }
-      this.lastFrameTimestamp = now;
       this.setStreamOutput(frames[this.currentFrameIndex]);
       this.currentFrameIndex = this.currentFrameIndex === frames.length - 1 ? 0 : ++this.currentFrameIndex;
     }, interval);
   }
 
   setStreamOutput(frame = '') {
-    if (this.renderMode !== 'interactive') {
-      return;
-    }
-    try {
-      let output = '';
-      const linesLength: number[] = [];
-      const hasActiveSpinners = this.hasActiveSpinners();
-      Object.entries(this.spinners).forEach(([_spinnerName, spinnerState]) => {
-        const { indent = 0, status } = spinnerState;
-        const text = spinnerState.text;
-        let prefixLength = indent;
-        let lineText = text;
-        let line = '';
-        if (status === 'spinning') {
-          prefixLength += frame.length + 1;
-          lineText = breakText(text, prefixLength);
-          line = `${this.colorizeProgress(frame)} ${lineText}`;
-        } else if (status === 'fail') {
-          const failLabel = spinnerState.failPrefix || '✖';
-          prefixLength += stripAnsi(failLabel).length + 1;
-          lineText = breakText(text, prefixLength);
-          line = `${this.colorizeFail(failLabel)} ${lineText}`;
-        } else {
-          lineText = breakText(text, prefixLength);
-          line = lineText;
-        }
-        linesLength.push(...getLinesLength(lineText, prefixLength));
-        output += indent ? `${' '.repeat(indent)}${line}\n` : `${line}\n`;
-      });
+    let output = '';
+    const linesLength = [];
+    const hasActiveSpinners = this.hasActiveSpinners();
+    Object.entries(this.spinners).forEach(([_spinnerName, { text, status, indent }]) => {
+      let line;
+      let prefixLength = indent || 0;
+      if (status === 'spinning') {
+        prefixLength += frame.length + 1;
+        text = breakText(text, prefixLength);
+        line = `${this.colorizeProgress(frame)} ${text}`;
+      } else if (hasActiveSpinners) {
+        text = breakText(text, prefixLength);
+      }
+      linesLength.push(...getLinesLength(text, prefixLength));
+      output += indent ? `${' '.repeat(indent)}${line}\n` : `${line}\n`;
+    });
 
-      if (!hasActiveSpinners) {
-        readline.clearScreenDown(this.stream);
-      }
-      writeStream(this.stream, output, linesLength);
-      if (hasActiveSpinners) {
-        cleanStream(this.stream, linesLength);
-      }
-      this.lineCount = linesLength.length;
-    } catch {
-      this.fallbackToBasicMode('render-error');
+    if (!hasActiveSpinners) {
+      readline.clearScreenDown(this.stream);
+    }
+    writeStream(this.stream, output, linesLength);
+    if (hasActiveSpinners) {
+      cleanStream(this.stream, linesLength);
+    }
+    this.lineCount = linesLength.length;
+  }
+
+  checkIfActiveSpinners() {
+    if (!this.hasActiveSpinners()) {
+      this.setStreamOutput();
+      readline.moveCursor(this.stream, 0, this.lineCount);
+      clearInterval(this.currentInterval);
+      this.isCursorHidden = false;
+      cliCursor.show();
+      this.spinners = {};
     }
   }
 
   cleanUpAfterExitSignal() {
-    if (this.renderMode === 'interactive') {
-      cliCursor.show();
-      readline.moveCursor(process.stderr, 0, this.lineCount);
-    }
-  }
-
-  private shouldUseInteractiveMode() {
-    if (FORCE_DISABLE_MODE || FORCE_SIMPLE_MODE || RUNNING_IN_CI) {
-      return false;
-    }
-    if (!this.stream || typeof this.stream.write !== 'function') {
-      return false;
-    }
-    return Boolean(this.stream.isTTY);
-  }
-
-  private ensureRenderLoop() {
-    if (this.currentInterval || !this.hasActiveSpinners()) {
-      return;
-    }
-    this.lastFrameTimestamp = Date.now();
-    this.currentInterval = this.loopStream();
-    if (!this.isCursorHidden) {
-      cliCursor.hide();
-      this.isCursorHidden = true;
-    }
-  }
-
-  private handleNoActiveSpinners() {
-    this.setStreamOutput();
-    this.stopRenderLoop();
-    this.spinners = {};
-  }
-
-  private stopRenderLoop() {
-    if (this.currentInterval) {
-      clearInterval(this.currentInterval);
-      this.currentInterval = null;
-    }
-    if (this.isCursorHidden) {
-      this.isCursorHidden = false;
-      cliCursor.show();
-    }
-    this.lineCount = 0;
-  }
-
-  private fallbackToBasicMode(_reason: string) {
-    if (this.renderMode === 'basic') {
-      return;
-    }
-    this.renderMode = 'basic';
-    this.options.disableSpins = true;
-    this.stopRenderLoop();
-    Object.keys(this.spinners).forEach((name) => {
-      const spinner = this.spinners[name];
-      const phase = spinner.status === 'fail' ? 'fail' : 'start';
-      this.logBasicStatus(name, phase);
-    });
-  }
-
-  private logBasicStatus(name: string, phase: 'start' | 'update' | 'fail') {
-    const spinner = this.spinners[name];
-    if (!spinner) {
-      return;
-    }
-    const text = spinner.text;
-    if (phase === 'update' && this.basicModeLastPrintedText[name] === text) {
-      return;
-    }
-    if (phase !== 'fail') {
-      this.basicModeLastPrintedText[name] = text;
-    } else {
-      delete this.basicModeLastPrintedText[name];
-    }
-    let prefix: string;
-    if (phase === 'fail') {
-      prefix = this.colorizeFail(spinner.failPrefix || '✖');
-    } else if (phase === 'start') {
-      prefix = this.colorizeProgress('•');
-    } else {
-      prefix = this.colorizeProgress('↻');
-    }
-    this.stream.write(`${prefix} ${text}\n`);
+    cliCursor.show();
+    readline.moveCursor(process.stderr, 0, this.lineCount);
   }
 }
