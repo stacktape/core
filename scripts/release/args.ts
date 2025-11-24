@@ -3,7 +3,7 @@ import { readJson, writeJson } from 'fs-extra';
 import inquirer from 'inquirer';
 import { inc } from 'semver';
 import yargsParser from 'yargs-parser';
-import packageJson from '../../../package.json';
+import packageJson from '../../package.json';
 
 type PlatformToBuildFor = SupportedPlatform | 'current-arch' | 'all' | 'current';
 
