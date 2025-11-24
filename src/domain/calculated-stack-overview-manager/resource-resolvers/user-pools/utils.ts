@@ -81,7 +81,9 @@ export const getUserPoolResource = ({
     },
     ...(mfaConfiguration?.status && { MfaConfiguration: mfaConfiguration?.status }),
     ...(mfaConfiguration?.enabledTypes && {
-      EnabledMfas: (mfaConfiguration?.enabledTypes || []).map((type) => `${type}_MFA`)
+      EnabledMfas: (mfaConfiguration?.enabledTypes || []).map((type) =>
+        type === 'EMAIL_OTP' ? 'EMAIL_OTP' : `${type}_MFA`
+      )
     }),
     ...(passwordPolicy && {
       Policies: {
