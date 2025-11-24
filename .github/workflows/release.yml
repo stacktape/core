@@ -82,8 +82,8 @@ jobs:
         with:
           name: binary-${{ matrix.platform }}
           path: |
-            dist-package/*.tar.gz
-            dist-package/*.zip
+            __dist/*.tar.gz
+            __dist/*.zip
           retention-days: 1
 
   release:
@@ -122,8 +122,8 @@ jobs:
 
       - name: Organize artifacts
         run: |
-          mkdir -p dist-package
-          find __dist-package-platform -type f -exec mv {} dist-package/ \;
+          mkdir -p __dist
+          find __dist-package-platform -type f -exec mv {} __dist/ \;
 
       - name: Install Stacktape CLI
         run: |

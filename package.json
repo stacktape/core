@@ -12,7 +12,7 @@
     "dev": "bun run scripts/dev.ts",
     "lint": "bunx eslint ./src ./shared ./scripts ./helper-lambdas --fix",
     "test": "bun test ./src/**/*.spec.ts ./shared/**/*.spec.ts",
-    "build": "bun scripts/build-everything.ts",
+    "build": "bun scripts/build-dist-package.ts",
     "build:npm": "bun --max_old_space_size=32768 scripts/build-npm.ts",
     "build:npm:sdk": "bun --max_old_space_size=32768 scripts/build-npm-sdk.ts",
     "build:npm:main": "bun --max_old_space_size=32768 scripts/build-npm-main-export.ts",
