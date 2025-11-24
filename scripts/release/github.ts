@@ -1,5 +1,5 @@
 import { basename, join } from 'node:path';
-import { BIN_DIST_FOLDER_PATH } from '@shared/naming/project-fs-paths';
+import { DIST_PACKAGE_FOLDER_PATH } from '@shared/naming/project-fs-paths';
 import { createRelease, getReleaseByTag } from '@shared/utils/github-api';
 import { uploadReleaseAsset } from '@shared/utils/github-file-manipulation';
 import { logInfo, logSuccess } from '@shared/utils/logging';
@@ -31,12 +31,12 @@ export const createGithubRelease = async ({ version, isPrerelease }: { version: 
 
 export const uploadReleaseAssets = async ({ releaseId }: { uploadUrl: string; releaseId: number }) => {
   logInfo('Uploading release assets...');
-  const allItems = await readdir(BIN_DIST_FOLDER_PATH);
+  const allItems = await readdir(DIST_PACKAGE_FOLDER_PATH);
 
   // Filter to only archive files (.tar.gz and .zip), skip directories
   const assetsToUpload: string[] = [];
   for (const item of allItems) {
-    const absolutePath = join(BIN_DIST_FOLDER_PATH, item);
+    const absolutePath = join(DIST_PACKAGE_FOLDER_PATH, item);
     const stats = await stat(absolutePath);
     if (stats.isFile() && (item.endsWith('.tar.gz') || item.endsWith('.zip'))) {
       assetsToUpload.push(item);
@@ -45,7 +45,7 @@ export const uploadReleaseAssets = async ({ releaseId }: { uploadUrl: string; re
 
   await Promise.all(
     assetsToUpload.map((assetName) => {
-      const absoluteAssetPath = join(BIN_DIST_FOLDER_PATH, assetName);
+      const absoluteAssetPath = join(DIST_PACKAGE_FOLDER_PATH, assetName);
       return uploadReleaseAsset({
         assetName: basename(assetName),
         sourceFilePath: absoluteAssetPath,

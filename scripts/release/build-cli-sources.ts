@@ -1,8 +1,6 @@
 import { arch } from 'node:os';
-import { basename, dirname, join } from 'node:path';
+import { basename, join } from 'node:path';
 import {
-  CLI_BUILD_DIST_FOLDER_PATH,
-  CLI_DIST_PATH,
   COMPLETIONS_SCRIPTS_PATH,
   CONFIG_SCHEMA_PATH,
   DIST_FOLDER_PATH,
@@ -97,11 +95,11 @@ export const EXECUTABLE_FILE_PATTERNS = [
   '*/exec.exe'
 ];
 
-export const generateSourceMapInstall = async ({ distFolderPath }: { distFolderPath?: string }) => {
+export const generateSourceMapInstall = async ({ distFolderPath }: { distFolderPath: string }) => {
   logInfo('Generating source map install file...');
   await buildEsCode({
     rawCode: 'require("source-map-support").install({ environment: "node", handleUncaughtExceptions: false });',
-    distPath: join(distFolderPath || CLI_BUILD_DIST_FOLDER_PATH, SOURCE_MAP_INSTALL_FILE_NAME),
+    distPath: join(distFolderPath, SOURCE_MAP_INSTALL_FILE_NAME),
     externals: ['path'],
     excludeDependencies: ['path'],
     sourceMaps: 'disabled',
@@ -355,12 +353,6 @@ export const createReleaseDataFile = async ({
   logInfo('Creating release data file...');
   await writeJson(join(distFolderPath, 'release-data.json'), { version: version || 'dev' });
   logSuccess('Release data file created successfully.');
-};
-
-export const copyLegalComments = async ({ distFolderPath }: { distFolderPath?: string }) => {
-  logInfo('Copying config schema...');
-  await copy(join(dirname(CLI_DIST_PATH), `${basename(CLI_DIST_PATH)}.LEGAL.txt`), join(distFolderPath, 'LEGAL.txt'));
-  logSuccess('Config schema copied successfully.');
 };
 
 export const getPlatformsToBuildFor = ({

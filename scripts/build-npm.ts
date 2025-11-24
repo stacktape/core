@@ -4,13 +4,11 @@ import { NPM_PACKAGE_JSON_SOURCE_PATH, NPM_RELEASE_FOLDER_PATH } from '../shared
 import { logInfo, logSuccess } from '../shared/utils/logging';
 import { buildNpmMainExport } from './build-npm-main-export';
 import { buildNpmSdkExport } from './build-npm-sdk-export.js';
-import { packageHelperLambdas } from './package-helper-lambdas.js';
 import { getVersion } from './release/args';
 
 export const copySdkPackageJson = async (version?: string) => {
   const packageJson = await readJson(NPM_PACKAGE_JSON_SOURCE_PATH);
 
-  // Update version if provided
   if (version) {
     packageJson.version = version;
   }
@@ -35,7 +33,6 @@ export const buildNpm = async ({ version }: { version?: string } = {}) => {
   await Promise.all([
     buildNpmMainExport(),
     buildNpmSdkExport({ distFolderPath: NPM_RELEASE_FOLDER_PATH }),
-    packageHelperLambdas({ isDev: false, distFolderPath: NPM_RELEASE_FOLDER_PATH }),
     copySdkPackageJson(versionToUse),
     copyBinWrapper()
   ]);

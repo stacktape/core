@@ -1,5 +1,5 @@
 import { join } from 'node:path';
-import { BIN_DIST_FOLDER_PATH } from '@shared/naming/project-fs-paths';
+import { DIST_PACKAGE_FOLDER_PATH } from '@shared/naming/project-fs-paths';
 import { getPlatform } from '@shared/utils/bin-executable';
 import { logInfo, logSuccess } from '@shared/utils/logging';
 import { archiveItem } from '@shared/utils/zip';
@@ -34,7 +34,7 @@ const buildEverything = async () => {
 
   logInfo(`Building binary for platform: ${platform}, version: ${version}`);
 
-  const distFolderPath = BIN_DIST_FOLDER_PATH;
+  const distFolderPath = DIST_PACKAGE_FOLDER_PATH;
   await remove(distFolderPath);
 
   const platformDistFolderPath = await buildBinaryFile({
