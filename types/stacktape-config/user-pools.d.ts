@@ -701,23 +701,108 @@ type StpUserAuthPool = UserAuthPool['properties'] & {
 };
 
 interface CognitoAuthorizerProperties {
+  /**
+   * #### Name of the user pool to protect the API
+   *
+   * ---
+   *
+   * The Stacktape name of the `user-auth-pool` resource whose tokens should be accepted by this HTTP API authorizer.
+   * Stacktape uses this to:
+   *
+   * - Set the expected **audience** to the user pool client ID.
+   * - Build the expected **issuer** URL based on the user pool and AWS region.
+   *
+   * In practice this means only JWTs issued by this pool (and its client) will be considered valid.
+   */
   userPoolName: string;
+  /**
+   * #### Where to read the JWT from in the request
+   *
+   * ---
+   *
+   * A list of identity sources that tell API Gateway where to look for the bearer token, using the
+   * `$request.*` syntax from API Gateway (for example `'$request.header.Authorization'`).
+   *
+   * If you omit this, Stacktape defaults to reading the token from the `Authorization` HTTP header,
+   * using a JWT authorizer as described in the API Gateway v2 authorizer docs
+   * ([AWS::ApiGatewayV2::Authorizer](https://docs.aws.amazon.com/AWSCloudFormation/latest/TemplateReference/aws-resource-apigatewayv2-authorizer)).
+   */
   identitySources?: string[];
 }
 
 interface CognitoAuthorizer {
+  /**
+   * #### Cognito JWT authorizer
+   *
+   * ---
+   *
+   * Configures an HTTP API authorizer that validates JSON Web Tokens (JWTs) issued by a Cognito user pool.
+   * This is the simplest way to protect routes when your users sign in via `user-auth-pool`.
+   *
+   * Stacktape turns this into an API Gateway v2 authorizer of type `JWT` that checks the token's issuer and audience.
+   */
   type: 'cognito';
   properties: CognitoAuthorizerProperties;
 }
 
 interface LambdaAuthorizerProperties {
+  /**
+   * #### Name of the authorizer function
+   *
+   * ---
+   *
+   * The Stacktape name of a `function` resource that should run for each authorized request.
+   * API Gateway calls this Lambda, passes request details, and uses its response to allow or deny access.
+   */
   functionName: string;
+  /**
+   * #### Use IAM-style (v1) authorizer responses
+   *
+   * ---
+   *
+   * - If `true`, your Lambda must return a full IAM policy document (the "v1" format).
+   * - If `false` or omitted, Stacktape enables **simple responses** (the HTTP API v2 payload format)
+   *   so your Lambda can return a small JSON object with an `isAuthorized` flag and optional context.
+   *
+   * This flag is wired to `EnableSimpleResponses` on the underlying `AWS::ApiGatewayV2::Authorizer`.
+   */
   iamResponse?: boolean;
+  /**
+   * #### Where to read identity data from
+   *
+   * ---
+   *
+   * A list of request fields API Gateway should pass into your Lambda authorizer (for example headers, query parameters,
+   * or stage variables) using the `$request.*` syntax.
+   *
+   * When left empty, no specific identity sources are configured and your Lambda must inspect the incoming event directly.
+   */
   identitySources?: string[];
+  /**
+   * #### Cache authorizer results
+   *
+   * ---
+   *
+   * Number of seconds API Gateway should cache the result of the Lambda authorizer for a given identity.
+   * While cached, repeated requests skip calling your authorizer function and reuse the previous result.
+   *
+   * This value is applied to `AuthorizerResultTtlInSeconds`. If omitted, Stacktape sets it to `0` (no caching).
+   */
   cacheResultSeconds?: number;
 }
 
 interface LambdaAuthorizer {
+  /**
+   * #### Lambda-based HTTP API authorizer
+   *
+   * ---
+   *
+   * Configures an API Gateway **request** authorizer that runs a Lambda function to decide whether a request is allowed.
+   * This is useful when your authorization logic can't be expressed as simple JWT validation – for example when you
+   * check API keys, look up permissions in a database, or integrate with a non-JWT identity system.
+   *
+   * Stacktape creates an `AWS::ApiGatewayV2::Authorizer` of type `REQUEST` and wires it up to your Lambda.
+   */
   type: 'lambda';
   properties: LambdaAuthorizerProperties;
 }
