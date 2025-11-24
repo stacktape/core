@@ -2,6 +2,7 @@ import { CLI_DIST_PATH, CLI_SOURCE_PATH, DIST_FOLDER_PATH } from '@shared/naming
 import { dynamicRequire } from '@shared/utils/fs-utils';
 import { logError, logInfo, logWarn } from '@shared/utils/logging';
 import packageJson from '../package.json';
+import { generateSourceMapInstall } from './build-cli-sources';
 import { packageHelperLambdas } from './package-helper-lambdas';
 
 const buildSource = async () => {
@@ -22,7 +23,11 @@ const buildSource = async () => {
 };
 
 export const runDev = async () => {
-  await Promise.all([buildSource(), packageHelperLambdas({ isDev: true, distFolderPath: DIST_FOLDER_PATH })]);
+  await Promise.all([
+    buildSource(),
+    packageHelperLambdas({ isDev: true, distFolderPath: DIST_FOLDER_PATH }),
+    generateSourceMapInstall({ distFolderPath: DIST_FOLDER_PATH })
+  ]);
 
   logInfo('----- RUN -----');
   try {

@@ -1,6 +1,6 @@
 import { join } from 'node:path';
 import yargsParser from 'yargs-parser';
-import { adjustPackageJsonVersion } from '../release/utils/args';
+import { adjustPackageJsonVersion } from '../release/args';
 
 const main = async () => {
   const argv = yargsParser(process.argv.slice(2));

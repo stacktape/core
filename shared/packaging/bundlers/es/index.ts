@@ -621,7 +621,9 @@ const getSourceMapBanner = async ({
             resolve(__dirname, './source-map-install.js'),
             SOURCE_MAP_INSTALL_DIST_PATH
           ]);
-          sourceMapBannerFromFile = await readFile(sourceMapBannerFilePath, 'utf-8');
+          sourceMapBannerFromFile = await readFile(sourceMapBannerFilePath, 'utf-8').catch(() => {
+            return '';
+          });
           return { js: sourceMapBannerFromFile };
         }
         if (outputModuleFormat === 'esm') {

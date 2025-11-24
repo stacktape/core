@@ -64,7 +64,7 @@ jobs:
 
       - name: Build binary for ${{ matrix.platform }}
         if: matrix.platform != 'alpine'
-        run: bun run scripts/github-actions/build-platform-binary.ts --platform ${{ matrix.platform }} --version ${{ inputs.version }}
+        run: bun run scripts/build-dist-package.ts --platform ${{ matrix.platform }} --version ${{ inputs.version }}
 
       - name: Build Alpine binary (in Docker)
         if: matrix.platform == 'alpine'
@@ -74,7 +74,7 @@ jobs:
             curl -fsSL https://bun.sh/install | bash
             export PATH=\$HOME/.bun/bin:\$PATH
             bun install
-            bun run scripts/github-actions/build-platform-binary.ts --platform alpine --version ${{ inputs.version }}
+            bun run scripts/build-dist-package.ts --platform alpine --version ${{ inputs.version }}
           "
 
       - name: Upload binary artifact

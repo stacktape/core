@@ -1,5 +1,5 @@
 import yargsParser from 'yargs-parser';
-import { createGithubRelease, uploadReleaseAssets } from '../release/utils/github';
+import { createGithubRelease, uploadReleaseAssets } from '../release/github';
 
 const main = async () => {
   const argv = yargsParser(process.argv.slice(2));

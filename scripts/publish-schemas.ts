@@ -1,6 +1,6 @@
 import { SCHEMAS_BUCKET_NAME } from '@config';
 import { logInfo, logSuccess } from '@shared/utils/logging';
-import { syncBucket } from './release/utils/stacktape';
+import { syncBucket } from './release/stacktape';
 
 export const publishSchemas = async () => {
   logInfo('Publishing schemas to the schemas hosting bucket...');

@@ -31,5 +31,5 @@
     "forceConsistentCasingInFileNames": true
   },
   "include": ["src/**/*", "types/**/*", "shared/**/*", "scripts/**/*", "helper-lambdas/**/*", "eslint.config.ts"],
-  "exclude": ["scripts/starter-projects/_script-test-api.ts", "user-projects/**/*"]
+  "exclude": ["scripts/starter-projects/_script-test-api.ts"]
 }

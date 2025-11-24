@@ -7,7 +7,7 @@ import { exec as execAsync } from 'node:child_process';
 import { promisify } from 'node:util';
 import { octokit } from '@shared/utils/github-api';
 import { logInfo, logSuccess } from '@shared/utils/logging';
-import { getVersion } from './release/utils/args';
+import { getVersion } from './release/args';
 
 const exec = promisify(execAsync);
 

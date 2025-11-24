@@ -1,16 +1,13 @@
-/// <reference types="bun-types" />
 import { arch } from 'node:os';
 import { basename, dirname, join } from 'node:path';
 import {
-  BIN_DIST_FOLDER_PATH,
-  BRIDGE_FILES_FOLDER_NAME,
-  BRIDGE_FILES_SOURCE_FOLDER_PATH,
+  CLI_BUILD_DIST_FOLDER_PATH,
   CLI_DIST_PATH,
   COMPLETIONS_SCRIPTS_PATH,
   CONFIG_SCHEMA_PATH,
   DIST_FOLDER_PATH,
-  HELPER_LAMBDAS_FOLDER_NAME,
-  SCRIPTS_ASSETS_PATH
+  SCRIPTS_ASSETS_PATH,
+  SOURCE_MAP_INSTALL_FILE_NAME
 } from '@shared/naming/project-fs-paths';
 import { buildEsCode } from '@shared/packaging/bundlers/es';
 import { getPlatform } from '@shared/utils/bin-executable';
@@ -29,10 +26,7 @@ import {
   createBashCompletionScript,
   createPowershellCompletionScript,
   createZshCompletionScript
-} from './generate-completions';
-import { generateStarterProjectsMetadata } from './generate-starter-projects-metadata';
-import { packageHelperLambdas } from './package-helper-lambdas';
-import { getCliArgs, getVersion } from './release/utils/args';
+} from '../generate-completions';
 
 // import { generateAllStarterProjects } from './generate-starter-project';
 
@@ -103,20 +97,30 @@ export const EXECUTABLE_FILE_PATTERNS = [
   '*/exec.exe'
 ];
 
-const copyBridgeFiles = async ({ distFolderPath }: { distFolderPath?: string }) => {
-  logInfo('Copying bridge files...');
-  await copy(BRIDGE_FILES_SOURCE_FOLDER_PATH, join(distFolderPath, BRIDGE_FILES_FOLDER_NAME));
-  logSuccess('Bridge files copied successfully.');
+export const generateSourceMapInstall = async ({ distFolderPath }: { distFolderPath?: string }) => {
+  logInfo('Generating source map install file...');
+  await buildEsCode({
+    rawCode: 'require("source-map-support").install({ environment: "node", handleUncaughtExceptions: false });',
+    distPath: join(distFolderPath || CLI_BUILD_DIST_FOLDER_PATH, SOURCE_MAP_INSTALL_FILE_NAME),
+    externals: ['path'],
+    excludeDependencies: ['path'],
+    sourceMaps: 'disabled',
+    sourceMapBannerType: 'disabled',
+    tsConfigPath: localBuildTsConfigPath,
+    keepNames: true,
+    nodeTarget: '18.18',
+    cwd: process.cwd()
+  });
+
+  logSuccess('Source map install file generated successfully.');
 };
 
 export const buildBinaryFile = async ({
   distFolderPath,
   debug,
   platform,
-  sourceFolderPath,
   version
 }: {
-  sourceFolderPath?: string;
   distFolderPath?: string;
   debug?: boolean;
   platform: SupportedPlatform;
@@ -150,7 +154,7 @@ export const buildBinaryFile = async ({
     }
   })();
 
-  const entrypoint = join(sourceFolderPath, 'src', 'api', 'cli', 'index.ts');
+  const entrypoint = join(process.cwd(), 'src', 'api', 'cli', 'index.ts');
   const outputFileName = platform === 'win' ? 'stacktape.exe' : 'stacktape';
   const outputPath = join(outputFolderPath, outputFileName);
 
@@ -171,7 +175,7 @@ export const buildBinaryFile = async ({
 
   try {
     await exec('bun', buildArgs, {
-      cwd: sourceFolderPath,
+      cwd: process.cwd(),
       disableStdout: true
     });
   } catch (error) {
@@ -381,88 +385,6 @@ export const getPlatformsToBuildFor = ({
   return Array.isArray(platforms) ? (platforms as SupportedPlatform[]) : [platforms as SupportedPlatform];
 };
 
-export const buildCliSources = async ({
-  distFolderPath,
-  version: suppliedVersion,
-  debug,
-  keepUnarchived,
-  presetPlatforms,
-  skipArchiving
-}: {
-  distFolderPath: string;
-  version?: string;
-  presetPlatforms?: (SupportedPlatform | 'current-arch' | 'all' | 'current')[];
-  debug?: boolean;
-  keepUnarchived?: boolean;
-  skipArchiving?: boolean;
-}) => {
-  const version = suppliedVersion || (await getVersion());
-  const { debug: debugFromArgs, skipArchiving: skipArchivingFromArgs } = getCliArgs();
-  await remove(distFolderPath);
-  await Promise.all([
-    packageHelperLambdas({ isDev: false, distFolderPath: DIST_FOLDER_PATH }),
-    copyBridgeFiles({ distFolderPath })
-  ]);
-
-  const starterProjectsMetadataFilePath = await generateStarterProjectsMetadata();
-  const platformPaths: Record<SupportedPlatform, string> = {} as Record<SupportedPlatform, string>;
-
-  const { platforms, keepUnarchived: keepUnarchivedFromArgs } = getCliArgs();
-  const platformsToBuildFor = getPlatformsToBuildFor({ presetPlatforms: presetPlatforms || platforms });
-  logInfo(`Building binaries for platforms: ${platformsToBuildFor.join(', ')}...`);
-
-  for (const platform of platformsToBuildFor) {
-    try {
-      const platformDistFolderPath = await buildBinaryFile({
-        sourceFolderPath: process.cwd(),
-        distFolderPath,
-        platform,
-        debug: debug || debugFromArgs || false,
-        version
-      });
-
-      await copyPackBinary({ distFolderPath, platform });
-      await copyNixpacksBinary({ distFolderPath, platform });
-      await copySessionsManagerPluginBinary({ distFolderPath, platform });
-      await copyEsbuildBinary({ distFolderPath, platform });
-      await buildEsbuildRegister({ distFolderPath: platformDistFolderPath });
-      await copyConfigSchema({ distFolderPath: platformDistFolderPath });
-      await copyHelperLambdas({ distFolderPath: platformDistFolderPath });
-      await createReleaseDataFile({ distFolderPath: platformDistFolderPath, version });
-      await copy(starterProjectsMetadataFilePath, join(platformDistFolderPath, 'starter-projects.json'));
-
-      platformPaths[platform] = platformDistFolderPath;
-      if (!skipArchiving && !skipArchivingFromArgs) {
-        await archiveItem({
-          absoluteSourcePath: platformDistFolderPath,
-          format: platform === 'win' ? 'zip' : 'tgz',
-          executablePatterns: EXECUTABLE_FILE_PATTERNS
-        });
-      }
-
-      if (!keepUnarchived && !keepUnarchivedFromArgs && !skipArchiving && !skipArchivingFromArgs) {
-        await remove(platformDistFolderPath);
-      }
-    } catch (error) {
-      throw new Error(
-        `Failed to build platform ${platform}: ${error instanceof Error ? error.message : String(error)}\n${error instanceof Error ? error.stack : ''}`
-      );
-    }
-  }
-
-  logInfo('Cleaning up temporary files...');
-  await Promise.all([
-    remove(join(distFolderPath, 'downloaded')),
-    remove(DIST_FOLDER_PATH),
-    remove(join(distFolderPath, HELPER_LAMBDAS_FOLDER_NAME)),
-    remove(join(distFolderPath, BRIDGE_FILES_FOLDER_NAME))
-  ]);
-  logSuccess('Temporary files cleaned up successfully.');
-
-  logSuccess(`Binaries for platforms ${platformsToBuildFor.join(', ')} built successfully to ${BIN_DIST_FOLDER_PATH}`);
-  return platformPaths;
-};
-
 export const archiveCliBinaries = async ({
   distFolderPath,
   platforms
@@ -490,7 +412,3 @@ export const archiveCliBinaries = async ({
 
   logSuccess('All binaries archived successfully');
 };
-
-if (import.meta.main) {
-  buildCliSources({ distFolderPath: BIN_DIST_FOLDER_PATH });
-}

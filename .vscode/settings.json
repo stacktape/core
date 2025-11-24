@@ -22,8 +22,7 @@
     "**/node_modules": true,
     "**/bower_components": true,
     "**/*.code-search": true,
-    "**/__dev-bin/**/*": true,
-    "user-projects/**/*": true
+    "**/__dev-bin/**/*": true
   },
   "java.configuration.updateBuildConfiguration": "automatic",
   "python.formatting.provider": "autopep8",

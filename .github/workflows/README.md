@@ -175,7 +175,7 @@ To test the build scripts locally:
 bun run scripts/github-actions/build-platform-binary.ts --platform linux --version 2.23.0-test
 
 # Test version determination
-bun run scripts/release/utils/get-version.ts --version 2.23.0-test
+bun run scripts/release/get-version.ts --version 2.23.0-test
 
 # Test npm publish with provenance (requires trusted publisher setup)
 cd __release-npm

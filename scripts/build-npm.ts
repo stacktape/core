@@ -5,7 +5,7 @@ import { logInfo, logSuccess } from '../shared/utils/logging';
 import { buildNpmMainExport } from './build-npm-main-export';
 import { buildNpmSdkExport } from './build-npm-sdk-export.js';
 import { packageHelperLambdas } from './package-helper-lambdas.js';
-import { getVersion } from './release/utils/args';
+import { getVersion } from './release/args';
 
 export const copySdkPackageJson = async (version?: string) => {
   const packageJson = await readJson(NPM_PACKAGE_JSON_SOURCE_PATH);

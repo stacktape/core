@@ -4,7 +4,7 @@ import { CLI_RELEASE_FOLDER_PATH, INSTALL_SCRIPTS_PATH } from '@shared/naming/pr
 import { logInfo, logSuccess } from '@shared/utils/logging';
 import { mkdirp, readdir, readFile, remove, writeFile } from 'fs-extra';
 import yargsParser from 'yargs-parser';
-import { syncBucket } from './release/utils/stacktape';
+import { syncBucket } from './release/stacktape';
 
 const argv = yargsParser(process.argv.slice(2));
 // Load environment variables from .env file
