@@ -1,0 +1,66 @@
+---
+title: "Network Load Balancer"
+order: 221
+---
+
+This example shows a basic network load balancer configuration.
+
+Network Load Balancer resource
+
+- Fully managed, Network (L4) Load balancer.
+- Routes TCP or UDP traffic to other resources.
+
+# Basic example
+
+```yml
+resources:
+  myNetworkLoadBalancer:
+    type: network-load-balancer
+    properties:
+      # Configures accessibility of the Load balancer</sd>
+      #
+      # - `internet`: Load balancer is accessible from the internet
+      # - `internal`: Load balancer is accessible only from within the same VPC network
+      # To learn more about VPCs, refer to [Stacktape docs](https://docs.stacktape.com/user-guides/vpcs)
+      #
+      # - Type: enum: [internal, internet]
+      # - Required: false
+      # - Default: internet
+      # - Allowed values: [internal, internet]
+      interface: internet
+      # Configures custom domains for this Load balancer
+      #
+      # Stacktape allows you to connect your custom domain names to some of your resources
+      # (Web Service, HTTP API Gateways, Application Load Balancers and Buckets with CDNs).
+      #
+      # Connecting a custom domain to the resource does 2 things:
+      # - **Creates DNS records**:
+      # - If you use your custom domain with a resource, Stacktape automatically creates a DNS record (during deploy) pointing the specified domain name to the resource.
+      # - **Adds TLS certificates**
+      # - If you do not specify custom `listeners` or your listeners use TLS, Stacktape takes care of
+      # issuing and attaching correct (free, AWS-managed) certificate to the resource.
+      # This means, you do not have to deal with TLS termination as it is handled by the connected resource.
+      # - If you want to use your own certificates, you can configure `customCertificateArns` on the listener.
+      #
+      # > To manage a custom domain, it first needs to be added to your AWS account.
+      # > This means that a [hosted zone](https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/AboutHZWorkingWith.html)
+      # > (collection of records managed together for a given domain)
+      # > for your domain exists in your AWS account and your domain registrar's name servers are pointing to it.
+      # > To learn more, refer to [Adding a domain guide](https://docs.stacktape.com/other-resources/domains-and-certificates/#adding-domain).
+      #
+      # - Type: array<string>
+      # - Required: false
+      customDomains:
+        - example-value
+      # Configures custom listeners (combinations of port and protocol) for this load balancer
+      #
+      # - Listeners are used to expose specific ports of the Load balancer.
+      # - Traffic routed to the listener is then routed to the target resource based on the integrations.
+      #
+      # - Type: array<object (reference)>
+      # - Required: true
+      listeners:
+        - port: 3000
+          protocol: HTTP
+          customCertificateArns: ["example-value"]
+```

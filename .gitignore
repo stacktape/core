@@ -31,8 +31,9 @@ __platform-packages
 stacktape-project
 compiled-template.yaml
 scripts/simon
-console-app/
-
+docs/node_modules
+docs/.next
+docs/public/_timestamps.json
 
 # Ignore Gradle project-specific cache directory
 .gradle

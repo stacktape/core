@@ -21,6 +21,7 @@ export default antfu(
     ],
     lessOpinionated: true,
     formatters: false,
+    react: true,
     yaml: true,
     plugins: {
       '@cspell': cspellPlugin

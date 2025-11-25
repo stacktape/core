@@ -1,0 +1,208 @@
+---
+title: "MongoDB Atlas Cluster"
+order: 250
+---
+
+This example shows a basic mongo db atlas cluster configuration.
+
+MongoDb Atlas Cluster resource
+
+- Fully managed MongoDb Atlas cluster.
+- Automatically deployed to your AWS account and managed within your stack.
+
+# Basic example
+
+```yml
+resources:
+  myMongoDbAtlasCluster:
+    type: mongo-db-atlas-cluster
+    properties:
+      # Size of the disk
+      #
+      # - By default, all M10+ clusters autoscale the storage without any manual intervention.
+      # You can disable this behavior by [configuring autoscaling properties](https://docs.stacktape.com/3rd-party-resources/mongo-db-atlas-clusters#auto-scaling)
+      #
+      # > Setting disk size is NOT available for shared clusters (M2 and M5). For M10+
+      # > clusters default disk size depends on the instance size (see
+      # > [MongoDB Atlas docs](https://docs.atlas.mongodb.com/reference/faq/storage/)).
+      #
+      # - Type: number
+      # - Required: false
+      diskSizeGB: 20
+      # Configures resources (memory, default storage, IOPS specification) for each data-bearing node in the cluster
+      #
+      # - To learn more, refer to [list of available cluster tier](https://docs.atlas.mongodb.com/reference/amazon-aws/#cluster-configuration-options).
+      #
+      # - Type: enum: [M10, M100, M140, M2, M20, M200, M200 Low-CPU (R200), M200_NVME, M30, M300, M300 Low-CPU (R300), M40, M40 Low-CPU (R40), M400, M400 Low-CPU (R400), M400_NVME, M40_NVME, M5, M50, M50 Low-CPU (R50), M50_NVME, M60, M60 Low-CPU (R60), M60_NVME, M700, M700 Low-CPU (R700), M80, M80 Low-CPU (R80), M80_NVME]
+      # - Required: true
+      # - Allowed values: [M10, M100, M140, M2, M20, M200, M200 Low-CPU (R200), M200_NVME, M30, M300, M300 Low-CPU (R300), M40, M40 Low-CPU (R40), M400, M400 Low-CPU (R400), M400_NVME, M40_NVME, M5, M50, M50 Low-CPU (R50), M50_NVME, M60, M60 Low-CPU (R60), M60_NVME, M700, M700 Low-CPU (R700), M80, M80 Low-CPU (R80), M80_NVME]
+      clusterTier: M10
+      # Major version of the MongoDB engine
+      #
+      # Available versions are `5.0`, `6.0`, `7.0`
+      #
+      # - Type: enum: [5.0, 6.0, 7.0]
+      # - Required: false
+      # - Default: 7
+      # - Allowed values: [5.0, 6.0, 7.0]
+      version: 1.0.0
+      # Amount of shards for the cluster
+      #
+      # - If you configure more than 1 shard, the cluster will run in a sharded mode.
+      # - Sharding distributes data across multiple physical machines enabling horizontal scaling.
+      # - Sharded mode is available only for cluster tiers M30 or higher.
+      # - To learn more about sharding, refer to [MongoDb Docs](https://www.mongodb.com/basics/sharding).
+      #
+      # - Type: number
+      # - Required: false
+      # - Default: 1
+      numShards: 1
+      # Configures additional nodes for your cluster
+      #
+      # - Increasing number of nodes can lead to better redundancy and performance.
+      # - By default, each cluster has 3 data-bearing nodes (electable to master).
+      #
+      # - Type: object
+      # - Required: false
+      replication:
+        # Number of analytics nodes
+        #
+        # - Analytics nodes are read only nodes meant for long-running queries.
+        # - Executing long-running queries on basic read-only or electable nodes can hinder overall performance of the cluster.
+        # - By using analytics nodes these queries you avoid a performance impact on your operational
+        # compute resource handled by electable and basic read only nodes.
+        # - Analytics nodes work well for `biConnector` with read preference set on `analytics`
+        #
+        # - Type: number
+        # - Required: false
+        numAnalyticsNodes: 100
+        # Number of electable nodes (can become a primary node)
+        #
+        # - Adding electable nodes improves the redundancy and availability of a cluster.
+        #
+        # - Type: enum: [3, 5, 7]
+        # - Required: false
+        # - Default: 3
+        # - Allowed values: [3, 5, 7]
+        numElectableNodes: 3
+        # Number of read only nodes
+        #
+        # - Type: number
+        # - Required: false
+        numReadOnlyNodes: 100
+      # Configures backups for the cluster
+      #
+      # - Backups are copies of your data that encapsulate the state of your cluster at a given time.
+      # Backups provide a safety measure in the event of a data loss.
+      # - The default snapshot time is **every day at 18:00 UTC**.
+      # - Available only in M10+ Clusters.
+      # - Snapshots are automatically taken even for M2/M5 clusters, but have different properties.
+      # To learn more, refer to [M2 and M5 backups docs](https://docs.atlas.mongodb.com/backup-restore-cluster/#m2---m5-snapshots)
+      # - You can also take manual snapshots in the MongoDb Atlas console.
+      # - MongoDb Cloud Backup includes additional charges. To learn more, refer to
+      # [MongoDb Cloud backup pricing Docs](https://docs.atlas.mongodb.com/billing/cluster-configuration-costs/#cloud-backups)
+      #
+      # - Type: boolean
+      # - Required: false
+      enableBackups: true
+      # Enables point in time recovery
+      #
+      # - Enables Continuous Cloud Backups, which replay the oplog (history of ordered logical writes) and enables you to
+      # restore a cluster from a particular point in time.
+      # - You can make a point in time recovery to any point within the **last 7 days**.
+      # - Available only in M10+ Clusters.
+      # - If you enable point-in-time recovery, you must also enable backups.
+      # - MongoDb Continuous cloud backup includes additional charges. To learn more, refer to
+      # [MongoDb Continuous cloud backup pricing Docs](https://docs.atlas.mongodb.com/billing/cluster-configuration-costs/#continuous-cloud-backups)
+      #
+      # - Type: boolean
+      # - Required: false
+      enablePointInTimeRecovery: true
+      # Configures BI (Business Intelligence) connector
+      #
+      # - The BI Connector allows SQL-based access.
+      # - BI Connector performs operations which may be CPU and memory intensive
+      # - Given the limited hardware resources on `M10` and `M20` cluster tiers, you may experience performance degradation of the
+      # cluster when enabling the BI Connector.
+      #
+      # - Type: object
+      # - Required: false
+      biConnector:
+        # Enables BI connector
+        #
+        # - Type: boolean
+        # - Required: true
+        # - Default: false
+        enabled: true
+        # Configures the type of node to which the BI connector will connect
+        #
+        # - Type: enum: [analytics, primary, secondary]
+        # - Required: false
+        # - Allowed values: [analytics, primary, secondary]
+        readPreference: analytics
+      # Configures scaling behavior of the cluster
+      #
+      # - You can configure your cluster to automatically scale its cluster tier,
+      # storage capacity, or both based on the cluster usage.
+      # - To help control the costs, you can select a range of cluster tiers to which your cluster can scale to.
+      # - Cluster is `scaled up` (to the next tier), if one the following criteria is met:
+      # - Average CPU Utilization has exceeded 75% for the past hour
+      # - Memory Utilization has exceeded 75% for the past hour
+      # - Cluster is `scaled down` (to the lower tier), if both of the following criteria are met:
+      # - The average CPU Utilization and Memory Utilization over the past 24 hours is below 50%
+      # - The cluster has not been scaled down (manually or automatically) in the past 24 hours
+      #
+      # - Type: object
+      # - Required: false
+      autoScaling:
+        # Minimum cluster tier to scale DOWN to
+        #
+        # - Type: enum: [M10, M100, M140, M20, M200, M200 Low-CPU (R200), M200_NVME, M30, M300, M300 Low-CPU (R300), M40, M40 Low-CPU (R40), M400 Low-CPU (R400), M400_NVME, M40_NVME, M50, M50 Low-CPU (R50), M50_NVME, M60, M60 Low-CPU (R60), M60_NVME, M700 Low-CPU (R700), M80, M80 Low-CPU (R80), M80_NVME]
+        # - Required: false
+        # - Allowed values: [M10, M100, M140, M20, M200, M200 Low-CPU (R200), M200_NVME, M30, M300, M300 Low-CPU (R300), M40, M40 Low-CPU (R40), M400 Low-CPU (R400), M400_NVME, M40_NVME, M50, M50 Low-CPU (R50), M50_NVME, M60, M60 Low-CPU (R60), M60_NVME, M700 Low-CPU (R700), M80, M80 Low-CPU (R80), M80_NVME]
+        minClusterTier: M10
+        # Maximum cluster tier to scale UP to
+        #
+        # - Type: enum: [M10, M100, M140, M20, M200, M200 Low-CPU (R200), M200_NVME, M30, M300, M300 Low-CPU (R300), M40, M40 Low-CPU (R40), M400 Low-CPU (R400), M400_NVME, M40_NVME, M50, M50 Low-CPU (R50), M50_NVME, M60, M60 Low-CPU (R60), M60_NVME, M700 Low-CPU (R700), M80, M80 Low-CPU (R80), M80_NVME]
+        # - Required: false
+        # - Allowed values: [M10, M100, M140, M20, M200, M200 Low-CPU (R200), M200_NVME, M30, M300, M300 Low-CPU (R300), M40, M40 Low-CPU (R40), M400 Low-CPU (R400), M400_NVME, M40_NVME, M50, M50 Low-CPU (R50), M50_NVME, M60, M60 Low-CPU (R60), M60_NVME, M700 Low-CPU (R700), M80, M80 Low-CPU (R80), M80_NVME]
+        maxClusterTier: M10
+        # Disables disk size scaling
+        #
+        # - When disk scaling is enabled, cluster storage is automatically increased when disk space usage reaches 90%.
+        # - Cluster storage scaling aims to achieve 70% disk utilization.
+        # - Cluster storage is never automatically scaled down.
+        #
+        # - Type: boolean
+        # - Required: false
+        disableDiskScaling: false
+        # Disables scale down of cluster tier
+        #
+        # - When scale down is disabled, cluster can only scale Up (to higher tier).
+        #
+        # - Type: boolean
+        # - Required: false
+        disableScaleDown: false
+      # Creates and configures MongoDb Atlas user `atlasAdmin` with specified credentials
+      #
+      # - Optionally, you can create an admin database user user with
+      # [administrative access privileges](https://docs.atlas.mongodb.com/security-add-mongodb-users/#mongodb-atlasrole-Atlas-admin).
+      # - Accessing the cluster from your compute resources (batch-jobs, multi-container-workloads, functions or container based services),
+      # is possible even without creating this user.
+      # - Creating an admin user can be useful for performing administrative tasks, or when connecting
+      # to the cluster from a local machine.
+      #
+      # - Type: object
+      # - Required: false
+      adminUserCredentials:
+        # Name of the admin user
+        #
+        # - Type: string
+        # - Required: true
+        userName: myUserName
+        # Password for the admin user
+        #
+        # - Type: string
+        # - Required: true
+        password: example-value
+```

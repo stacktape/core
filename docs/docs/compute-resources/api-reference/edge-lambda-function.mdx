@@ -1,0 +1,647 @@
+---
+title: "Edge Lambda Function"
+order: 116
+---
+
+This example shows a basic edge lambda function configuration.
+
+Lambda function resource
+
+- Short-lived serverless functions able to quickly scale up to 1000s of parallel executions with pay-per-use pricing.
+
+# Basic example
+
+```yml
+resources:
+  myEdgeLambdaFunction:
+    type: edge-lambda-function
+    properties:
+      # Configures how your source code is turned into a deployment package (deployment artifact)
+      #
+      # - Currently supported packaging types are:
+      # - `stacktape-lambda-buildpack` - Stacktape automatically builds your source code from the supplied source file path.
+      # - `custom-artifact` - You provide path to your own lambda artifact. Stacktape will zip it for you if it's not zipped.
+      # - Your deployment artifacts are automatically uploaded to the S3 deployment bucket.
+      #
+      # - Type: union (anyOf)
+      # - Required: true
+      #
+      # - Type: object
+      # - Required: true
+      packaging:
+        #
+        # - Type: string
+        # - Required: true
+        type: stacktape-lambda-buildpack
+        #
+        # - Type: object
+        # - Required: true
+        properties:
+          # Path to the entry point of your compute resource (relative to the stacktape config file)
+          #
+          # - Stacktape tries to bundle all your source code with its dependencies into a single file.
+          # - If a certain dependency doesn't support static bundling (because it depends on binary executable, uses dynamic require() calls, etc.),
+          # Stacktape will install it and copy it to the bundle
+          #
+          # - Type: string
+          # - Required: true
+          entryfilePath: ./src/index.ts
+          # The handler function (method) ran when the lambda function is invoked.
+          #
+          # - Type: string
+          # - Required: false
+          handlerFunction: example-value
+          # Files that should be explicitly included in the deployment package (glob pattern)
+          #
+          # - Example glob pattern: `images/*.jpg`
+          # - The path is relative to the stacktape configuration file location or to `cwd` if configured using `--currentWorkingDirectory` command line option.
+          #
+          # - Type: array<string>
+          # - Required: false
+          includeFiles:
+            - public/**/*
+            - assets/*.png
+          # Files that should be explicitly excluded from deployment package (glob pattern)
+          #
+          # Example glob pattern: `images/*.jpg`
+          #
+          # - Type: array<string>
+          # - Required: false
+          excludeFiles:
+            - *.test.ts
+            - node_modules/**
+          # Dependencies to ignore.
+          #
+          # - These dependencies won't be a part of your deployment package.
+          #
+          # - Type: array<string>
+          # - Required: false
+          excludeDependencies:
+            - example-value
+          # Configuration of packaging properties specific to given language
+          #
+          # - Type: union (anyOf)
+          # - Required: false
+      # Runtime used to execute the function
+      #
+      # - Stacktape automatically detects the function's language and uses the latest runtime version associated with that language
+      # - Example: uses `nodejs22.x` for all files ending with `.js` and `.ts`
+      #
+      # - Type: enum: [nodejs18.x, nodejs20.x, nodejs22.x, python3.10, python3.11, python3.12, python3.13, python3.8, python3.9]
+      # - Required: false
+      # - Allowed values: [nodejs18.x, nodejs20.x, nodejs22.x, python3.10, python3.11, python3.12, python3.13, python3.8, python3.9]
+      runtime: nodejs18.x
+      # Amount of memory (in MB) available to the function during execution
+      #
+      # - Maximum allowed memory depends on how you will associate your edge function with CDN:
+      # - when using the function with `onRequest` or `onResponse` (viewer request/response) - 128 MB
+      # - when using the function with `onOriginRequest` or `onOriginResponse` (origin request/response) - 10240 MB
+      # - Refer to [CDN docs](https://docs.stacktape.com/other-resources/cdns/#edge-lambda-functions) for more info on associating edge lambdas with CDN.
+      #
+      # - Type: number
+      # - Required: false
+      # - Default: 128
+      memory: 2048
+      # Maximum amount of time (in seconds) the lambda function is allowed to run
+      #
+      # - Maximum allowed time depends on how you will associate your edge function with CDN:
+      # - when using the function with `onRequest` or `onResponse` (viewer request/response) - 5 seconds
+      # - when using the function with `onOriginRequest` or `onOriginResponse` (origin request/response) - 30 seconds
+      # - Refer to [CDN docs](https://docs.stacktape.com/other-resources/cdns/#edge-lambda-functions) for more info on associating edge lambdas with CDN.
+      #
+      # - Type: number
+      # - Required: false
+      # - Default: 3
+      timeout: 3600
+      # Configures access to other resources of your stack (such as databases, buckets, event-buses, etc.) and aws services
+      #
+      # By referencing resources (or services) in `connectTo` list, Stacktape automatically:
+      # - configures correct compute resource's **IAM role permissions** if needed
+      # - sets up correct **security group rules** to allow access if needed
+      # - **injects relevant environment variables** containing information about resource you are connecting to into the compute resource's runtime
+      # - names of environment variables use upper-snake-case and are in form `STP_[RESOURCE_NAME]_[VARIABLE_NAME]`,
+      # - examples: `STP_MY_DATABASE_CONNECTION_STRING` or `STP_MY_EVENT_BUS_ARN`,
+      # - list of injected variables for each resource type can be seen below.
+      #
+      # > Injecting of environment variables does not work for edge lambda functions.
+      #
+      # > Using connectTo with resources which are protected within VPC does not work,
+      # > as edge lambda functions are distributed across globe and are not part of VPC.
+      #
+      #
+      # Granted permissions and injected environment variables are different depending on resource type:
+      #
+      #
+      # `Bucket`
+      # - **Permissions:**
+      # - list objects in a bucket
+      # - create / get / delete / tag object in a bucket
+      # - **Injected env variables**: `NAME`, `ARN`
+      #
+      #
+      # `DynamoDB table`
+      # - **Permissions:**
+      # - get / put / update / delete item in a table
+      # - scan / query a table
+      # - describe table stream
+      # - **Injected env variables**: `NAME`, `ARN`, `STREAM_ARN`
+      #
+      #
+      # `MongoDB Atlas cluster`
+      # - **Permissions:**
+      # - Allows connection to a cluster with `accessibilityMode` set to `scoping-workloads-in-vpc`. To learn more about
+      # MongoDB Atlas clusters accessibility modes, refer to
+      # [MongoDB Atlas cluster docs](https://docs.stacktape.com/3rd-party-resources/mongo-db-atlas-clusters/#accessibility).
+      # - Creates access "user" associated with compute resource's role to allow for secure credential-less access to the the cluster
+      # - **Injected env variables**: `CONNECTION_STRING`
+      #
+      #
+      # `Relational(SQL) database`
+      # - **Permissions:**
+      # - Allows connection to a relational database with `accessibilityMode` set to `scoping-workloads-in-vpc`. To learn more about
+      # relational database accessibility modes, refer to [Relational databases docs](https://docs.stacktape.com/resources/relational-databases#accessibility).
+      # - **Injected env variables**: `CONNECTION_STRING`, `JDBC_CONNECTION_STRING`, `HOST`, `PORT`
+      # (in case of aurora multi instance cluster additionally: `READER_CONNECTION_STRING`, `READER_JDBC_CONNECTION_STRING`, `READER_HOST`)
+      #
+      #
+      # `Redis cluster`
+      # - **Permissions:**
+      # - Allows connection to a redis cluster with `accessibilityMode` set to `scoping-workloads-in-vpc`. To learn more about
+      # redis cluster accessibility modes, refer to [Redis clusters docs](https://docs.stacktape.com/resources/redis-clusters#accessibility).
+      # - **Injected env variables**: `HOST`, `READER_HOST`, `PORT`
+      #
+      #
+      # `Event bus`
+      # - **Permissions:**
+      # - publish events to the specified Event bus
+      # - **Injected env variables**: `ARN`
+      #
+      #
+      # `Function`
+      # - **Permissions:**
+      # - invoke the specified function
+      # - **Injected env variables**: `ARN`
+      #
+      #
+      # `Batch job`
+      # - **Permissions:**
+      # - submit batch-job instance into batch-job queue
+      # - list submitted job instances in a batch-job queue
+      # - describe / terminate a batch-job instance
+      # - list executions of state machine which executes the batch-job according to its strategy
+      # - start / terminate execution of a state machine which executes the batch-job according to its strategy
+      # - **Injected env variables**: `JOB_DEFINITION_ARN`, `STATE_MACHINE_ARN`
+      #
+      #
+      # `User auth pool`
+      # - **Permissions:**
+      # - full control over the user pool (`cognito-idp:*`)
+      # - for more information about allowed methods refer to [AWS docs](https://docs.aws.amazon.com/service-authorization/latest/reference/list_amazoncognitouserpools.html)
+      # - **Injected env variables**: `ID`, `CLIENT_ID`, `ARN`
+      #
+      #
+      # `Upstash Kafka topic`
+      # - **Injected env variables**: `TOPIC_NAME`, `TOPIC_ID`, `USERNAME`, `PASSWORD`, `TCP_ENDPOINT`, `REST_URL`
+      #
+      #
+      # `Upstash Redis`
+      # - **Injected env variables**: `HOST`, `PORT`, `PASSWORD`, `REST_TOKEN`, `REST_URL`, `REDIS_URL`
+      #
+      #
+      # `aws:ses`(Macro)
+      # - **Permissions:**
+      # - gives full permissions to aws ses (`ses:*`).
+      # - for more information about allowed methods refer to [AWS docs](https://docs.aws.amazon.com/service-authorization/latest/reference/list_amazonses.html)
+      #
+      # - Type: array<string>
+      # - Required: false
+      connectTo:
+        - myDatabase
+        - myBucket
+      # Raw AWS IAM role statements appended to your compute resource's role.
+      #
+      # - Type: array<object (reference)>
+      # - Required: false
+      iamRoleStatements:
+        - Resource: ["example-value"]
+          Sid: example-value
+      # Configures logging behavior for this edge-lambda-function
+      #
+      # - Information about the function invocation and function logs (stdout and stderr)
+      # are automatically sent to a pre-created CloudWatch log group.
+      # - By default, logs are retained for 180 days..
+      # - You can see the logs in the log group page in the AWS CloudWatch console. You can use `stacktape stack-info` command to get a direct link.
+      #
+      # > Edge lambda functions are executed in multiple locations (regions) across the world depending on
+      # > the cdn edge location which serves the client request (usually the location closest to the client).
+      # >
+      # > As a result the logs for the function executed in given region are delivered to a log group in that region.
+      # > The list of regions where edge lambda can execute: **us-east-1**, **us-east-2**, **us-west-1**, **us-west-2**,
+      # > **ap-south-1**, **ap-northeast-1**, **ap-northeast-2**, **ap-southeast-1**, **ap-southeast-2**, **eu-west-1**,
+      # > **eu-west-2**, **eu-central-1**, **sa-east-1**
+      #
+      # - Type: object
+      # - Required: false
+      logging:
+        # Disables the collection of function's application logs (stdout and stderr) to CloudWatch
+        #
+        # - Type: boolean
+        # - Required: false
+        # - Default: false
+        disabled: false
+        # Amount of days the logs will be retained in the log group
+        #
+        # - Type: enum: [1, 120, 14, 150, 180, 1827, 3, 30, 365, 3653, 400, 5, 545, 60, 7, 731, 90]
+        # - Required: false
+        # - Default: 180
+        # - Allowed values: [1, 120, 14, 150, 180, 1827, 3, 30, 365, 3653, 400, 5, 545, 60, 7, 731, 90]
+        retentionDays: 180
+        # Configures forwarding of logs to specified destination
+        #
+        # - Log forwarding is done using [Amazon Kinesis Data Firehose](https://aws.amazon.com/kinesis/data-firehose/) delivery stream.
+        # - When using log forwarding, you will incur costs based on the amount of data being transferred to the destination (~$0.03 per transferred GB).
+        # Refer to [AWS Kinesis Firehose Pricing](https://aws.amazon.com/kinesis/data-firehose/pricing/?nc=sn&loc=3) page to see details.
+        # - Currently supported destinations for logs:
+        # - `http-endpoint`
+        # - delivers logs to any HTTP endpoint.
+        # - The endpoint must follow [Firehose request and response specifications](https://docs.aws.amazon.com/firehose/latest/dev/httpdeliveryrequestresponse.html).
+        # (Many of the third party vendors are compliant with this specifications out of the box.)
+        # - `datadog`
+        # - delivers logs to [Datadog](https://www.datadoghq.com/).
+        # - `highlight`
+        # - delivers logs to [Highlight.io](https://www.highlight.io/) project.
+        #
+        # Refer to [our docs](https://docs.stacktape.com/configuration/log-forwarding/) for more information.
+        #
+        # > Logs that fail to be delivered to the destination even after multiple retries (time spend on retries can be configured) are put into bucket with name `{stackName}-{resourceName}-logs-{generatedHash}`
+        #
+        # - Type: union (anyOf)
+        # - Required: false
+        #
+        # - Type: object
+        # - Required: false
+        logForwarding:
+          #
+          # - Type: string
+          # - Required: true
+          type: http-endpoint
+          #
+          # - Type: object
+          # - Required: true
+          properties:
+            # HTTPS endpoint where logs will be forwarded
+            #
+            # - Type: string
+            # - Required: true
+            endpointUrl: https://example.com
+            # Specifies whether to use GZIP compression for the request
+            #
+            # - When enabled, Firehose uses the content encoding to compress the body of a request before sending the request to the destination
+            #
+            # - Type: boolean
+            # - Required: false
+            gzipEncodingEnabled: true
+            # Parameters included in each call to HTTP endpoint
+            #
+            # - Key/Value pairs containing additional metadata you wish to send to the HTTP endpoint.
+            # - Parameters are delivered within **X-Amz-Firehose-Common-Attributes** header as a JSON object with following format: `{"commonAttributes":{"param1":"val1", "param2":"val2"}}`
+            #
+            # - Type: object
+            # - Required: false
+            # Amount of time spend on retries.
+            #
+            # - The total amount of time that Kinesis Data Firehose spends on retries.
+            # - This duration starts after the initial attempt to send data to the custom destination via HTTPS endpoint fails.
+            # - Logs that fail to be delivered to the HTTP endpoint even after multiple retries (time spend on retries can be configured) are put into bucket with name `{stackName}-{resourceName}-logs-{generatedHash}`
+            #
+            # - Type: number
+            # - Required: false
+            retryDuration: 100
+            # Access key (credentials), needed for authenticating with endpoint
+            #
+            # - Access key is carried within a **X-Amz-Firehose-Access-Key** header
+            # - The configured key is copied verbatim into the value of this header.The contents can be arbitrary and can potentially represent a JWT token or an ACCESS_KEY.
+            # - It is recommended to use [secret](https://docs.stacktape.com/resources/secrets/) for storing your access key.
+            #
+            # - Type: string
+            # - Required: false
+            accessKey: example-value
+```
+
+# Packaging alternatives
+
+## stacktape-lambda-buildpack
+
+This example shows how to configure packaging using stacktape-lambda-buildpack. 
+
+```yml
+resources:
+  myEdgeLambdaFunction:
+    type: edge-lambda-function
+    properties:
+      # Configures how your source code is turned into a deployment package (deployment artifact)
+      #
+      # - Currently supported packaging types are:
+      # - `stacktape-lambda-buildpack` - Stacktape automatically builds your source code from the supplied source file path.
+      # - `custom-artifact` - You provide path to your own lambda artifact. Stacktape will zip it for you if it's not zipped.
+      # - Your deployment artifacts are automatically uploaded to the S3 deployment bucket.
+      #
+      # - Type: object
+      # - Required: true
+      packaging:
+        #
+        # - Type: string
+        # - Required: true
+        type: stacktape-lambda-buildpack
+        #
+        # - Type: object
+        # - Required: true
+        properties:
+          # Path to the entry point of your compute resource (relative to the stacktape config file)
+          #
+          # - Stacktape tries to bundle all your source code with its dependencies into a single file.
+          # - If a certain dependency doesn't support static bundling (because it depends on binary executable, uses dynamic require() calls, etc.),
+          # Stacktape will install it and copy it to the bundle
+          #
+          # - Type: string
+          # - Required: true
+          entryfilePath: ./src/index.ts
+          # The handler function (method) ran when the lambda function is invoked.
+          #
+          # - Type: string
+          # - Required: false
+          handlerFunction: example-value
+          # Files that should be explicitly included in the deployment package (glob pattern)
+          #
+          # - Example glob pattern: `images/*.jpg`
+          # - The path is relative to the stacktape configuration file location or to `cwd` if configured using `--currentWorkingDirectory` command line option.
+          #
+          # - Type: array<string>
+          # - Required: false
+          includeFiles:
+            - public/**/*
+            - assets/*.png
+          # Files that should be explicitly excluded from deployment package (glob pattern)
+          #
+          # Example glob pattern: `images/*.jpg`
+          #
+          # - Type: array<string>
+          # - Required: false
+          excludeFiles:
+            - *.test.ts
+            - node_modules/**
+          # Dependencies to ignore.
+          #
+          # - These dependencies won't be a part of your deployment package.
+          #
+          # - Type: array<string>
+          # - Required: false
+          excludeDependencies:
+            - example-value
+          # Configuration of packaging properties specific to given language
+          #
+          # - Type: union (anyOf)
+          # - Required: false
+```
+
+## custom-artifact
+
+This example shows how to configure packaging using custom-artifact. 
+
+```yml
+resources:
+  myEdgeLambdaFunction:
+    type: edge-lambda-function
+    properties:
+      # Configures how your source code is turned into a deployment package (deployment artifact)
+      #
+      # - Currently supported packaging types are:
+      # - `stacktape-lambda-buildpack` - Stacktape automatically builds your source code from the supplied source file path.
+      # - `custom-artifact` - You provide path to your own lambda artifact. Stacktape will zip it for you if it's not zipped.
+      # - Your deployment artifacts are automatically uploaded to the S3 deployment bucket.
+      #
+      # - Type: object
+      # - Required: true
+      packaging:
+        #
+        # - Type: string
+        # - Required: true
+        type: custom-artifact
+        #
+        # - Type: object
+        # - Required: true
+        properties:
+          # Path to the lambda package to use as the source for this lambda function
+          #
+          # - If the specified package path is a directory or an non-zip file, it will be automatically zipped.
+          #
+          # - Type: string
+          # - Required: true
+          packagePath: ./path/to/packagePath
+          # The handler function (method) ran when the lambda function is invoked.
+          #
+          # - Path to the entryfile and method inside your package.
+          # - The syntax is `{{filepath}}:{{functionName}}`.
+          # - Example: `my-lambda/index.js:default`
+          #
+          # - Type: string
+          # - Required: false
+          handler: example-value
+```
+
+# LogForwarding alternatives
+
+## http-endpoint
+
+This example shows how to configure logforwarding using http-endpoint. 
+
+```yml
+resources:
+  myEdgeLambdaFunction:
+    type: edge-lambda-function
+    properties:
+      logging:
+        # Configures forwarding of logs to specified destination
+        #
+        # - Log forwarding is done using [Amazon Kinesis Data Firehose](https://aws.amazon.com/kinesis/data-firehose/) delivery stream.
+        # - When using log forwarding, you will incur costs based on the amount of data being transferred to the destination (~$0.03 per transferred GB).
+        # Refer to [AWS Kinesis Firehose Pricing](https://aws.amazon.com/kinesis/data-firehose/pricing/?nc=sn&loc=3) page to see details.
+        # - Currently supported destinations for logs:
+        # - `http-endpoint`
+        # - delivers logs to any HTTP endpoint.
+        # - The endpoint must follow [Firehose request and response specifications](https://docs.aws.amazon.com/firehose/latest/dev/httpdeliveryrequestresponse.html).
+        # (Many of the third party vendors are compliant with this specifications out of the box.)
+        # - `datadog`
+        # - delivers logs to [Datadog](https://www.datadoghq.com/).
+        # - `highlight`
+        # - delivers logs to [Highlight.io](https://www.highlight.io/) project.
+        #
+        # Refer to [our docs](https://docs.stacktape.com/configuration/log-forwarding/) for more information.
+        #
+        # > Logs that fail to be delivered to the destination even after multiple retries (time spend on retries can be configured) are put into bucket with name `{stackName}-{resourceName}-logs-{generatedHash}`
+        #
+        # - Type: object
+        # - Required: true
+        logForwarding:
+          #
+          # - Type: string
+          # - Required: true
+          type: http-endpoint
+          #
+          # - Type: object
+          # - Required: true
+          properties:
+            # HTTPS endpoint where logs will be forwarded
+            #
+            # - Type: string
+            # - Required: true
+            endpointUrl: https://example.com
+            # Specifies whether to use GZIP compression for the request
+            #
+            # - When enabled, Firehose uses the content encoding to compress the body of a request before sending the request to the destination
+            #
+            # - Type: boolean
+            # - Required: false
+            gzipEncodingEnabled: true
+            # Parameters included in each call to HTTP endpoint
+            #
+            # - Key/Value pairs containing additional metadata you wish to send to the HTTP endpoint.
+            # - Parameters are delivered within **X-Amz-Firehose-Common-Attributes** header as a JSON object with following format: `{"commonAttributes":{"param1":"val1", "param2":"val2"}}`
+            #
+            # - Type: object
+            # - Required: false
+            # Amount of time spend on retries.
+            #
+            # - The total amount of time that Kinesis Data Firehose spends on retries.
+            # - This duration starts after the initial attempt to send data to the custom destination via HTTPS endpoint fails.
+            # - Logs that fail to be delivered to the HTTP endpoint even after multiple retries (time spend on retries can be configured) are put into bucket with name `{stackName}-{resourceName}-logs-{generatedHash}`
+            #
+            # - Type: number
+            # - Required: false
+            retryDuration: 100
+            # Access key (credentials), needed for authenticating with endpoint
+            #
+            # - Access key is carried within a **X-Amz-Firehose-Access-Key** header
+            # - The configured key is copied verbatim into the value of this header.The contents can be arbitrary and can potentially represent a JWT token or an ACCESS_KEY.
+            # - It is recommended to use [secret](https://docs.stacktape.com/resources/secrets/) for storing your access key.
+            #
+            # - Type: string
+            # - Required: false
+            accessKey: example-value
+```
+
+## highlight
+
+This example shows how to configure logforwarding using highlight. 
+
+```yml
+resources:
+  myEdgeLambdaFunction:
+    type: edge-lambda-function
+    properties:
+      logging:
+        # Configures forwarding of logs to specified destination
+        #
+        # - Log forwarding is done using [Amazon Kinesis Data Firehose](https://aws.amazon.com/kinesis/data-firehose/) delivery stream.
+        # - When using log forwarding, you will incur costs based on the amount of data being transferred to the destination (~$0.03 per transferred GB).
+        # Refer to [AWS Kinesis Firehose Pricing](https://aws.amazon.com/kinesis/data-firehose/pricing/?nc=sn&loc=3) page to see details.
+        # - Currently supported destinations for logs:
+        # - `http-endpoint`
+        # - delivers logs to any HTTP endpoint.
+        # - The endpoint must follow [Firehose request and response specifications](https://docs.aws.amazon.com/firehose/latest/dev/httpdeliveryrequestresponse.html).
+        # (Many of the third party vendors are compliant with this specifications out of the box.)
+        # - `datadog`
+        # - delivers logs to [Datadog](https://www.datadoghq.com/).
+        # - `highlight`
+        # - delivers logs to [Highlight.io](https://www.highlight.io/) project.
+        #
+        # Refer to [our docs](https://docs.stacktape.com/configuration/log-forwarding/) for more information.
+        #
+        # > Logs that fail to be delivered to the destination even after multiple retries (time spend on retries can be configured) are put into bucket with name `{stackName}-{resourceName}-logs-{generatedHash}`
+        #
+        # - Type: object
+        # - Required: true
+        logForwarding:
+          #
+          # - Type: string
+          # - Required: true
+          type: highlight
+          #
+          # - Type: object
+          # - Required: true
+          properties:
+            # Id of a [highlight.io](https://www.highlight.io/) project.
+            #
+            # - You can get the id of your project in your [highlight.io console](https://app.highlight.io/).
+            #
+            # - Type: string
+            # - Required: true
+            projectId: example-value
+            # HTTPS endpoint where logs will be forwarded
+            #
+            # - By default Stacktape uses `https://pub.highlight.io/v1/logs/firehose`
+            #
+            # - Type: string
+            # - Required: false
+            # - Default: https://pub.highlight.io/v1/logs/firehose
+            endpointUrl: https://pub.highlight.io/v1/logs/firehose
+```
+
+## datadog
+
+This example shows how to configure logforwarding using datadog. 
+
+```yml
+resources:
+  myEdgeLambdaFunction:
+    type: edge-lambda-function
+    properties:
+      logging:
+        # Configures forwarding of logs to specified destination
+        #
+        # - Log forwarding is done using [Amazon Kinesis Data Firehose](https://aws.amazon.com/kinesis/data-firehose/) delivery stream.
+        # - When using log forwarding, you will incur costs based on the amount of data being transferred to the destination (~$0.03 per transferred GB).
+        # Refer to [AWS Kinesis Firehose Pricing](https://aws.amazon.com/kinesis/data-firehose/pricing/?nc=sn&loc=3) page to see details.
+        # - Currently supported destinations for logs:
+        # - `http-endpoint`
+        # - delivers logs to any HTTP endpoint.
+        # - The endpoint must follow [Firehose request and response specifications](https://docs.aws.amazon.com/firehose/latest/dev/httpdeliveryrequestresponse.html).
+        # (Many of the third party vendors are compliant with this specifications out of the box.)
+        # - `datadog`
+        # - delivers logs to [Datadog](https://www.datadoghq.com/).
+        # - `highlight`
+        # - delivers logs to [Highlight.io](https://www.highlight.io/) project.
+        #
+        # Refer to [our docs](https://docs.stacktape.com/configuration/log-forwarding/) for more information.
+        #
+        # > Logs that fail to be delivered to the destination even after multiple retries (time spend on retries can be configured) are put into bucket with name `{stackName}-{resourceName}-logs-{generatedHash}`
+        #
+        # - Type: object
+        # - Required: true
+        logForwarding:
+          #
+          # - Type: string
+          # - Required: true
+          type: datadog
+          #
+          # - Type: object
+          # - Required: true
+          properties:
+            # API key required to enable delivery of logs to Datadog
+            #
+            # - You can get your Datadog API key in [Datadog console](https://app.datadoghq.com/organization-settings/api-keys)
+            # - It is recommended to use [secret](https://docs.stacktape.com/resources/secrets/) for storing your api key.
+            #
+            # - Type: string
+            # - Required: true
+            apiKey: example-value
+            # HTTPS endpoint where logs will be forwarded
+            #
+            # - By default Stacktape uses `https://aws-kinesis-http-intake.logs.datadoghq.com/v1/input`
+            # - If your Datadog site is in EU you should probably use `https://aws-kinesis-http-intake.logs.datadoghq.eu/v1/input`
+            #
+            # - Type: string
+            # - Required: false
+            # - Default: https://aws-kinesis-http-intake.logs.datadoghq.com/v1/input
+            endpointUrl: https://aws-kinesis-http-intake.logs.datadoghq.com/v1/input
+```

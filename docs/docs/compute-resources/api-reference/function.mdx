@@ -1,0 +1,1638 @@
+---
+title: "Lambda Function"
+order: 115
+---
+
+This example shows a basic lambda function configuration.
+
+Lambda function resource
+
+- Short-lived serverless functions able to quickly scale up to 1000s of parallel executions with pay-per-use pricing.
+
+# Basic example
+
+```yml
+resources:
+  myFunction:
+    type: function
+    properties:
+      # Configures how your source code is turned into a deployment package (deployment artifact)
+      #
+      # - Currently supported packaging types are:
+      # - `stacktape-lambda-buildpack` - Stacktape automatically builds your source code from the supplied source file path.
+      # - `custom-artifact` - You provide path to your own lambda artifact. Stacktape will zip it for you if it's not zipped.
+      # - Your deployment artifacts are automatically uploaded to the S3 deployment bucket.
+      #
+      # - Type: union (anyOf)
+      # - Required: true
+      #
+      # - Type: object
+      # - Required: true
+      packaging:
+        #
+        # - Type: string
+        # - Required: true
+        type: stacktape-lambda-buildpack
+        #
+        # - Type: object
+        # - Required: true
+        properties:
+          # Path to the entry point of your compute resource (relative to the stacktape config file)
+          #
+          # - Stacktape tries to bundle all your source code with its dependencies into a single file.
+          # - If a certain dependency doesn't support static bundling (because it depends on binary executable, uses dynamic require() calls, etc.),
+          # Stacktape will install it and copy it to the bundle
+          #
+          # - Type: string
+          # - Required: true
+          entryfilePath: ./src/index.ts
+          # The handler function (method) ran when the lambda function is invoked.
+          #
+          # - Type: string
+          # - Required: false
+          handlerFunction: example-value
+          # Files that should be explicitly included in the deployment package (glob pattern)
+          #
+          # - Example glob pattern: `images/*.jpg`
+          # - The path is relative to the stacktape configuration file location or to `cwd` if configured using `--currentWorkingDirectory` command line option.
+          #
+          # - Type: array<string>
+          # - Required: false
+          includeFiles:
+            - public/**/*
+            - assets/*.png
+          # Files that should be explicitly excluded from deployment package (glob pattern)
+          #
+          # Example glob pattern: `images/*.jpg`
+          #
+          # - Type: array<string>
+          # - Required: false
+          excludeFiles:
+            - *.test.ts
+            - node_modules/**
+          # Dependencies to ignore.
+          #
+          # - These dependencies won't be a part of your deployment package.
+          #
+          # - Type: array<string>
+          # - Required: false
+          excludeDependencies:
+            - example-value
+          # Configuration of packaging properties specific to given language
+          #
+          # - Type: union (anyOf)
+          # - Required: false
+      # List of event integrations that invoke (trigger) this function
+      #
+      # Functions are invoked ("triggered") in reaction to an event.
+      # - Connecting your lambda functions to an event integrations is automatically handled by Stacktape.
+      # - Stacktape automatically adds all the permissions required to invoke the function.
+      # - Each function can have multiple event integrations.
+      # - Payload (data) received by the function is based on the event integration.
+      #
+      # - Type: array<union (anyOf)>
+      # - Required: false
+      events:
+        # Array of objects
+      # Environment variables injected to the runtime environment
+      #
+      # - Environment variables are often used to inject information about other parts of the infrastructure (such as database URLs, secrets, etc.).
+      #
+      # - Type: array<object (reference)>
+      # - Required: false
+      environment:
+        - name: NODE_ENV
+          value: production
+        - name: DATABASE_URL
+          value: $ResourceParam(myDatabase, connectionString)
+      # Runtime used to execute the function
+      #
+      # - Stacktape automatically detects the function's language and uses the latest runtime version associated with that language.
+      # - Example: uses `nodejs22.x` for all files ending with `.js` and `.ts`.
+      # - For the list of all available lambda runtimes, refer to [AWS docs](https://docs.aws.amazon.com/lambda/latest/dg/lambda-runtimes.html).
+      #
+      # - Type: enum: [dotnet6, dotnet7, java11, java17, java8, java8.al2, nodejs18.x, nodejs20.x, nodejs22.x, provided.al2, provided.al2023, python3.10, python3.11, python3.12, python3.13, python3.8, python3.9, ruby3.2]
+      # - Required: false
+      # - Allowed values: [dotnet6, dotnet7, java11, java17, java8, java8.al2, nodejs18.x, nodejs20.x, nodejs22.x, provided.al2, provided.al2023, python3.10, python3.11, python3.12, python3.13, python3.8, python3.9, ruby3.2]
+      runtime: dotnet6
+      # Amount of memory (in MB) available to the function during execution
+      #
+      # - Must be between 128 MB and 10,240 MB in 1-MB increments.
+      # - Amount of CPU power available to the function is also set using memory property - it's proportionate to the amount of available memory.
+      # - Function with 1797MB has a CPU power equal to 1 virtual CPU. Lambda function can have a maximum of 6 vCPUs (at 10,240 MB of RAM).
+      #
+      # - Type: number
+      # - Required: false
+      memory: 2048
+      # Maximum amount of time (in seconds) the lambda function is allowed to run
+      #
+      # Maximum allowed time is 900 seconds.
+      #
+      # - Type: number
+      # - Required: false
+      # - Default: 10
+      timeout: 3600
+      # Connects the function to the default VPC
+      #
+      # > Connecting a function to the VPC makes it lose connection to the internet. (Outbound requests will fail).
+      # - Functions are NOT connected to the default VPC of your stack by default.
+      # - To communicate with certain resources inside your VPC, you might need to connect your function to the VPC - most commonly when accessing relational-database or redis-cluster.
+      # - If your function connect to S3 (**bucket**) or DynamoDB (**dynamo-db-table**) resources using `connectTo`, VPC gateway endpoints are automatically created in the VPC so that your function can access the resources even without internet access.
+      # - To learn more about VPCs, refer to [VPCs Stacktape documentation](https://docs.stacktape.com/user-guides/vpcs).
+      #
+      # - Type: boolean
+      # - Required: false
+      joinDefaultVpc: true
+      # Tags to apply to this function
+      #
+      # - Tags can help you to identify and categorize resources.
+      # - A maximum number of 50 tags can be specified.
+      #
+      # - Type: array<object (reference)>
+      # - Required: false
+      tags:
+        - name: example-name
+          value: example-value
+      # Lambda Destinations allow you to orchestrate simple, lambda-based, event-driven workflows.
+      #
+      # - Works only for [asynchronous invocations](https://docs.stacktape.com/compute-resources/lambda-functions#sync-vs-async-invocations)
+      # - You can hook into `onSuccess` or `onFailure` events
+      # - 4 different destinations are supported:
+      # - SQS queue
+      # - SNS topic
+      # - Event bus
+      # - other lambda function
+      # - Destination receives both function's result (or error) and original event.
+      # - To learn more about Lambda destinations, refer to [AWS blog post](https://aws.amazon.com/blogs/compute/introducing-aws-lambda-destinations/).
+      # - Defined using a destinations property on the function
+      # - For SNS, DynamoDB and Kinesis event integrations, onFailure destination can be set per event integration.
+      #
+      # - Type: object
+      # - Required: false
+      destinations:
+        # ARN (Amazon resource name) of the destination (SNS topic, SQS Queue, Event bus or another Lambda function)
+        #
+        # After each successful invocation, `JSON object` containing result (response) and other information
+        # about the execution is sent to the destination.
+        #
+        # Format of the response:
+        # ```json
+        # {
+        # "version": "1.0",
+        # "timestamp": "2019-11-24T23:08:25.651Z",
+        # "requestContext": {
+        # "requestId": "c2a6f2ae-7dbb-4d22-8782-d0485c9877e2",
+        # "functionArn": "arn:aws:lambda:sa-east-1:123456789123:function:event-destinations:$LATEST",
+        # "condition": "Success",
+        # "approximateInvokeCount": 1
+        # },
+        # "requestPayload": {
+        # "Success": true
+        # },
+        # "responseContext": {
+        # "statusCode": 200,
+        # "executedVersion": "$LATEST"
+        # },
+        # "responsePayload": null
+        # }
+        # ```
+        # Response object is passed in different ways based on the destination:
+        # - `SNS topic / SQS queue`: Passed as the `Message` to the destination
+        # - `Lambda function`: Passed as the payload to the function. The destination function cannot
+        # be the same as the source function. For example, if FunctionA has a Destination configuration
+        # attached for `Success`, FunctionA is not a valid destination ARN. This prevents recursive functions.
+        # - `Event bus`: Passed as the `detail` of the event. The source is `lambda`, and detail type is either
+        # `Lambda Function Invocation Result - Success` or `Lambda Function Invocation Result – Failure`.
+        # The resource fields contain the function and destination ARNs.
+        #
+        # To learn more about event bus integration, refer to [Stacktape docs](https://docs.stacktape.com/compute-resources/lambda-functions#event-bus-event)
+        #
+        # - Type: string
+        # - Required: false
+        onSuccess: example-value
+        # ARN (Amazon resource name) of the destination (SNS topic, SQS Queue, Event bus or another Lambda function)
+        #
+        # After each successful invocation, `JSON object` containing original event(request), error(response) and other information
+        # about the execution is sent to the destination.
+        #
+        # Format of the response:
+        # ```json
+        # {
+        # "version": "1.0",
+        # "timestamp": "2019-11-24T21:52:47.333Z",
+        # "requestContext": {
+        # "requestId": "8ea123e4-1db7-4aca-ad10-d9ca1234c1fd",
+        # "functionArn": "arn:aws:lambda:sa-east-1:123456678912:function:event-destinations:$LATEST",
+        # "condition": "RetriesExhausted",
+        # "approximateInvokeCount": 3
+        # },
+        # "requestPayload": {
+        # "Success": false
+        # },
+        # "responseContext": {
+        # "statusCode": 200,
+        # "executedVersion": "$LATEST",
+        # "functionError": "Handled"
+        # },
+        # "responsePayload": {
+        # "errorMessage": "Failure from event, Success = false, I am failing!",
+        # "errorType": "Error",
+        # "stackTrace": [ "exports.handler (/var/task/index.js:18:18)" ]
+        # }
+        # }
+        # ```
+        # Response object is passed in different ways based on the destination:
+        # - `SNS topic / SQS queue`: Passed as the `Message` to the destination
+        # - `Lambda function`: Passed as the payload to the function. The destination function cannot
+        # be the same as the source function. For example, if FunctionA has a Destination configuration
+        # attached for `Success`, FunctionA is not a valid destination ARN. This prevents recursive functions.
+        # - `Event bus`: Passed as the `detail` of the event. The source is `lambda`, and detail type is either
+        # `Lambda Function Invocation Result - Success` or `Lambda Function Invocation Result – Failure`.
+        # The resource fields contain the function and destination ARNs.
+        #
+        # To learn more about event bus integration, refer to [Stacktape docs](https://docs.stacktape.com/compute-resources/lambda-functions#event-bus-event)
+        #
+        # - Type: string
+        # - Required: false
+        onFailure: example-value
+      # Configures logging behavior for this function
+      #
+      # - Information about the function invocation and function logs (stdout and stderr)
+      # are automatically sent to a pre-created CloudWatch log group.
+      # - By default, logs are retained for 180 days.
+      # - You can browse your logs in 2 ways:
+      # - go to the log group page in the AWS CloudWatch console. You can use `stacktape stack-info` command to get a
+      # direct link.
+      # - use [stacktape logs command](https://docs.stacktape.com/cli/commands/logs/) to print logs to the console
+      #
+      # - Type: object
+      # - Required: false
+      logging:
+        # Disables the collection of function's application logs (stdout and stderr) to CloudWatch
+        #
+        # - Type: boolean
+        # - Required: false
+        # - Default: false
+        disabled: false
+        # Amount of days the logs will be retained in the log group
+        #
+        # - Type: enum: [1, 120, 14, 150, 180, 1827, 3, 30, 365, 3653, 400, 5, 545, 60, 7, 731, 90]
+        # - Required: false
+        # - Default: 180
+        # - Allowed values: [1, 120, 14, 150, 180, 1827, 3, 30, 365, 3653, 400, 5, 545, 60, 7, 731, 90]
+        retentionDays: 180
+        # Configures forwarding of logs to specified destination
+        #
+        # - Log forwarding is done using [Amazon Kinesis Data Firehose](https://aws.amazon.com/kinesis/data-firehose/) delivery stream.
+        # - When using log forwarding, you will incur costs based on the amount of data being transferred to the destination (~$0.03 per transferred GB).
+        # Refer to [AWS Kinesis Firehose Pricing](https://aws.amazon.com/kinesis/data-firehose/pricing/?nc=sn&loc=3) page to see details.
+        # - Currently supported destinations for logs:
+        # - `http-endpoint`
+        # - delivers logs to any HTTP endpoint.
+        # - The endpoint must follow [Firehose request and response specifications](https://docs.aws.amazon.com/firehose/latest/dev/httpdeliveryrequestresponse.html).
+        # (Many of the third party vendors are compliant with this specifications out of the box.)
+        # - `datadog`
+        # - delivers logs to [Datadog](https://www.datadoghq.com/).
+        # - `highlight`
+        # - delivers logs to [Highlight.io](https://www.highlight.io/) project.
+        #
+        # Refer to [our docs](https://docs.stacktape.com/configuration/log-forwarding/) for more information.
+        #
+        # > Logs that fail to be delivered to the destination even after multiple retries (time spend on retries can be configured) are put into bucket with name `{stackName}-{resourceName}-logs-{generatedHash}`
+        #
+        # - Type: union (anyOf)
+        # - Required: false
+        #
+        # - Type: object
+        # - Required: false
+        logForwarding:
+          #
+          # - Type: string
+          # - Required: true
+          type: http-endpoint
+          #
+          # - Type: object
+          # - Required: true
+          properties:
+            # HTTPS endpoint where logs will be forwarded
+            #
+            # - Type: string
+            # - Required: true
+            endpointUrl: https://example.com
+            # Specifies whether to use GZIP compression for the request
+            #
+            # - When enabled, Firehose uses the content encoding to compress the body of a request before sending the request to the destination
+            #
+            # - Type: boolean
+            # - Required: false
+            gzipEncodingEnabled: true
+            # Parameters included in each call to HTTP endpoint
+            #
+            # - Key/Value pairs containing additional metadata you wish to send to the HTTP endpoint.
+            # - Parameters are delivered within **X-Amz-Firehose-Common-Attributes** header as a JSON object with following format: `{"commonAttributes":{"param1":"val1", "param2":"val2"}}`
+            #
+            # - Type: object
+            # - Required: false
+            # Amount of time spend on retries.
+            #
+            # - The total amount of time that Kinesis Data Firehose spends on retries.
+            # - This duration starts after the initial attempt to send data to the custom destination via HTTPS endpoint fails.
+            # - Logs that fail to be delivered to the HTTP endpoint even after multiple retries (time spend on retries can be configured) are put into bucket with name `{stackName}-{resourceName}-logs-{generatedHash}`
+            #
+            # - Type: number
+            # - Required: false
+            retryDuration: 100
+            # Access key (credentials), needed for authenticating with endpoint
+            #
+            # - Access key is carried within a **X-Amz-Firehose-Access-Key** header
+            # - The configured key is copied verbatim into the value of this header.The contents can be arbitrary and can potentially represent a JWT token or an ACCESS_KEY.
+            # - It is recommended to use [secret](https://docs.stacktape.com/resources/secrets/) for storing your access key.
+            #
+            # - Type: string
+            # - Required: false
+            accessKey: example-value
+      # Configures deployment (update) behaviour of the function
+      #
+      # - Using `deployment` you can update the function in live environment in a safe way - by shifting the traffic to the new version gradually.
+      # - Gradual shift of traffic gives you opportunity to test/monitor the function during update and in a case of a problem swiftly rollback.
+      # - Supports multiple strategies:
+      # - **Canary10Percent5Minutes** - Shifts 10 percent of traffic in the first increment. The remaining 90 percent is deployed five minutes later.
+      # - **Canary10Percent10Minutes** - Shifts 10 percent of traffic in the first increment. The remaining 90 percent is deployed 10 minutes later.
+      # - **Canary10Percent15Minutes** - Shifts 10 percent of traffic in the first increment. The remaining 90 percent is deployed 15 minutes later.
+      # - **Canary10Percent30Minutes** - Shifts 10 percent of traffic in the first increment. The remaining 90 percent is deployed 30 minutes later.
+      # - **Linear10PercentEvery1Minute** - Shifts 10 percent of traffic every minute until all traffic is shifted.
+      # - **Linear10PercentEvery2Minutes** - Shifts 10 percent of traffic every two minutes until all traffic is shifted.
+      # - **Linear10PercentEvery3Minutes** - Shifts 10 percent of traffic every three minutes until all traffic is shifted.
+      # - **Linear10PercentEvery10Minutes** - Shifts 10 percent of traffic every 10 minutes until all traffic is shifted.
+      # - **AllAtOnce** - Shifts all traffic to the updated Lambda functions at once.
+      # - You can validate/abort deployment(update) using lambda-function hooks.
+      #
+      # - Type: object
+      # - Required: false
+      deployment:
+        # Strategy to use for deployment(update)
+        #
+        # - Supported strategies:
+        # - **Canary10Percent5Minutes** - Shifts 10 percent of traffic in the first increment. The remaining 90 percent is deployed five minutes later.
+        # - **Canary10Percent10Minutes** - Shifts 10 percent of traffic in the first increment. The remaining 90 percent is deployed 10 minutes later.
+        # - **Canary10Percent15Minutes** - Shifts 10 percent of traffic in the first increment. The remaining 90 percent is deployed 15 minutes later.
+        # - **Canary10Percent30Minutes** - Shifts 10 percent of traffic in the first increment. The remaining 90 percent is deployed 30 minutes later.
+        # - **Linear10PercentEvery1Minute** - Shifts 10 percent of traffic every minute until all traffic is shifted.
+        # - **Linear10PercentEvery2Minutes** - Shifts 10 percent of traffic every two minutes until all traffic is shifted.
+        # - **Linear10PercentEvery3Minutes** - Shifts 10 percent of traffic every three minutes until all traffic is shifted.
+        # - **Linear10PercentEvery10Minutes** - Shifts 10 percent of traffic every 10 minutes until all traffic is shifted.
+        # - **AllAtOnce** - Shifts all traffic to the updated Lambda functions at once.
+        #
+        # - Type: enum: [AllAtOnce, Canary10Percent10Minutes, Canary10Percent15Minutes, Canary10Percent30Minutes, Canary10Percent5Minutes, Linear10PercentEvery10Minutes, Linear10PercentEvery1Minute, Linear10PercentEvery2Minutes, Linear10PercentEvery3Minutes]
+        # - Required: true
+        # - Allowed values: [AllAtOnce, Canary10Percent10Minutes, Canary10Percent15Minutes, Canary10Percent30Minutes, Canary10Percent5Minutes, Linear10PercentEvery10Minutes, Linear10PercentEvery1Minute, Linear10PercentEvery2Minutes, Linear10PercentEvery3Minutes]
+        strategy: AllAtOnce
+        # The name of the lambda function to run before traffic routing starts.
+        #
+        # - Typical usage is performing checks before the traffic is shifted
+        # - The function must send response (success of failure) to the code deploy API. See example [in the docs](/compute-resources/lambda-functions/#hook-functions)
+        #
+        # - Type: string
+        # - Required: false
+        beforeAllowTrafficFunction: example-value
+        # The name of the lambda function to run after traffic is shifted.
+        #
+        # - Typical usage is performing final checks after the traffic is shifted
+        # - The function must send response (success of failure) to the code deploy API. See example [in the docs](/compute-resources/lambda-functions/#hook-functions)
+        #
+        # - Type: string
+        # - Required: false
+        afterTrafficShiftFunction: example-value
+      # Configures Lambda function URL endpoint
+      #
+      # - Lambda URL is a dedicated HTTPS endpoint for the Lambda function
+      # - URL is automatically generated and has the following format `https://{url-id}.lambda-url.{region}.on.aws`
+      #
+      # - Type: object
+      # - Required: false
+      url:
+        # Enables Lambda function URL endpoint
+        #
+        # - Lambda URL is a dedicated HTTPS endpoint for the Lambda function
+        # - URL is automatically generated and has the following format `https://{url-id}.lambda-url.{region}.on.aws`
+        #
+        # - Type: boolean
+        # - Required: true
+        enabled: true
+        # Configures CORS (Cross-Origin Resource Sharing) HTTP headers for this endpoint.
+        #
+        # - If CORS is configured using this property, CORS headers returned from the function are ignored and replaced
+        #
+        # - Type: object
+        # - Required: false
+        cors:
+          # Enables CORS (Cross-Origin Resource Sharing)
+          #
+          # If you do not specify any additional properties, default CORS configuration is used:
+          # - `AllowedMethods`: `*`
+          # - `AllowedOrigins`: `*`
+          # - `AllowedHeaders`: `Content-Type`, `X-Amz-Date`, `Authorization`, `X-Api-Key`, `X-Amz-Security-Token`, `X-Amz-User-Agent`
+          #
+          # - Type: boolean
+          # - Required: true
+          # - Default: false
+          enabled: true
+          # Origins to accepts cross-domain requests from
+          #
+          # - Origin is a combination of scheme (protocol), hostname (domain), and port of the URL
+          # - Example origin: https://foo.example
+          #
+          # - Type: array<string>
+          # - Required: false
+          # - Default: *
+          allowedOrigins:
+            - https://example.com
+            - https://app.example.com
+          # Allowed HTTP headers
+          #
+          # - Each header name in the `Access-Control-Request-Headers` header of a preflight request must match a corresponding entry in the rule.
+          #
+          # - Type: array<string>
+          # - Required: false
+          allowedHeaders:
+            - Content-Type
+            - Authorization
+          # Allowed HTTP methods
+          #
+          # - By default, Stacktape determines allowed methods based on the event integrations associated with gateway
+          #
+          # - Type: array<object (reference)>
+          # - Required: false
+          allowedMethods:
+            - GET
+            - POST
+            - PUT
+            - DELETE
+          # Configures the presence of credentials in the CORS request
+          #
+          # - Type: boolean
+          # - Required: false
+          allowCredentials: true
+          # Response headers that should be made available to scripts running in the browser, in response to a cross-origin request
+          #
+          # - Type: array<string>
+          # - Required: false
+          exposedResponseHeaders:
+            - example-value
+          # Time in seconds that browser can cache the response for a preflight request
+          #
+          # - Type: number
+          # - Required: false
+          maxAge: 3600
+        # Configures authentication mode for the URL
+        #
+        # Available modes are:
+        # - `AWS_IAM`
+        # - only IAM users and roles with sufficient permission can invoke the endpoint
+        # - to grant other resources of your stack permissions to access the endpoint you can use `connectTo` property
+        # - `NONE`
+        # - everyone can invoke the endpoint (endpoint is public)
+        #
+        # - Type: enum: [AWS_IAM, NONE]
+        # - Required: false
+        # - Default: NONE
+        # - Allowed values: [AWS_IAM, NONE]
+        authMode: NONE
+        # Enables response streaming
+        #
+        # - When response streaming is enabled, lambda streams the response as it becomes available.
+        # - To use the streaming responses, you need to wrap the lambda handler with `awslambda.streamifyResponse` decorator
+        # (see [AWS docs](https://docs.aws.amazon.com/lambda/latest/dg/configuration-response-streaming.html#config-rs-write-functions-handler))
+        # - Streaming advantages:
+        # - can improve performance for web and mobile applications (lower TTFB - time to first byte)
+        # - response size can be up to 20MB (compared to Lambda's default 6MB limit) - this is soft limit and can be increased
+        #
+        # - Type: boolean
+        # - Required: false
+        responseStreamEnabled: true
+      # Configures AWS Cloudfront CDN (Content Delivery Network) to be in front of your Lambda function
+      #
+      # - CDN is a globally distributed network that can cache responses from your Lambda function at the edge - close to your users.
+      # - AWS Cloudfront has 205 edge locations on 6 continents.
+      # - The CDN is used to:
+      # - reduce latency & improve load times
+      # - reduce bandwidth costs
+      # - reduce the amount of traffic coming to the origin
+      # - improve security
+      # - The "origin" is the resource (Lambda function) to which CDN is attached.
+      # CDN caches responses from the origin at the edge for specified amount of time.
+      # - If the content requested by the client is in the CDN cache,
+      # the CDN immediately returns it to the client without making a request to the origin.
+      # - If the content is NOT in the cache, the CDN makes a request to the Origin.
+      # The response from the origin is then forwarded to the client, and cached at the edge.
+      #
+      # - Type: object
+      # - Required: false
+      cdn:
+        # Enables the CDN
+        #
+        #
+        # - Type: boolean
+        # - Required: true
+        # - Default: false
+        enabled: true
+        # Configures custom caching options
+        #
+        # - Configures the caching behavior of your edge distribution (what & when should stay in cache, and when to refetch it from the origin).
+        # - When response from the origin does not contain neither `cache-control` nor `expires` headers default caching behaviour is used.
+        # - Default caching behaviour depends on the type of origin the CDN is attached to:
+        # - **bucket** - by default objects are cached for 6 months (or until the CDN cache is invalidated).
+        # - **http-api-gateway** and **application-load-balancer** - by default responses are not cached.
+        #
+        # - Type: object
+        # - Required: false
+        cachingOptions:
+          # Only responses to the requests with these methods will be cached
+          #
+          # - Possible values are:
+          # - `['GET', 'HEAD']`
+          # - `['GET', 'HEAD', 'OPTIONS']`
+          #
+          # - Type: array<string>
+          # - Required: false
+          cacheMethods:
+            - GET
+          # The minimum amount of time in seconds that the objects will stay in the CDN cache before another request is sent to the origin
+          #
+          # - To learn more about cache expiration, refer to [AWS Docs](https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/Expiration.html)
+          #
+          # - Type: number
+          # - Required: false
+          minTTL: 100
+          # The maximum amount of time in seconds that the objects will stay in the CDN cache before another request is sent to the origin
+          #
+          # - To learn more about cache expiration, refer to [AWS Docs](https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/Expiration.html)
+          #
+          # - Type: number
+          # - Required: false
+          maxTTL: 100
+          # The default amount of time in seconds that the objects will stay in the CDN cache before another request is sent to the origin
+          #
+          # - To learn more about cache expiration, refer to [AWS Docs](https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/Expiration.html)
+          #
+          # - Type: number
+          # - Required: false
+          defaultTTL: 100
+          # Disables compression of the objects served by the CDN
+          #
+          # - Compression is enabled by default.
+          # - Compression can significantly reduce the size of the responses from the CDN.
+          # In some cases, less than a quarter the size of the original. This can result in a better performance
+          # and lower transfer costs.
+          # - The CDN compresses objects using the `Gzip` and `Brotli` compression methods.
+          # - If the viewer supports both formats, Brotli version is used.
+          # - The client must indicate that it accepts compressed files using the `Accept-Encoding` HTTP header.
+          # - To learn more about compression, refer to [AWS Docs](https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/ServingCompressedFiles.html)
+          #
+          # - Type: boolean
+          # - Required: false
+          # - Default: false
+          disableCompression: false
+          # Configures HTTP headers, cookies, and URL query strings to include in the cache key
+          #
+          # - By default the cache key depends on the type of origin the CDN routes to:
+          # - **bucket** - only `url path` is part of the cache key
+          # - **http-api-gateway** and **application-load-balancer** - only `url path` and `query string` are part of the cache key
+          # - The values included in the cache key are automatically forwarded in the requests that the CDN sends to the origin.
+          #
+          # - Type: object
+          # - Required: false
+          cacheKeyParameters:
+            # Configures cookies that will be included in the cache key
+            #
+            # - By default no cookies are included in the cache key.
+            #
+            # - Type: object
+            # - Required: false
+            cookies:
+              # No cookies are included in the cache key
+              #
+              # - Type: boolean
+              # - Required: false
+              none: true
+              # Only the listed cookies are included in the cache key
+              #
+              # - Type: array<string>
+              # - Required: false
+              whitelist:
+                - example-value
+              # All cookies except the ones listed are included in the cache key
+              #
+              # - Type: array<string>
+              # - Required: false
+              allExcept:
+                - example-value
+              # All cookies are included in the cache key
+              #
+              # - Type: boolean
+              # - Required: false
+              all: true
+            # Configures headers that will be included included in the cache key
+            #
+            # - By default no headers (except `Accept-Encoding` for compression to work) are included in the cache key.
+            #
+            # - Type: object
+            # - Required: false
+            headers:
+              # No headers are included in the cache key
+              #
+              # - Type: boolean
+              # - Required: false
+              none: true
+              # Only the headers listed are included in the cache key
+              #
+              # - Type: array<string>
+              # - Required: false
+              whitelist:
+                - example-value
+            # Configures query parameters that will be included in the cache key
+            #
+            # - The query params included in the cache key are automatically forwarded in the requests that the CDN sends to the origin.
+            # - By default no query params are included in the cache key.
+            #
+            # - Type: object
+            # - Required: false
+            queryString:
+              # All query params are included in the cache key
+              #
+              # - Type: boolean
+              # - Required: false
+              all: true
+              # No query params are included in the cache key
+              #
+              # - Type: boolean
+              # - Required: false
+              none: true
+              # Only the query parameters listed are included in the cache key
+              #
+              # - Type: array<string>
+              # - Required: false
+              whitelist:
+                - example-value
+          # Specifies id of pre-created cache policy that you wish to use
+          #
+          # - Use this in a case you wish to use pre-created cache policy, instead of configuring `ttl`, `cacheKeyParameters` and other options.
+          #
+          # - Type: string
+          # - Required: false
+          cachePolicyId: example-value
+        # Configures which parts of the request are forwarded to the origin (headers, query parameters, cookies etc.)
+        #
+        # - Type: object
+        # - Required: false
+        forwardingOptions:
+          # Adds static headers that the CDN will add to all requests sent to the origin
+          #
+          # - Type: array<object (reference)>
+          # - Required: false
+          customRequestHeaders:
+            - headerName: myHeaderName
+              value: example-value
+          # Configured methods that will be forwarded by the CDN to the origin
+          #
+          # - If not set, all methods are forwarded
+          #
+          # - Type: array<string>
+          # - Required: false
+          allowedMethods:
+            - GET
+            - POST
+            - PUT
+            - DELETE
+          # Configured cookies forwarded to the origin
+          #
+          # - If not set, all cookies are forwarded
+          # - All cookies that are part of the cache key (see `cachingOptions`) are automatically forwarded to the origin.
+          #
+          # - Type: object
+          # - Required: false
+          cookies:
+            # No cookies are forwarded to the origin
+            #
+            # - Type: boolean
+            # - Required: false
+            none: true
+            # Only the cookies listed are forwarded to the origin
+            #
+            # - Type: array<string>
+            # - Required: false
+            whitelist:
+              - example-value
+            # All cookies are forwarded to the origin
+            #
+            # - Type: boolean
+            # - Required: false
+            all: true
+          # Configured headers will be forwarded to the origin
+          #
+          # - If not set, all headers are forwarded
+          # - All headers that are part of the cache key (see `cachingOptions`) are automatically forwarded to the origin.
+          #
+          # > Warning: `Authorization` header must be set to be used as a cache key parameter within the caching options in order to be forwarded to the origin. This is to avoid unauthorized access to the resources.
+          #
+          # - Type: object
+          # - Required: false
+          headers:
+            # No headers are forwarded to the origin
+            #
+            # - Type: boolean
+            # - Required: false
+            none: true
+            # Only the headers listed are forwarded to the origin
+            #
+            # - Type: array<string>
+            # - Required: false
+            whitelist:
+              - example-value
+            # All viewer headers are forwarded to the origin
+            #
+            # - Type: boolean
+            # - Required: false
+            allViewer: true
+            # All viewer headers and additional listed CDN headers are forwarded to the origin
+            #
+            # - Type: array<string>
+            # - Required: false
+            allViewerAndWhitelistCloudFront:
+              - example-value
+            # All viewer headers except those that are explicitly specified are forwarded to the origin
+            #
+            # - Type: array<string>
+            # - Required: false
+            allExcept:
+              - example-value
+          # Configured query params will be forwarded to the origin
+          #
+          # - If not set, all query string parameters are forwarded
+          # - All query string parameters that are part of the cache key (see `cachingOptions`) are automatically forwarded to the origin.
+          #
+          # - Type: object
+          # - Required: false
+          queryString:
+            # All query params are forwarded to the origin
+            #
+            # - Type: boolean
+            # - Required: false
+            all: true
+            # No query params are forwarded to the origin
+            #
+            # - Type: boolean
+            # - Required: false
+            none: true
+            # Only the query parameters listed are forwarded to the origin
+            #
+            # - Type: array<string>
+            # - Required: false
+            whitelist:
+              - example-value
+          # Specifies id of pre-created origin request policy that you wish to use
+          #
+          # - Use this in a case you wish to use pre-created origin request policy, instead of configuring `cookies`, `headers` and `queryString` options.
+          #
+          # - Type: string
+          # - Required: false
+          originRequestPolicyId: example-value
+        # Enables you to redirect specific requests to a different origin
+        #
+        # - Each incoming request to the CDN is first evaluated against route rewrites. The requested path is compared with path pattern specified in route rewrite.
+        # - If the requested path matches the path pattern specified by route rewrite, the request is sent to the configured route.
+        # - Route rewrites are evaluated in order. The first match is where the request will be sent to.
+        # - If no match is found, request is sent to the default origin (the one that the CDN is attached to).
+        #
+        # **Example use cases**:
+        # - Most of the content you are serving is a static content
+        # served from a bucket (static website). Some content however needs to be
+        # rendered dynamically by a lambda function. You can route paths that need
+        # to be rendered dynamically to the Lambda function.
+        # - You want to cache your `jpg` files longer than
+        # other files. You can create route rewrite that will catch every path
+        # ending with `jpg` and set custom caching options for these paths.
+        #
+        # - Type: array<object (reference)>
+        # - Required: false
+        routeRewrites:
+          - path: example-value
+            routePrefix: example-value
+        # Attaches a custom domains to this CDN
+        #
+        # Stacktape allows you to connect your custom domain names to some of your resources
+        # (Web Service, Nextjs web, HTTP API Gateways, Application Load Balancers and Buckets with CDNs).
+        #
+        # Connecting a custom domain to the resource does 2 things:
+        # - **Creates DNS records**:
+        # - If you use your custom domain with a resource, Stacktape automatically creates a DNS record (during deploy) pointing the specified domain name to the resource.
+        # - **Adds TLS certificates**
+        # - If the origin resource (HTTP API Gateway, Application Load Balancer or CDN) uses HTTPS protocol, Stacktape takes care of
+        # issuing and attaching correct (free, AWS-managed) certificate to the resource.
+        # This means, you do not have to deal with TLS termination as it is handled by the connected resource.
+        # - If you want to use your own certificates, you can configure `customCertificateArns`.
+        #
+        # > To manage a custom domain, it first needs to be added to your AWS account.
+        # > This means that a [hosted zone](https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/AboutHZWorkingWith.html)
+        # > (collection of records managed together for a given domain)
+        # > for your domain exists in your AWS account and your domain registrar's name servers are pointing to it.
+        # > To learn more, refer to [Adding a domain guide](https://docs.stacktape.com/other-resources/domains-and-certificates/#adding-domain).
+        #
+        # - Type: array<object (reference)>
+        # - Required: false
+        customDomains:
+          - domainName: api.example.com
+            customCertificateArn: example-value
+        # Configures Edge function triggers
+        #
+        # - You can associate `edge-lambda-function` with CDN to be executed:
+        # - `onRequest` - function is executed when CDN receives a request from a client(viewer) before checking CDN cache
+        # - `onResponse` - function is executed before returning the response to the client(viewer)
+        #
+        # - Potential use-cases for using edge functions:
+        # - generating immediate HTTP response without the need to check CDN cache or forward to the origin
+        # - modifying request (i.e rewrite url, headers etc) before forwarding to the origin
+        # - inspection of cookies
+        # - inspection/validation of authorization headers and tokens
+        #
+        # - Type: object
+        # - Required: false
+        edgeFunctions:
+          # Name of the edge-lambda-function in the config
+          #
+          # - `onRequest` function is triggered when CDN receives a request from a client(viewer):
+          # - You can modify the request before forwarding it to the origin
+          # - You can return immediate response to the client(viewer)
+          # - You can make network calls to external resources to confirm user credentials, or fetch additional content
+          # - The body of the request is exposed to the function with some restrictions
+          # (refer to [AWS docs](https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/edge-functions-restrictions.html#lambda-at-edge-restrictions-request-body) for more details)
+          #
+          # - Type: string
+          # - Required: false
+          onRequest: example-value
+          # Name of the edge-lambda-function in the config
+          #
+          # - `onResponse` function is triggered before CDN returns response to the client(viewer):
+          # - You can modify the response (headers, cookies) before returning to the client
+          # - The function does not execute in following cases:
+          # - When the origin returns an HTTP status code of 400 or higher.
+          # - When the response is generated from a function that was triggered by a viewer request event (`onRequest` function).
+          #
+          # - Type: string
+          # - Required: false
+          onResponse: example-value
+          # Name of the edge-lambda-function in the config
+          #
+          # > Use `onOriginRequest` trigger only if you are an advanced user and know what you are doing.
+          # > Using this trigger can **override the default behaviour configured by Stacktape**.
+          # > Stacktape uses pre-configured lambdas together with this trigger when using CDN with:
+          # > - **bucket** - Stacktape uses this trigger with pre-configured lambda to correctly resolve URLs
+          # > - **web-service, http-api-gateway, application-load-balancer** - Stacktape uses this trigger with pre-configured lambda to adjust headers before sending to origin
+          # - `onOriginRequest` function is triggered after CDN receives a request from a client(viewer) but before the request is send to the origin:
+          # - This means that function is NOT triggered when response is found in the cache (as no request to origin needs to happen)
+          # - You can modify the request before forwarding it to the origin
+          # - You can return immediate response to the client(viewer) - the response will be cached same way as if it was from the origin
+          # - You can make network calls to external resources to confirm user credentials, or fetch additional content
+          # - The body of the request is exposed to the function with some restrictions
+          # (refer to [AWS docs](https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/edge-functions-restrictions.html#lambda-at-edge-restrictions-request-body) for more details)
+          #
+          # - Type: string
+          # - Required: false
+          onOriginRequest: example-value
+          # Name of the edge-lambda-function in the config
+          #
+          # - `onOriginResponse` function is triggered after origin returns response but before it is sent back to the client(viewer):
+          # - You can modify the response (headers, cookies) before returning to the client - the response will be cached same way as if it was from the origin
+          # - You can update the response status.
+          #
+          # - Type: string
+          # - Required: false
+          onOriginResponse: example-value
+        # Configures locations from which the CDN serves traffic
+        #
+        # - Higher price class results in more locations that serve your traffic.
+        # - This can result in better performance in some regions, but is more costly.
+        # - Example: If your users are located only in US & Europe, you can save money by configuring `PriceClass_100`
+        # - To learn more about price classes, refer to [AWS docs](https://aws.amazon.com/cloudfront/pricing/)
+        #
+        # - Type: enum: [PriceClass_100, PriceClass_200, PriceClass_All]
+        # - Required: false
+        # - Default: PriceClass_All
+        # - Allowed values: [PriceClass_100, PriceClass_200, PriceClass_All]
+        cloudfrontPriceClass: PriceClass_All
+        # Prefixes requests to the origin with specified prefix
+        #
+        # - Incoming requests will be prefixed with `defaultRoutePrefix` before being forwarded to the origin.
+        # - Example: If the CDN receives a request with path `/my/resource/url`, the request will be sent to the origin as
+        # `/default_route_prefix/my/resource/url`
+        #
+        # - Type: string
+        # - Required: false
+        defaultRoutePrefix: example-value
+        # Custom error document URL
+        #
+        # - Error document is requested by the CDN if the original request to the origin responds with an error code `404`.
+        # - Example: `/error.html`
+        #
+        # - Type: string
+        # - Required: false
+        # - Default: /404.html
+        errorDocument: /404.html
+        # Custom index (root) document served for requests with root path `/`
+        #
+        #
+        # - Type: string
+        # - Required: false
+        # - Default: '/index.html'
+        indexDocument: '/index.html'
+        # Disables invalidating of the CDN cache after each deployment
+        #
+        # - Cache is by default invalidated after every deploy to prevent serving outdated content to your users.
+        # - When invalidating the cache, CDN flushes all the cached content and new requests
+        # will result in a request to the origin (bucket, application-load-balancer, function or http-api-gateway)
+        #
+        # - Type: boolean
+        # - Required: false
+        # - Default: false
+        disableInvalidationAfterDeploy: false
+        # Name of the 'web-app-firewall' resource to used with your CDN
+        #
+        # - You can use `web-app-firewall` to protect your resources from common web exploits that could affect application availability, compromise security, or consume excessive resources.
+        # - Web app firewall protects your application by filtering dangerous requests coming to your app.
+        # You can read more about the firewall [in our docs](https://docs.stacktape.com/security-resources/web-app-firewalls/).
+        #
+        # - Type: string
+        # - Required: false
+        useFirewall: example-value
+      # Size of functions `/tmp` directory in MB
+      #
+      # - Minimum is 512
+      # - Maximum is 10240
+      #
+      # - Type: number
+      # - Required: false
+      # - Default: 512
+      storage: 512
+      # List of volume mounts to attach to the function
+      #
+      # - Volumes provide persistent storage for your function
+      # - Currently supports EFS (Elastic File System) volumes
+      # - Multiple functions can share the same volume
+      # - Volumes persist even if the function is stopped or replaced
+      # - Requires the function to be connected to a VPC (use `joinDefaultVpc: true`)
+      #
+      # - Type: array<object (reference)>
+      # - Required: false
+      volumeMounts:
+        - type: efs
+      # Configures access to other resources of your stack (such as databases, buckets, event-buses, etc.) and aws services
+      #
+      # By referencing resources (or services) in `connectTo` list, Stacktape automatically:
+      # - configures correct compute resource's **IAM role permissions** if needed
+      # - sets up correct **security group rules** to allow access if needed
+      # - **injects relevant environment variables** containing information about resource you are connecting to into the compute resource's runtime
+      # - names of environment variables use upper-snake-case and are in form `STP_[RESOURCE_NAME]_[VARIABLE_NAME]`,
+      # - examples: `STP_MY_DATABASE_CONNECTION_STRING` or `STP_MY_EVENT_BUS_ARN`,
+      # - list of injected variables for each resource type can be seen below.
+      #
+      #
+      # Granted permissions and injected environment variables are different depending on resource type:
+      #
+      #
+      # `Bucket`
+      # - **Permissions:**
+      # - list objects in a bucket
+      # - create / get / delete / tag object in a bucket
+      # - **Injected env variables**: `NAME`, `ARN`
+      #
+      #
+      # `DynamoDB table`
+      # - **Permissions:**
+      # - get / put / update / delete item in a table
+      # - scan / query a table
+      # - describe table stream
+      # - **Injected env variables**: `NAME`, `ARN`, `STREAM_ARN`
+      #
+      #
+      # `MongoDB Atlas cluster`
+      # - **Permissions:**
+      # - Allows connection to a cluster with `accessibilityMode` set to `scoping-workloads-in-vpc`. To learn more about
+      # MongoDB Atlas clusters accessibility modes, refer to
+      # [MongoDB Atlas cluster docs](https://docs.stacktape.com/3rd-party-resources/mongo-db-atlas-clusters/#accessibility).
+      # - Creates access "user" associated with compute resource's role to allow for secure credential-less access to the the cluster
+      # - **Injected env variables**: `CONNECTION_STRING`
+      #
+      #
+      # `Relational(SQL) database`
+      # - **Permissions:**
+      # - Allows connection to a relational database with `accessibilityMode` set to `scoping-workloads-in-vpc`. To learn more about
+      # relational database accessibility modes, refer to [Relational databases docs](https://docs.stacktape.com/resources/relational-databases#accessibility).
+      # - **Injected env variables**: `CONNECTION_STRING`, `JDBC_CONNECTION_STRING`, `HOST`, `PORT`
+      # (in case of aurora multi instance cluster additionally: `READER_CONNECTION_STRING`, `READER_JDBC_CONNECTION_STRING`, `READER_HOST`)
+      #
+      #
+      # `Redis cluster`
+      # - **Permissions:**
+      # - Allows connection to a redis cluster with `accessibilityMode` set to `scoping-workloads-in-vpc`. To learn more about
+      # redis cluster accessibility modes, refer to [Redis clusters docs](https://docs.stacktape.com/resources/redis-clusters#accessibility).
+      # - **Injected env variables**: `HOST`, `READER_HOST`, `PORT`
+      #
+      #
+      # `Event bus`
+      # - **Permissions:**
+      # - publish events to the specified Event bus
+      # - **Injected env variables**: `ARN`
+      #
+      #
+      # `Function`
+      # - **Permissions:**
+      # - invoke the specified function
+      # - invoke the specified function via url (if lambda has URL enabled)
+      # - **Injected env variables**: `ARN`
+      #
+      #
+      # `Batch job`
+      # - **Permissions:**
+      # - submit batch-job instance into batch-job queue
+      # - list submitted job instances in a batch-job queue
+      # - describe / terminate a batch-job instance
+      # - list executions of state machine which executes the batch-job according to its strategy
+      # - start / terminate execution of a state machine which executes the batch-job according to its strategy
+      # - **Injected env variables**: `JOB_DEFINITION_ARN`, `STATE_MACHINE_ARN`
+      #
+      #
+      # `User auth pool`
+      # - **Permissions:**
+      # - full control over the user pool (`cognito-idp:*`)
+      # - for more information about allowed methods refer to [AWS docs](https://docs.aws.amazon.com/service-authorization/latest/reference/list_amazoncognitouserpools.html)
+      # - **Injected env variables**: `ID`, `CLIENT_ID`, `ARN`
+      #
+      #
+      #
+      # `SNS Topic`
+      # - **Permissions:**
+      # - confirm/list subscriptions of the topic
+      # - publish/subscribe to the topic
+      # - unsubscribe from the topic
+      # - **Injected env variables**: `ARN`, `NAME`
+      #
+      #
+      #
+      # `SQS Queue`
+      # - **Permissions:**
+      # - send/receive/delete message
+      # - change visibility of message
+      # - purge queue
+      # - **Injected env variables**: `ARN`, `NAME`, `URL`
+      #
+      #
+      # `Upstash Kafka topic`
+      # - **Injected env variables**: `TOPIC_NAME`, `TOPIC_ID`, `USERNAME`, `PASSWORD`, `TCP_ENDPOINT`, `REST_URL`
+      #
+      #
+      # `Upstash Redis`
+      # - **Injected env variables**: `HOST`, `PORT`, `PASSWORD`, `REST_TOKEN`, `REST_URL`, `REDIS_URL`
+      #
+      #
+      # `Private service`
+      # - **Injected env variables**: `ADDRESS`
+      #
+      #
+      # `aws:ses`(Macro)
+      # - **Permissions:**
+      # - gives full permissions to aws ses (`ses:*`).
+      # - for more information about allowed methods refer to [AWS docs](https://docs.aws.amazon.com/service-authorization/latest/reference/list_amazonses.html)
+      #
+      # - Type: array<string>
+      # - Required: false
+      connectTo:
+        - myDatabase
+        - myBucket
+      # Raw AWS IAM role statements appended to your resources's role.
+      #
+      # - Type: array<object (reference)>
+      # - Required: false
+      iamRoleStatements:
+        - Resource: ["example-value"]
+          Sid: example-value
+```
+
+# Packaging alternatives
+
+## stacktape-lambda-buildpack
+
+This example shows how to configure packaging using stacktape-lambda-buildpack. 
+
+```yml
+resources:
+  myFunction:
+    type: function
+    properties:
+      # Configures how your source code is turned into a deployment package (deployment artifact)
+      #
+      # - Currently supported packaging types are:
+      # - `stacktape-lambda-buildpack` - Stacktape automatically builds your source code from the supplied source file path.
+      # - `custom-artifact` - You provide path to your own lambda artifact. Stacktape will zip it for you if it's not zipped.
+      # - Your deployment artifacts are automatically uploaded to the S3 deployment bucket.
+      #
+      # - Type: object
+      # - Required: true
+      packaging:
+        #
+        # - Type: string
+        # - Required: true
+        type: stacktape-lambda-buildpack
+        #
+        # - Type: object
+        # - Required: true
+        properties:
+          # Path to the entry point of your compute resource (relative to the stacktape config file)
+          #
+          # - Stacktape tries to bundle all your source code with its dependencies into a single file.
+          # - If a certain dependency doesn't support static bundling (because it depends on binary executable, uses dynamic require() calls, etc.),
+          # Stacktape will install it and copy it to the bundle
+          #
+          # - Type: string
+          # - Required: true
+          entryfilePath: ./src/index.ts
+          # The handler function (method) ran when the lambda function is invoked.
+          #
+          # - Type: string
+          # - Required: false
+          handlerFunction: example-value
+          # Files that should be explicitly included in the deployment package (glob pattern)
+          #
+          # - Example glob pattern: `images/*.jpg`
+          # - The path is relative to the stacktape configuration file location or to `cwd` if configured using `--currentWorkingDirectory` command line option.
+          #
+          # - Type: array<string>
+          # - Required: false
+          includeFiles:
+            - public/**/*
+            - assets/*.png
+          # Files that should be explicitly excluded from deployment package (glob pattern)
+          #
+          # Example glob pattern: `images/*.jpg`
+          #
+          # - Type: array<string>
+          # - Required: false
+          excludeFiles:
+            - *.test.ts
+            - node_modules/**
+          # Dependencies to ignore.
+          #
+          # - These dependencies won't be a part of your deployment package.
+          #
+          # - Type: array<string>
+          # - Required: false
+          excludeDependencies:
+            - example-value
+          # Configuration of packaging properties specific to given language
+          #
+          # - Type: union (anyOf)
+          # - Required: false
+```
+
+## custom-artifact
+
+This example shows how to configure packaging using custom-artifact. 
+
+```yml
+resources:
+  myFunction:
+    type: function
+    properties:
+      # Configures how your source code is turned into a deployment package (deployment artifact)
+      #
+      # - Currently supported packaging types are:
+      # - `stacktape-lambda-buildpack` - Stacktape automatically builds your source code from the supplied source file path.
+      # - `custom-artifact` - You provide path to your own lambda artifact. Stacktape will zip it for you if it's not zipped.
+      # - Your deployment artifacts are automatically uploaded to the S3 deployment bucket.
+      #
+      # - Type: object
+      # - Required: true
+      packaging:
+        #
+        # - Type: string
+        # - Required: true
+        type: custom-artifact
+        #
+        # - Type: object
+        # - Required: true
+        properties:
+          # Path to the lambda package to use as the source for this lambda function
+          #
+          # - If the specified package path is a directory or an non-zip file, it will be automatically zipped.
+          #
+          # - Type: string
+          # - Required: true
+          packagePath: ./path/to/packagePath
+          # The handler function (method) ran when the lambda function is invoked.
+          #
+          # - Path to the entryfile and method inside your package.
+          # - The syntax is `{{filepath}}:{{functionName}}`.
+          # - Example: `my-lambda/index.js:default`
+          #
+          # - Type: string
+          # - Required: false
+          handler: example-value
+```
+
+# LogForwarding alternatives
+
+## http-endpoint
+
+This example shows how to configure logforwarding using http-endpoint. 
+
+```yml
+resources:
+  myFunction:
+    type: function
+    properties:
+      logging:
+        # Configures forwarding of logs to specified destination
+        #
+        # - Log forwarding is done using [Amazon Kinesis Data Firehose](https://aws.amazon.com/kinesis/data-firehose/) delivery stream.
+        # - When using log forwarding, you will incur costs based on the amount of data being transferred to the destination (~$0.03 per transferred GB).
+        # Refer to [AWS Kinesis Firehose Pricing](https://aws.amazon.com/kinesis/data-firehose/pricing/?nc=sn&loc=3) page to see details.
+        # - Currently supported destinations for logs:
+        # - `http-endpoint`
+        # - delivers logs to any HTTP endpoint.
+        # - The endpoint must follow [Firehose request and response specifications](https://docs.aws.amazon.com/firehose/latest/dev/httpdeliveryrequestresponse.html).
+        # (Many of the third party vendors are compliant with this specifications out of the box.)
+        # - `datadog`
+        # - delivers logs to [Datadog](https://www.datadoghq.com/).
+        # - `highlight`
+        # - delivers logs to [Highlight.io](https://www.highlight.io/) project.
+        #
+        # Refer to [our docs](https://docs.stacktape.com/configuration/log-forwarding/) for more information.
+        #
+        # > Logs that fail to be delivered to the destination even after multiple retries (time spend on retries can be configured) are put into bucket with name `{stackName}-{resourceName}-logs-{generatedHash}`
+        #
+        # - Type: object
+        # - Required: true
+        logForwarding:
+          #
+          # - Type: string
+          # - Required: true
+          type: http-endpoint
+          #
+          # - Type: object
+          # - Required: true
+          properties:
+            # HTTPS endpoint where logs will be forwarded
+            #
+            # - Type: string
+            # - Required: true
+            endpointUrl: https://example.com
+            # Specifies whether to use GZIP compression for the request
+            #
+            # - When enabled, Firehose uses the content encoding to compress the body of a request before sending the request to the destination
+            #
+            # - Type: boolean
+            # - Required: false
+            gzipEncodingEnabled: true
+            # Parameters included in each call to HTTP endpoint
+            #
+            # - Key/Value pairs containing additional metadata you wish to send to the HTTP endpoint.
+            # - Parameters are delivered within **X-Amz-Firehose-Common-Attributes** header as a JSON object with following format: `{"commonAttributes":{"param1":"val1", "param2":"val2"}}`
+            #
+            # - Type: object
+            # - Required: false
+            # Amount of time spend on retries.
+            #
+            # - The total amount of time that Kinesis Data Firehose spends on retries.
+            # - This duration starts after the initial attempt to send data to the custom destination via HTTPS endpoint fails.
+            # - Logs that fail to be delivered to the HTTP endpoint even after multiple retries (time spend on retries can be configured) are put into bucket with name `{stackName}-{resourceName}-logs-{generatedHash}`
+            #
+            # - Type: number
+            # - Required: false
+            retryDuration: 100
+            # Access key (credentials), needed for authenticating with endpoint
+            #
+            # - Access key is carried within a **X-Amz-Firehose-Access-Key** header
+            # - The configured key is copied verbatim into the value of this header.The contents can be arbitrary and can potentially represent a JWT token or an ACCESS_KEY.
+            # - It is recommended to use [secret](https://docs.stacktape.com/resources/secrets/) for storing your access key.
+            #
+            # - Type: string
+            # - Required: false
+            accessKey: example-value
+```
+
+## highlight
+
+This example shows how to configure logforwarding using highlight. 
+
+```yml
+resources:
+  myFunction:
+    type: function
+    properties:
+      logging:
+        # Configures forwarding of logs to specified destination
+        #
+        # - Log forwarding is done using [Amazon Kinesis Data Firehose](https://aws.amazon.com/kinesis/data-firehose/) delivery stream.
+        # - When using log forwarding, you will incur costs based on the amount of data being transferred to the destination (~$0.03 per transferred GB).
+        # Refer to [AWS Kinesis Firehose Pricing](https://aws.amazon.com/kinesis/data-firehose/pricing/?nc=sn&loc=3) page to see details.
+        # - Currently supported destinations for logs:
+        # - `http-endpoint`
+        # - delivers logs to any HTTP endpoint.
+        # - The endpoint must follow [Firehose request and response specifications](https://docs.aws.amazon.com/firehose/latest/dev/httpdeliveryrequestresponse.html).
+        # (Many of the third party vendors are compliant with this specifications out of the box.)
+        # - `datadog`
+        # - delivers logs to [Datadog](https://www.datadoghq.com/).
+        # - `highlight`
+        # - delivers logs to [Highlight.io](https://www.highlight.io/) project.
+        #
+        # Refer to [our docs](https://docs.stacktape.com/configuration/log-forwarding/) for more information.
+        #
+        # > Logs that fail to be delivered to the destination even after multiple retries (time spend on retries can be configured) are put into bucket with name `{stackName}-{resourceName}-logs-{generatedHash}`
+        #
+        # - Type: object
+        # - Required: true
+        logForwarding:
+          #
+          # - Type: string
+          # - Required: true
+          type: highlight
+          #
+          # - Type: object
+          # - Required: true
+          properties:
+            # Id of a [highlight.io](https://www.highlight.io/) project.
+            #
+            # - You can get the id of your project in your [highlight.io console](https://app.highlight.io/).
+            #
+            # - Type: string
+            # - Required: true
+            projectId: example-value
+            # HTTPS endpoint where logs will be forwarded
+            #
+            # - By default Stacktape uses `https://pub.highlight.io/v1/logs/firehose`
+            #
+            # - Type: string
+            # - Required: false
+            # - Default: https://pub.highlight.io/v1/logs/firehose
+            endpointUrl: https://pub.highlight.io/v1/logs/firehose
+```
+
+## datadog
+
+This example shows how to configure logforwarding using datadog. 
+
+```yml
+resources:
+  myFunction:
+    type: function
+    properties:
+      logging:
+        # Configures forwarding of logs to specified destination
+        #
+        # - Log forwarding is done using [Amazon Kinesis Data Firehose](https://aws.amazon.com/kinesis/data-firehose/) delivery stream.
+        # - When using log forwarding, you will incur costs based on the amount of data being transferred to the destination (~$0.03 per transferred GB).
+        # Refer to [AWS Kinesis Firehose Pricing](https://aws.amazon.com/kinesis/data-firehose/pricing/?nc=sn&loc=3) page to see details.
+        # - Currently supported destinations for logs:
+        # - `http-endpoint`
+        # - delivers logs to any HTTP endpoint.
+        # - The endpoint must follow [Firehose request and response specifications](https://docs.aws.amazon.com/firehose/latest/dev/httpdeliveryrequestresponse.html).
+        # (Many of the third party vendors are compliant with this specifications out of the box.)
+        # - `datadog`
+        # - delivers logs to [Datadog](https://www.datadoghq.com/).
+        # - `highlight`
+        # - delivers logs to [Highlight.io](https://www.highlight.io/) project.
+        #
+        # Refer to [our docs](https://docs.stacktape.com/configuration/log-forwarding/) for more information.
+        #
+        # > Logs that fail to be delivered to the destination even after multiple retries (time spend on retries can be configured) are put into bucket with name `{stackName}-{resourceName}-logs-{generatedHash}`
+        #
+        # - Type: object
+        # - Required: true
+        logForwarding:
+          #
+          # - Type: string
+          # - Required: true
+          type: datadog
+          #
+          # - Type: object
+          # - Required: true
+          properties:
+            # API key required to enable delivery of logs to Datadog
+            #
+            # - You can get your Datadog API key in [Datadog console](https://app.datadoghq.com/organization-settings/api-keys)
+            # - It is recommended to use [secret](https://docs.stacktape.com/resources/secrets/) for storing your api key.
+            #
+            # - Type: string
+            # - Required: true
+            apiKey: example-value
+            # HTTPS endpoint where logs will be forwarded
+            #
+            # - By default Stacktape uses `https://aws-kinesis-http-intake.logs.datadoghq.com/v1/input`
+            # - If your Datadog site is in EU you should probably use `https://aws-kinesis-http-intake.logs.datadoghq.eu/v1/input`
+            #
+            # - Type: string
+            # - Required: false
+            # - Default: https://aws-kinesis-http-intake.logs.datadoghq.com/v1/input
+            endpointUrl: https://aws-kinesis-http-intake.logs.datadoghq.com/v1/input
+```
+
+# RouteTo alternatives
+
+## application-load-balancer
+
+This example shows how to configure routeto using application-load-balancer. 
+
+```yml
+resources:
+  myFunction:
+    type: function
+    properties:
+      cdn:
+        routeRewrites:
+          items:
+            #
+            # - Type: object
+            # - Required: true
+            routeTo:
+              #
+              # - Type: string
+              # - Required: true
+              type: application-load-balancer
+              #
+              # - Type: object
+              # - Required: true
+              properties:
+                # Name of the Load balancer
+                #
+                # - Type: string
+                # - Required: true
+                loadBalancerName: myLoadBalancerName
+                # Port of the Load balancer listener
+                #
+                # - You need to specify listener port if the load balancer you are routing to uses custom listeners.
+                #
+                # - Type: number
+                # - Required: false
+                listenerPort: 3000
+                # Explicitly sets the origin domain name you wish to use when forwarding to load balancer
+                #
+                # - This is required only if the load balancer has no `customDomains` attached and listener uses `customCertificateArns`
+                #
+                # - Type: string
+                # - Required: false
+                originDomainName: myOriginDomainName
+```
+
+## http-api-gateway
+
+This example shows how to configure routeto using http-api-gateway. 
+
+```yml
+resources:
+  myFunction:
+    type: function
+    properties:
+      cdn:
+        routeRewrites:
+          items:
+            #
+            # - Type: object
+            # - Required: true
+            routeTo:
+              #
+              # - Type: string
+              # - Required: true
+              type: http-api-gateway
+              #
+              # - Type: object
+              # - Required: true
+              properties:
+                # Name of the HTTP Api Gateway
+                #
+                # - Type: string
+                # - Required: true
+                httpApiGatewayName: myHttpApiGatewayName
+```
+
+## function
+
+This example shows how to configure routeto using function. 
+
+```yml
+resources:
+  myFunction:
+    type: function
+    properties:
+      cdn:
+        routeRewrites:
+          items:
+            #
+            # - Type: object
+            # - Required: true
+            routeTo:
+              #
+              # - Type: string
+              # - Required: true
+              type: function
+              #
+              # - Type: object
+              # - Required: true
+              properties:
+                # Name of the Web Service resource
+                #
+                # - Type: string
+                # - Required: true
+                functionName: myFunctionName
+```
+
+## custom-origin
+
+This example shows how to configure routeto using custom-origin. 
+
+```yml
+resources:
+  myFunction:
+    type: function
+    properties:
+      cdn:
+        routeRewrites:
+          items:
+            #
+            # - Type: object
+            # - Required: true
+            routeTo:
+              #
+              # - Type: string
+              # - Required: true
+              type: custom-origin
+              #
+              # - Type: object
+              # - Required: true
+              properties:
+                # Domain name of the custom origin.
+                #
+                # Example: `mydomain.com` or `domain.example.com`
+                #
+                # - Type: string
+                # - Required: true
+                domainName: api.example.com
+                # Protocol to use when connecting to custom origin.
+                #
+                #
+                # - Type: enum: [HTTP, HTTPS]
+                # - Required: false
+                # - Default: HTTPS
+                # - Allowed values: [HTTP, HTTPS]
+                protocol: HTTP
+                # Port of the custom origin.
+                #
+                # By default port number 443 is used for `HTTPS` origins and port number 80 is used for `HTTP` origins.
+                #
+                # - Type: number
+                # - Required: false
+                # - Default: 443
+                port: 3000
+```
+
+## bucket
+
+This example shows how to configure routeto using bucket. 
+
+```yml
+resources:
+  myFunction:
+    type: function
+    properties:
+      cdn:
+        routeRewrites:
+          items:
+            #
+            # - Type: object
+            # - Required: true
+            routeTo:
+              #
+              # - Type: string
+              # - Required: true
+              type: bucket
+              #
+              # - Type: object
+              # - Required: true
+              properties:
+                # Name of the bucket
+                #
+                # - Type: string
+                # - Required: true
+                bucketName: my-example-bucket
+                # Disables URL normalization (ability to use clean urls without the `.html` extension)
+                #
+                # - URL normalization is enabled by default.
+                # - URL normalization is useful when you want to serve HTML files from the bucket
+                # - When the URL normalization is enabled, the CDN is able to fetch correct HTML files
+                # from the bucket even when incomplete URL is used (without the `.html` extension)
+                # - This enables you to use URLs such as `<<my-domain.com>>/about` instead of urls
+                # `<<my-domain.com>>/about.html` or `<<my-domain.com>>/about/index.html`
+                #
+                # - Type: boolean
+                # - Required: false
+                # - Default: false
+                disableUrlNormalization: false
+```

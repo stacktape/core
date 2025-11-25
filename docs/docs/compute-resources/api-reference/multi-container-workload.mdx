@@ -1,0 +1,1153 @@
+---
+title: "Multi-Container Workload"
+order: 113
+---
+
+This example shows a basic container workload configuration.
+
+Container workload resource
+
+- Fully managed, auto-scalable and easy-to-use runtime for your Docker containers.
+
+# Basic example
+
+```yml
+resources:
+  myMultiContainerWorkload:
+    type: multi-container-workload
+    properties:
+      # List of containers that will run in this container workload.
+      #
+      # - Container workload can have one or more containers
+      # - Multiple containers in the same container workload share computing resources and scale together
+      #
+      # - Type: array<object (reference)>
+      # - Required: true
+      containers:
+        - name: example-name
+          events: []
+      # Configures computing resources(CPU/memory and EC2 instance types) for the service container
+      #
+      # - When specifying resources there are two underlying compute engines to use:
+      # - **Fargate** - abstracts the server and cluster management away from the user, allowing them to run containers without
+      # managing the underlying servers, simplifying deployment and management of applications but offering less control over the computing environment.
+      # - **EC2 (Elastic Compute Cloud)** - provides granular control over the underlying servers (instances).
+      # By choosing `instanceTypes` you get complete control over the computing environment and the ability to optimize for specific workloads.
+      #
+      # - To use Fargate: Do NOT specify `instanceTypes` and specify `cpu` and `memory` properties.
+      # - To use EC2 instances: specify `instanceTypes`.
+      #
+      # - Type: object
+      # - Required: true
+      resources:
+        # Number of virtual CPUs available to containers
+        #
+        # - If you specify `instanceTypes` property, and do not set `cpu`, cpus of an EC2 instance are shared between **instances of your compute resource** running on the EC2 instance.
+        #
+        # - Type: enum: [0.25, 0.5, 1, 16, 2, 4, 8]
+        # - Required: false
+        # - Allowed values: [0.25, 0.5, 1, 16, 2, 4, 8]
+        cpu: 0.5
+        # Amount of memory in MB available to containers
+        #
+        # - If you do not specify `instanceTypes` property you are using Fargate and you are only allowed to use following memory and vCPU configurations:
+        # - 0.25 vCPU: `512`, `1024`, `2048`
+        # - 0.5 vCPU: `1024`, `2048`, `3072`, `4096`
+        # - 1 vCPU: `2048`, `3072`, `4096`, `5120`, `6144`, `7168`, `8192`
+        # - 2 vCPU: Between `4096` and `16384` GB in `1024-MB` increments
+        # - 4 vCPU: Between `8192` and `30720` in `1024-MB` increments
+        # - 8 vCPU: Between `16384` and `61440` in `4096-MB` increments
+        # - 16 vCPU: Between `32768` and `122880` in `8192-MB` increments
+        # - If you specify `instanceTypes` property, this property is optional. If you do not set `memory` property, Stacktape sets the memory
+        # to a maximum possible value so that all EC2 instance types listed in `instanceTypes` are able provide that amount of memory.
+        #
+        # In other words: Stacktape sets the memory so that the smallest instance type in `instanceTypes`(in terms of memory) is able to provide that amount of memory.
+        #
+        # - Type: number
+        # - Required: false
+        memory: 2048
+        # Types of EC2 instances(VMs) that can be used
+        #
+        # - EC2 instances are automatically added or removed to meet the scaling needs of your compute resource(see also `scaling` property).
+        # - When using `instanceTypes`, **we recommend to specify only one instance type and to NOT set `cpu` or `memory` properties**.
+        # By doing so, Stacktape will set the cpu and memory to fit the instance precisely - resulting in the optimal resource utilization.
+        # - Stacktape leverages [ECS Managed Scaling](https://docs.aws.amazon.com/AmazonECS/latest/developerguide/cluster-auto-scaling.html) with target utilization 100%.
+        # This means that there are no unused EC2 instances(unused = not running your workload/service) running. Unused EC2 instances are terminated.
+        # - Ordering in `instanceTypes` list matters. Instance types which are higher on the list are preferred over the instance types which are lower on the list.
+        # Only when instance type higher on the list is not available, next instance type on the list will be used.
+        # - For exhaustive list of available EC2 instance types refer to [AWS docs](https://aws.amazon.com/ec2/instance-types/).
+        #
+        # > To ensure that your containers are running on patched and up-to-date EC2 instances, your instances are automatically
+        # > refreshed (replaced) once a week(Sunday 00:00 UTC). Your compute resource stays available throughout this process.
+        #
+        # - Type: array<string>
+        # - Required: false
+        instanceTypes:
+          - t3.medium
+          - t3.large
+        # Enable EC2 Auto Scaling warm pool
+        #
+        # - **Only works when you specify exactly one instance type in `instanceTypes`**. Warm pools are not supported with mixed instance types.
+        # - Creates a warm pool of pre-initialized EC2 instances that are kept in a `Stopped` state, ready to be quickly launched when scaling up.
+        # - Warm pool instances are maintained between the desired capacity count and the maximum capacity count of your Auto Scaling group.
+        # - When scaling up is needed, instances from the warm pool are started much faster than launching new instances from scratch.
+        # - **Cost optimization**: Instances in the warm pool are in `Stopped` state, so you only pay for EBS storage, not for compute time.
+        # - Improves scaling performance by reducing the time needed to launch new instances during traffic spikes.
+        # - The warm pool size is automatically managed based on your workload's scaling configuration.
+        # - For more details, see [AWS Auto Scaling warm pools documentation](https://docs.aws.amazon.com/autoscaling/ec2/userguide/ec2-auto-scaling-warm-pools.html).
+        #
+        # - Type: boolean
+        # - Required: false
+        enableWarmPool: true
+      # Configures how your container workload will scale
+      #
+      # - Scaling is done horizontally (adding more parallel instances of the same workload)
+      # - Incoming requests to your container are split between all available instances
+      #
+      # - Type: object
+      # - Required: false
+      scaling:
+        # Minimum number of workload/service instances running in parallel
+        #
+        # - Type: number
+        # - Required: false
+        # - Default: 1
+        minInstances: 1
+        # Maximum number of workload/service instances running in parallel
+        #
+        # - Type: number
+        # - Required: false
+        # - Default: 1
+        maxInstances: 3
+        # Configures when the scaling is triggered
+        #
+        # - Type: object
+        # - Required: false
+        scalingPolicy:
+          # Maximum amount for CPU utilization after which the `scale out`(adding new workload/service instance) is triggered
+          #
+          # - Utilization is calculated as an average utilization of all workload/service instances running.
+          # - Metrics are collected in 1 minute intervals.
+          # - If average CPU utilization metric is below this value, the `scale in` is triggered (removing an instance).
+          #
+          # - Type: number
+          # - Required: false
+          # - Default: 80
+          keepAvgCpuUtilizationUnder: 80
+          # Maximum amount for memory utilization after which the `scale out`(adding new workload/service instance) is triggered
+          #
+          # - Utilization is calculated as an average utilization of all workload/service instances running.
+          # - Metrics are collected in 1 minute intervals.
+          # - If average memory utilization metric is below this value, the `scale in` is triggered (removing an instance).
+          #
+          # - Type: number
+          # - Required: false
+          # - Default: 80
+          keepAvgMemoryUtilizationUnder: 80
+      # Configures deployment (update) behaviour of the container workload
+      #
+      # - Using `deployment` you can update the container workload in live environment in a safe way - by shifting the traffic to the new version gradually.
+      # - Gradual shift of traffic gives you opportunity to test/monitor the workload during update and in a case of a problem quickly rollback.
+      # - Deployment supports multiple strategies:
+      # - **Canary10Percent5Minutes** - Shifts 10 percent of traffic in the first increment. The remaining 90 percent is deployed five minutes later.
+      # - **Canary10Percent15Minutes** - Shifts 10 percent of traffic in the first increment. The remaining 90 percent is deployed 15 minutes later.
+      # - **Linear10PercentEvery1Minute** - Shifts 10 percent of traffic every minute until all traffic is shifted.
+      # - **Linear10PercentEvery3Minutes** - Shifts 10 percent of traffic every three minutes until all traffic is shifted.
+      # - **AllAtOnce** - Shifts all traffic to the updated container workload at once.
+      # - You can validate/abort deployment(update) using lambda-function hooks.
+      # > When using deployment, your container workload must use [**application-load-balancer** event integration](https://docs.stacktape.com/compute-resources/multi-container-workloads/#application-load-balancer-event)
+      #
+      # - Type: object
+      # - Required: false
+      deployment:
+        # Determines strategy used for deployment (update)
+        #
+        # - **Canary10Percent5Minutes** - Shifts 10 percent of traffic in the first increment. The remaining 90 percent is deployed five minutes later.
+        # - **Canary10Percent15Minutes** - Shifts 10 percent of traffic in the first increment. The remaining 90 percent is deployed 15 minutes later.
+        # - **Linear10PercentEvery1Minute** - Shifts 10 percent of traffic every minute until all traffic is shifted.
+        # - **Linear10PercentEvery3Minutes** - Shifts 10 percent of traffic every three minutes until all traffic is shifted.
+        # - **AllAtOnce** - Shifts all traffic to the updated container workload at once.
+        #
+        # - Type: enum: [AllAtOnce, Canary10Percent15Minutes, Canary10Percent5Minutes, Linear10PercentEvery1Minutes, Linear10PercentEvery3Minutes]
+        # - Required: true
+        # - Allowed values: [AllAtOnce, Canary10Percent15Minutes, Canary10Percent5Minutes, Linear10PercentEvery1Minutes, Linear10PercentEvery3Minutes]
+        strategy: AllAtOnce
+        # The name of the lambda function to run before traffic routing starts.
+        #
+        # - Typical usage is performing checks before the traffic is shifted
+        # - The function must send response (success of failure) to the code deploy API.
+        # To learn more, refer to [documentation](https://docs.stacktape.com/compute-resources/multi-container-workloads/#hook-functions)
+        #
+        # - Type: string
+        # - Required: false
+        beforeAllowTrafficFunction: example-value
+        # The name of the lambda function to run after traffic is shifted.
+        #
+        # - Typical usage is performing final checks after the traffic is shifted
+        # - The function must send response (success of failure) to the code deploy API.
+        # To learn more, refer to [documentation](https://docs.stacktape.com/compute-resources/multi-container-workloads/#hook-functions)
+        #
+        # - Type: string
+        # - Required: false
+        afterTrafficShiftFunction: example-value
+        # Port of the listener to be used for test traffic
+        #
+        # - Specify this property if you are using `beforeAllowTrafficFunction` and your load balancer uses custom listeners
+        # - To see how to use test listener with beforeAllowTrafficFunction refer to [test listener](https://docs.stacktape.com/compute-resources/multi-container-workloads/#test-traffic-listener).
+        #
+        # - Type: number
+        # - Required: false
+        testListenerPort: 3000
+      # Enables remote interactive shell sessions into running containers
+      #
+      # - When enabled, you can use `stacktape container:session` command to start an interactive shell session inside a running container
+      # - Uses AWS ECS Exec and SSM Session Manager under the hood to establish secure connection to the container
+      # - SSM agent binaries are mounted into your container and the SSM core agent runs alongside your application (using small amount of CPU/memory)
+      # - Useful for debugging issues and quick inspecting deployed containers
+      #
+      # - Type: boolean
+      # - Required: false
+      enableRemoteSessions: true
+      # Configures access to other resources of your stack (such as databases, buckets, event-buses, etc.) and aws services
+      #
+      # By referencing resources (or services) in `connectTo` list, Stacktape automatically:
+      # - configures correct compute resource's **IAM role permissions** if needed
+      # - sets up correct **security group rules** to allow access if needed
+      # - **injects relevant environment variables** containing information about resource you are connecting to into the compute resource's runtime
+      # - names of environment variables use upper-snake-case and are in form `STP_[RESOURCE_NAME]_[VARIABLE_NAME]`,
+      # - examples: `STP_MY_DATABASE_CONNECTION_STRING` or `STP_MY_EVENT_BUS_ARN`,
+      # - list of injected variables for each resource type can be seen below.
+      #
+      #
+      # Granted permissions and injected environment variables are different depending on resource type:
+      #
+      #
+      # `Bucket`
+      # - **Permissions:**
+      # - list objects in a bucket
+      # - create / get / delete / tag object in a bucket
+      # - **Injected env variables**: `NAME`, `ARN`
+      #
+      #
+      # `DynamoDB table`
+      # - **Permissions:**
+      # - get / put / update / delete item in a table
+      # - scan / query a table
+      # - describe table stream
+      # - **Injected env variables**: `NAME`, `ARN`, `STREAM_ARN`
+      #
+      #
+      # `MongoDB Atlas cluster`
+      # - **Permissions:**
+      # - Allows connection to a cluster with `accessibilityMode` set to `scoping-workloads-in-vpc`. To learn more about
+      # MongoDB Atlas clusters accessibility modes, refer to
+      # [MongoDB Atlas cluster docs](https://docs.stacktape.com/3rd-party-resources/mongo-db-atlas-clusters/#accessibility).
+      # - Creates access "user" associated with compute resource's role to allow for secure credential-less access to the the cluster
+      # - **Injected env variables**: `CONNECTION_STRING`
+      #
+      #
+      # `Relational(SQL) database`
+      # - **Permissions:**
+      # - Allows connection to a relational database with `accessibilityMode` set to `scoping-workloads-in-vpc`. To learn more about
+      # relational database accessibility modes, refer to [Relational databases docs](https://docs.stacktape.com/resources/relational-databases#accessibility).
+      # - **Injected env variables**: `CONNECTION_STRING`, `JDBC_CONNECTION_STRING`, `HOST`, `PORT`
+      # (in case of aurora multi instance cluster additionally: `READER_CONNECTION_STRING`, `READER_JDBC_CONNECTION_STRING`, `READER_HOST`)
+      #
+      #
+      # `Redis cluster`
+      # - **Permissions:**
+      # - Allows connection to a redis cluster with `accessibilityMode` set to `scoping-workloads-in-vpc`. To learn more about
+      # redis cluster accessibility modes, refer to [Redis clusters docs](https://docs.stacktape.com/resources/redis-clusters#accessibility).
+      # - **Injected env variables**: `HOST`, `READER_HOST`, `PORT`
+      #
+      #
+      # `Event bus`
+      # - **Permissions:**
+      # - publish events to the specified Event bus
+      # - **Injected env variables**: `ARN`
+      #
+      #
+      # `Function`
+      # - **Permissions:**
+      # - invoke the specified function
+      # - invoke the specified function via url (if lambda has URL enabled)
+      # - **Injected env variables**: `ARN`
+      #
+      #
+      # `Batch job`
+      # - **Permissions:**
+      # - submit batch-job instance into batch-job queue
+      # - list submitted job instances in a batch-job queue
+      # - describe / terminate a batch-job instance
+      # - list executions of state machine which executes the batch-job according to its strategy
+      # - start / terminate execution of a state machine which executes the batch-job according to its strategy
+      # - **Injected env variables**: `JOB_DEFINITION_ARN`, `STATE_MACHINE_ARN`
+      #
+      #
+      # `User auth pool`
+      # - **Permissions:**
+      # - full control over the user pool (`cognito-idp:*`)
+      # - for more information about allowed methods refer to [AWS docs](https://docs.aws.amazon.com/service-authorization/latest/reference/list_amazoncognitouserpools.html)
+      # - **Injected env variables**: `ID`, `CLIENT_ID`, `ARN`
+      #
+      #
+      #
+      # `SNS Topic`
+      # - **Permissions:**
+      # - confirm/list subscriptions of the topic
+      # - publish/subscribe to the topic
+      # - unsubscribe from the topic
+      # - **Injected env variables**: `ARN`, `NAME`
+      #
+      #
+      #
+      # `SQS Queue`
+      # - **Permissions:**
+      # - send/receive/delete message
+      # - change visibility of message
+      # - purge queue
+      # - **Injected env variables**: `ARN`, `NAME`, `URL`
+      #
+      #
+      # `Upstash Kafka topic`
+      # - **Injected env variables**: `TOPIC_NAME`, `TOPIC_ID`, `USERNAME`, `PASSWORD`, `TCP_ENDPOINT`, `REST_URL`
+      #
+      #
+      # `Upstash Redis`
+      # - **Injected env variables**: `HOST`, `PORT`, `PASSWORD`, `REST_TOKEN`, `REST_URL`, `REDIS_URL`
+      #
+      #
+      # `Private service`
+      # - **Injected env variables**: `ADDRESS`
+      #
+      #
+      # `aws:ses`(Macro)
+      # - **Permissions:**
+      # - gives full permissions to aws ses (`ses:*`).
+      # - for more information about allowed methods refer to [AWS docs](https://docs.aws.amazon.com/service-authorization/latest/reference/list_amazonses.html)
+      #
+      # - Type: array<string>
+      # - Required: false
+      connectTo:
+        - myDatabase
+        - myBucket
+      # Raw AWS IAM role statements appended to your resources's role.
+      #
+      # - Type: array<object (reference)>
+      # - Required: false
+      iamRoleStatements:
+        - Resource: ["example-value"]
+          Sid: example-value
+```
+
+# Events alternatives
+
+## application-load-balancer
+
+This example shows how to configure events using application-load-balancer. 
+
+```yml
+resources:
+  myMultiContainerWorkload:
+    type: multi-container-workload
+    properties:
+      containers:
+        items:
+          # The specified container port will receive traffic from the specified Application Load Balancer.
+          #
+          # - You can filter requests based on **HTTP Method**, **Path**, **Headers**, **Query parameters**, and **IP Address**.
+          #
+          # - Type: object
+          # - Required: true
+          events:
+            #
+            # - Type: string
+            # - Required: true
+            type: application-load-balancer
+            # Properties of the integration
+            #
+            # - Type: object
+            # - Required: true
+            properties:
+              # Port of the container that will receive the traffic from this integration.
+              #
+              # - Type: number
+              # - Required: true
+              containerPort: 3000
+              # Name of the Load balancer
+              #
+              # - Reference to the load balancer
+              #
+              # - Type: string
+              # - Required: true
+              loadBalancerName: myLoadBalancerName
+              # Priority of the integration
+              #
+              # - Load balancers evaluate integrations according to priority (from lowest to highest).
+              # - Incoming event is always sent to the first integration that matches the condition(path, method...).
+              #
+              # - Type: number
+              # - Required: true
+              priority: 100
+              # Port of the Load balancer listener
+              #
+              # - You need to specify listener port if the referenced load balancer uses custom listeners. Otherwise do not specify this property.
+              #
+              # - Type: number
+              # - Required: false
+              listenerPort: 3000
+              # List of URL paths that the request must match to be routed by this event integration
+              #
+              # - The condition is satisfied if any of the paths matches the request URL
+              # - The maximum size is 128 characters
+              # - The comparison is case sensitive
+              #
+              # The following patterns are supported:
+              # - basic URL path, i.e. `/posts`
+              # - `*` - wildcard (matches 0 or more characters)
+              # - `?` - wildcard (matches 1 or more characters)
+              #
+              # - Type: array<string>
+              # - Required: false
+              paths:
+                - example-value
+              # List of HTTP methods that the request must match to be routed by this event integration
+              #
+              # - Type: array<string>
+              # - Required: false
+              methods:
+                - example-value
+              # List of hostnames that the request must match to be routed by this event integration
+              #
+              # - Hostname is parsed from the host header of the request
+              #
+              # The following wildcard patterns are supported:
+              # - `*` - wildcard (matches 0 or more characters)
+              # - `?` - wildcard (matches 1 or more characters)
+              #
+              # - Type: array<string>
+              # - Required: false
+              hosts:
+                - example-value
+              # List of header conditions that the request must match to be routed by this event integration
+              #
+              # - All conditions must be satisfied.
+              #
+              # - Type: array<object (reference)>
+              # - Required: false
+              headers:
+                - headerName: myHeaderName
+                  values: ["example-value"]
+              # List of query parameters conditions that the request must match to be routed by this event integration
+              #
+              # - All conditions must be satisfied.
+              #
+              # - Type: array<object (reference)>
+              # - Required: false
+              queryParams:
+                - paramName: myParamName
+                  values: ["example-value"]
+              # List of IP addresses that the request must match to be routed by this event integration
+              #
+              # - IP addresses must be in a CIDR format.
+              # - If a client is behind a proxy, this is the IP address of the proxy, not the IP address of the client.
+              #
+              # - Type: array<string>
+              # - Required: false
+              sourceIps:
+                - example-value
+```
+
+## http-api-gateway
+
+This example shows how to configure events using http-api-gateway. 
+
+```yml
+resources:
+  myMultiContainerWorkload:
+    type: multi-container-workload
+    properties:
+      containers:
+        items:
+          # The specified container port will receive traffic from the specified HTTP Api Gateway.
+          #
+          # - You can filter requests based on **HTTP Method** and **Path**.
+          #
+          # - Type: object
+          # - Required: true
+          events:
+            #
+            # - Type: string
+            # - Required: true
+            type: http-api-gateway
+            # Properties of the integration
+            #
+            # - Type: object
+            # - Required: true
+            properties:
+              # Port of the container that will receive the traffic from this integration.
+              #
+              # - Type: number
+              # - Required: true
+              containerPort: 3000
+              # Name of the HTTP API Gateway
+              #
+              # - Type: string
+              # - Required: true
+              httpApiGatewayName: myHttpApiGatewayName
+              # HTTP method that the request should match to be routed by this event integration
+              #
+              # Can be either:
+              # - exact method (e.g. `GET` or `PUT`)
+              # - wildcard matching any method (`*`)
+              #
+              # - Type: enum: [*, DELETE, GET, HEAD, OPTIONS, PATCH, POST, PUT]
+              # - Required: true
+              # - Allowed values: [*, DELETE, GET, HEAD, OPTIONS, PATCH, POST, PUT]
+              method: *
+              # URL path that the request should match to be routed by this event integration
+              #
+              # Can be either:
+              # - **Exact URL Path** - e.g. `/posts`
+              # - **Path with a positional parameter** - e.g. `/post/{id}`. This matches any `id` parameter, e.g. `/post/6`.
+              # The parameter will be available to the compute resource using `event.pathParameters.id`
+              # - **Greedy path variable** - e.g. `/post/{anything+}`. This catches all child resources of the route.
+              # Example: `/post/{anything+}` catches both `/post/something/param1` and `/post/something2/param`
+              #
+              # - Type: string
+              # - Required: true
+              path: example-value
+              # Configures authorization rules for this event integration
+              #
+              # - Only the authorized requests will be forwarded to the workload.
+              # - All other requests will receive `{ "message": "Unauthorized" }`
+              #
+              # - Type: union (anyOf)
+              # - Required: false
+              # The format of the payload that the compute resource will received with this integration.
+              #
+              # - To learn more about the differences between the formats, refer to
+              # [AWS Docs](https://docs.aws.amazon.com/apigateway/latest/developerguide/http-api-develop-integrations-lambda.html)
+              #
+              # - Type: enum: [1.0, 2.0]
+              # - Required: false
+              # - Default: '1.0'
+              # - Allowed values: [1.0, 2.0]
+              payloadFormat: '1.0'
+```
+
+## workload-internal
+
+This example shows how to configure events using workload-internal. 
+
+```yml
+resources:
+  myMultiContainerWorkload:
+    type: multi-container-workload
+    properties:
+      containers:
+        items:
+          # The specified container port will be open to connection from other containers withing the same container workload.
+          #
+          # - Type: object
+          # - Required: true
+          events:
+            #
+            # - Type: string
+            # - Required: true
+            type: workload-internal
+            # Properties of the integration
+            #
+            # - Type: object
+            # - Required: true
+            properties:
+              # Port of the container that will be open to other containers of workload
+              #
+              # - Type: number
+              # - Required: true
+              containerPort: 3000
+```
+
+## service-connect
+
+This example shows how to configure events using service-connect. 
+
+```yml
+resources:
+  myMultiContainerWorkload:
+    type: multi-container-workload
+    properties:
+      containers:
+        items:
+          # The specified container port will be open to connection from other compute resources of stack (web-services, container-workloads, private-services, worker-services).
+          #
+          # - Type: object
+          # - Required: true
+          events:
+            #
+            # - Type: string
+            # - Required: true
+            type: service-connect
+            # Properties of the integration
+            #
+            # - Type: object
+            # - Required: true
+            properties:
+              # Port of the container that is open to other resources of stack (web-services, container-workloads, private-services, worker-services).
+              #
+              # - Type: number
+              # - Required: true
+              containerPort: 3000
+              # Alias name under which other resources of stack (web-services, container-workloads, private-services, worker-services) can find this service
+              #
+              # - Combination of alias and container port creates a unique identifier. You can then reach compute resource using URL in form `protocol://alias:containerPort` for example `http://my-service:8080` or `grpc://appserver:8080`
+              # - By default, alias is derived from the name of your resource and container i.e `resourceName-containerName`
+              #
+              # - Type: string
+              # - Required: false
+              alias: example-value
+              # Service connect protocol type
+              #
+              # - If you specify this parameter, AWS is able to capture protocol-specific metrics for the service application (i.e HTTP 5XX responses)
+              #
+              # - Type: enum: [grpc, http, http2]
+              # - Required: false
+              # - Allowed values: [grpc, http, http2]
+              protocol: HTTP
+```
+
+## network-load-balancer
+
+This example shows how to configure events using network-load-balancer. 
+
+```yml
+resources:
+  myMultiContainerWorkload:
+    type: multi-container-workload
+    properties:
+      containers:
+        items:
+          # The specified container port will receive traffic from the specified Network Load Balancer.
+          #
+          # - Network Load Balancer operates at Layer 4 (transport layer) and can handle TCP and TLS traffic.
+          #
+          # - Type: object
+          # - Required: true
+          events:
+            #
+            # - Type: string
+            # - Required: true
+            type: network-load-balancer
+            # Properties of the integration
+            #
+            # - Type: object
+            # - Required: true
+            properties:
+              # Port of the container that will receive the traffic from this integration.
+              #
+              # - Type: number
+              # - Required: true
+              containerPort: 3000
+              # Name of the Load balancer
+              #
+              # - Reference to the load balancer
+              #
+              # - Type: string
+              # - Required: true
+              loadBalancerName: myLoadBalancerName
+              # Port of the Load balancer listener
+              #
+              # - Specify the port of the listener that will forward the traffic to this integration.
+              #
+              # - Type: number
+              # - Required: true
+              listenerPort: 3000
+```
+
+# Packaging alternatives
+
+## stacktape-image-buildpack
+
+This example shows how to configure packaging using stacktape-image-buildpack. 
+
+```yml
+resources:
+  myMultiContainerWorkload:
+    type: multi-container-workload
+    properties:
+      containers:
+        items:
+          #
+          # - Type: object
+          # - Required: true
+          packaging:
+            #
+            # - Type: string
+            # - Required: true
+            type: stacktape-image-buildpack
+            # Configures properties for the image automatically built by Stacktape from the source code.
+            #
+            # - Type: object
+            # - Required: true
+            properties:
+              # Path to the entry point of your compute resource (relative to the stacktape config file)
+              #
+              # - Stacktape tries to bundle all your source code with its dependencies into a single file.
+              # - If a certain dependency doesn't support static bundling (because it depends on binary executable, uses dynamic require() calls, etc.),
+              # Stacktape will install it and copy it to the bundle
+              #
+              # - Type: string
+              # - Required: true
+              entryfilePath: ./src/index.ts
+              # Configuration of packaging properties specific to given language
+              #
+              # - Type: union (anyOf)
+              # - Required: false
+              # Builds image with support for glibc-based binaries
+              #
+              # - You can use this option to add support for glibc-based native dependencies.
+              # - This means that Stacktape will use different (and significantly larger) base-image for your container.
+              # - Stacktape uses alpine Docker images by default. These images use musl, instead of glibc.
+              # - Packages with C-based binaries compiled using glibc doesn't work with musl.
+              #
+              # - Type: boolean
+              # - Required: false
+              requiresGlibcBinaries: true
+              # List of commands to be executed during docker image building.
+              #
+              # - This property enables you to execute custom commands in your container during image building.
+              # - Commands are executed using docker `RUN` directive.
+              # - Commands can be used to install required additional dependencies into your container.
+              #
+              # - Type: array<string>
+              # - Required: false
+              customDockerBuildCommands:
+                - apt-get update && apt-get install -y curl
+                - npm install -g pm2
+              # Files that should be explicitly included in the deployment package (glob pattern)
+              #
+              # - Example glob pattern: `images/*.jpg`
+              # - The path is relative to the stacktape configuration file location or to `cwd` if configured using `--currentWorkingDirectory` command line option.
+              #
+              # - Type: array<string>
+              # - Required: false
+              includeFiles:
+                - public/**/*
+                - assets/*.png
+              # Files that should be explicitly excluded from deployment package (glob pattern)
+              #
+              # Example glob pattern: `images/*.jpg`
+              #
+              # - Type: array<string>
+              # - Required: false
+              excludeFiles:
+                - *.test.ts
+                - node_modules/**
+              # Dependencies to ignore.
+              #
+              # - These dependencies won't be a part of your deployment package.
+              #
+              # - Type: array<string>
+              # - Required: false
+              excludeDependencies:
+                - example-value
+```
+
+## external-buildpack
+
+This example shows how to configure packaging using external-buildpack. 
+
+```yml
+resources:
+  myMultiContainerWorkload:
+    type: multi-container-workload
+    properties:
+      containers:
+        items:
+          #
+          # - Type: object
+          # - Required: true
+          packaging:
+            #
+            # - Type: string
+            # - Required: true
+            type: external-buildpack
+            #
+            # - Type: object
+            # - Required: true
+            properties:
+              # Path to the directory where the buildpack will be executed
+              #
+              # - Type: string
+              # - Required: true
+              sourceDirectoryPath: ./
+              # Buildpack Builder to use
+              #
+              # - By default, [paketobuildpacks/builder-jammy-base](https://github.com/paketo-buildpacks/builder-jammy-base) is used.
+              #
+              # - Type: string
+              # - Required: false
+              # - Default: paketobuildpacks/builder-jammy-base
+              builder: paketobuildpacks/builder-jammy-base
+              # Buildpack to use
+              #
+              # - By default, buildpacks is detected automatically.
+              #
+              # - Type: array<string>
+              # - Required: false
+              buildpacks:
+                - example-value
+              # Command to be executed when the container starts.
+              #
+              # - Example: `['app.py']`.
+              #
+              # - Type: array<string>
+              # - Required: false
+              command:
+                - node
+                - dist/index.js
+```
+
+## prebuilt-image
+
+This example shows how to configure packaging using prebuilt-image. 
+
+```yml
+resources:
+  myMultiContainerWorkload:
+    type: multi-container-workload
+    properties:
+      containers:
+        items:
+          #
+          # - Type: object
+          # - Required: true
+          packaging:
+            #
+            # - Type: string
+            # - Required: true
+            type: prebuilt-image
+            # Configures properties for the image pre-built by user.
+            #
+            # - Type: object
+            # - Required: true
+            properties:
+              # Name or the URL of the image
+              #
+              # - Type: string
+              # - Required: true
+              image: example-value
+              # ARN (Amazon resource name) of the secret containing credentials for the private registry containing the image.
+              #
+              # - You can create a secret with you credentials using [stacktape secret:create](https://docs.stacktape.com/resources/secrets/) command.
+              # - The body of the secret should have the following format: `{"username" : "<<privateRegistryUsername>>", "password" : "<<privateRegistryPassword>>"}`
+              # - After you create the secret, its ARN can be retrieved using [stacktape secret:get](https://docs.stacktape.com/cli/commands/secret-get/) command
+              #
+              # - Type: string
+              # - Required: false
+              repositoryCredentialsSecretArn: example-value
+              # Script to be executed when the container starts. Overrides ENTRYPOINT instruction in the Dockerfile.
+              #
+              # - Type: array<string>
+              # - Required: false
+              entryPoint:
+                - /usr/local/bin/docker-entrypoint.sh
+              # Command to be executed when the container starts. Overrides CMD instruction in the Dockerfile.
+              #
+              # - Example: `['app.py']`
+              #
+              # - Type: array<string>
+              # - Required: false
+              command:
+                - node
+                - dist/index.js
+```
+
+## custom-dockerfile
+
+This example shows how to configure packaging using custom-dockerfile. 
+
+```yml
+resources:
+  myMultiContainerWorkload:
+    type: multi-container-workload
+    properties:
+      containers:
+        items:
+          #
+          # - Type: object
+          # - Required: true
+          packaging:
+            #
+            # - Type: string
+            # - Required: true
+            type: custom-dockerfile
+            # Configures properties for the image built by Stacktape using specified Dockerfile.
+            #
+            # - Type: object
+            # - Required: true
+            properties:
+              # Path to directory (relative to stacktape config file) used as build context
+              #
+              # - Type: string
+              # - Required: true
+              buildContextPath: ./
+              # Script to be executed when the container starts. Overrides ENTRYPOINT instruction in the Dockerfile.
+              #
+              # - Type: array<string>
+              # - Required: false
+              entryPoint:
+                - /usr/local/bin/docker-entrypoint.sh
+              # Path to Dockerfile (relative to `buildContextPath`) used to build application image.
+              #
+              # - Type: string
+              # - Required: false
+              dockerfilePath: Dockerfile
+              # List of arguments passed to the `docker build` command when building the image
+              #
+              # - Type: array<object (reference)>
+              # - Required: false
+              buildArgs:
+                - argName: NODE_ENV
+                  value: production
+                - argName: BUILD_VERSION
+                  value: 1.0.0
+              # Command to be executed when the container starts. Overrides CMD instruction in the Dockerfile.
+              #
+              # - Example: `['app.py']`
+              #
+              # - Type: array<string>
+              # - Required: false
+              command:
+                - node
+                - dist/index.js
+```
+
+## nixpacks
+
+This example shows how to configure packaging using nixpacks. 
+
+```yml
+resources:
+  myMultiContainerWorkload:
+    type: multi-container-workload
+    properties:
+      containers:
+        items:
+          #
+          # - Type: object
+          # - Required: true
+          packaging:
+            #
+            # - Type: string
+            # - Required: true
+            type: nixpacks
+            #
+            # - Type: object
+            # - Required: true
+            properties:
+              # Path to the directory where the buildpack will be executed
+              #
+              # - Type: string
+              # - Required: true
+              sourceDirectoryPath: ./
+              # Build Image
+              #
+              # - The image to use as the base when building the application.
+              # - To learn more, refer to [nixpacks docs](https://nixpacks.com/docs/configuration/file#build-image)
+              #
+              # - Type: string
+              # - Required: false
+              buildImage: example-value
+              # Providers
+              #
+              # - A list of provider names used to determine build and runtime environments.
+              #
+              # - Type: array<string>
+              # - Required: false
+              providers:
+                - example-value
+              # Start Command
+              #
+              # - The command to execute when starting the application.
+              # - Overrides default start commands inferred by nixpacks.
+              #
+              # - Type: string
+              # - Required: false
+              startCmd: example-value
+              # Start Run Image
+              #
+              # - The image to use as the base when running the application.
+              #
+              # - Type: string
+              # - Required: false
+              startRunImage: example-value
+              # Start Only Include Files
+              #
+              # - A list of file paths to include in the runtime environment.
+              # - Other files will be excluded.
+              #
+              # - Type: array<string>
+              # - Required: false
+              startOnlyIncludeFiles:
+                - example-value
+              # Phases
+              #
+              # - Defines the build phases for the application.
+              # - Each phase specifies commands, dependencies, and settings.
+              #
+              # - Type: array<object (reference)>
+              # - Required: false
+              phases:
+                - name: example-name
+                  cmds: ["example-value"]
+```
+
+# LogForwarding alternatives
+
+## http-endpoint
+
+This example shows how to configure logforwarding using http-endpoint. 
+
+```yml
+resources:
+  myMultiContainerWorkload:
+    type: multi-container-workload
+    properties:
+      containers:
+        items:
+          logging:
+            #
+            # - Type: object
+            # - Required: true
+            logForwarding:
+              #
+              # - Type: string
+              # - Required: true
+              type: http-endpoint
+              #
+              # - Type: object
+              # - Required: true
+              properties:
+                # HTTPS endpoint where logs will be forwarded
+                #
+                # - Type: string
+                # - Required: true
+                endpointUrl: https://example.com
+                # Specifies whether to use GZIP compression for the request
+                #
+                # - When enabled, Firehose uses the content encoding to compress the body of a request before sending the request to the destination
+                #
+                # - Type: boolean
+                # - Required: false
+                gzipEncodingEnabled: true
+                # Parameters included in each call to HTTP endpoint
+                #
+                # - Key/Value pairs containing additional metadata you wish to send to the HTTP endpoint.
+                # - Parameters are delivered within **X-Amz-Firehose-Common-Attributes** header as a JSON object with following format: `{"commonAttributes":{"param1":"val1", "param2":"val2"}}`
+                #
+                # - Type: object
+                # - Required: false
+                # Amount of time spend on retries.
+                #
+                # - The total amount of time that Kinesis Data Firehose spends on retries.
+                # - This duration starts after the initial attempt to send data to the custom destination via HTTPS endpoint fails.
+                # - Logs that fail to be delivered to the HTTP endpoint even after multiple retries (time spend on retries can be configured) are put into bucket with name `{stackName}-{resourceName}-logs-{generatedHash}`
+                #
+                # - Type: number
+                # - Required: false
+                retryDuration: 100
+                # Access key (credentials), needed for authenticating with endpoint
+                #
+                # - Access key is carried within a **X-Amz-Firehose-Access-Key** header
+                # - The configured key is copied verbatim into the value of this header.The contents can be arbitrary and can potentially represent a JWT token or an ACCESS_KEY.
+                # - It is recommended to use [secret](https://docs.stacktape.com/resources/secrets/) for storing your access key.
+                #
+                # - Type: string
+                # - Required: false
+                accessKey: example-value
+```
+
+## highlight
+
+This example shows how to configure logforwarding using highlight. 
+
+```yml
+resources:
+  myMultiContainerWorkload:
+    type: multi-container-workload
+    properties:
+      containers:
+        items:
+          logging:
+            #
+            # - Type: object
+            # - Required: true
+            logForwarding:
+              #
+              # - Type: string
+              # - Required: true
+              type: highlight
+              #
+              # - Type: object
+              # - Required: true
+              properties:
+                # Id of a [highlight.io](https://www.highlight.io/) project.
+                #
+                # - You can get the id of your project in your [highlight.io console](https://app.highlight.io/).
+                #
+                # - Type: string
+                # - Required: true
+                projectId: example-value
+                # HTTPS endpoint where logs will be forwarded
+                #
+                # - By default Stacktape uses `https://pub.highlight.io/v1/logs/firehose`
+                #
+                # - Type: string
+                # - Required: false
+                # - Default: https://pub.highlight.io/v1/logs/firehose
+                endpointUrl: https://pub.highlight.io/v1/logs/firehose
+```
+
+## datadog
+
+This example shows how to configure logforwarding using datadog. 
+
+```yml
+resources:
+  myMultiContainerWorkload:
+    type: multi-container-workload
+    properties:
+      containers:
+        items:
+          logging:
+            #
+            # - Type: object
+            # - Required: true
+            logForwarding:
+              #
+              # - Type: string
+              # - Required: true
+              type: datadog
+              #
+              # - Type: object
+              # - Required: true
+              properties:
+                # API key required to enable delivery of logs to Datadog
+                #
+                # - You can get your Datadog API key in [Datadog console](https://app.datadoghq.com/organization-settings/api-keys)
+                # - It is recommended to use [secret](https://docs.stacktape.com/resources/secrets/) for storing your api key.
+                #
+                # - Type: string
+                # - Required: true
+                apiKey: example-value
+                # HTTPS endpoint where logs will be forwarded
+                #
+                # - By default Stacktape uses `https://aws-kinesis-http-intake.logs.datadoghq.com/v1/input`
+                # - If your Datadog site is in EU you should probably use `https://aws-kinesis-http-intake.logs.datadoghq.eu/v1/input`
+                #
+                # - Type: string
+                # - Required: false
+                # - Default: https://aws-kinesis-http-intake.logs.datadoghq.com/v1/input
+                endpointUrl: https://aws-kinesis-http-intake.logs.datadoghq.com/v1/input
+```

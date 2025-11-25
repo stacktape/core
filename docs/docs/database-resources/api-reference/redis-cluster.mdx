@@ -1,0 +1,452 @@
+---
+title: "Redis Cluster"
+order: 152
+---
+
+This example shows a basic redis cluster configuration.
+
+Redis cluster resource
+
+- Fully managed, redis-compatible in-memory data store with sub-millisecond latency.
+
+# Basic example
+
+```yml
+resources:
+  myRedisCluster:
+    type: redis-cluster
+    properties:
+      # Enables sharding for the cluster
+      #
+      # - Sharding enables you to scale redis cluster horizontally, by splitting the data into shards.
+      # - Each shard is then served by a **shard cluster**, which is responsible for given shard.
+      # Each **shard cluster** has a primary instance and `numReplicaNodes` amount of replicas.
+      # - You can update (increase or decrease) number of shards without interrupting the cluster.
+      # - You cannot update number of replicas per shard cluster on sharded cluster.
+      # - Routing to correct shard and shard re-balancing is automatically handled by AWS.
+      # - To learn more about sharding, refer to
+      # [AWS Docs](https://docs.stacktape.com/resources/redis-clusters/#sharded-cluster).
+      #
+      # > Sharding comes with multiple limitations:
+      # > - Sharding can only be enabled during redis cluster initial creation.
+      # >   After that the cluster cannot be updated from non-sharded to sharded or vice-versa.
+      # > - Changing `numReplicaNodes` when sharding is enabled is not possible. In this case it is necessary to delete and recreate the cluster.
+      # > - `numReplicaNodes` must be set to at least `1` when sharding is enabled.
+      #
+      # - Type: boolean
+      # - Required: false
+      enableSharding: true
+      # Configures number of shards for the cluster
+      #
+      # - This property is only effective when `enableSharding` is set to true.
+      #
+      # - Type: number
+      # - Required: false
+      # - Default: 1
+      numShards: 1
+      # Number of replica nodes in the cluster
+      #
+      # - Adding replica nodes (read replicas) to a cluster has 2 benefits:
+      # - increases the read throughput
+      # - increases availability. Replica node can become the primary node in case of primary node failure.
+      # - Load balancing between replicas is automatically handled by AWS.
+      # - When there are multiple shards, this number specifies the number of replicas for each **shard cluster**.
+      #
+      # > Changing `numReplicaNodes` when sharding is enabled is not possible and will result in error.
+      #
+      # - Type: number
+      # - Required: false
+      # - Default: 0
+      numReplicaNodes: 0
+      # Enables automatic failover of cluster's primary instance
+      #
+      # - When automatic failover is enabled and primary instance fails, replica takes over and serves as primary instance.
+      # - To use automatic failover `numReplicaNodes` must be at least 1.
+      # - On sharded clusters automatic failover is enabled by default and cannot be disabled.
+      #
+      # > When you are deploying(updating) your cluster and you wish to enable automatic failover at least one replica must already exist.
+      # > If replicas do not exist for the cluster and you wish to enable automatic failover, you need to run `stacktape deploy` twice:
+      # > 1. first deploy: add replicas to the cluster.
+      # > 2. second deploy: enable automatic failover.
+      # >
+      # > Similarly, to disable automatic failover and remove replicas, it is 2 deploy process:
+      # > 1. first deploy: disable automatic failover
+      # > 2. second deploy: remove all replicas
+      #
+      # - Type: boolean
+      # - Required: false
+      enableAutomaticFailover: true
+      # Instance size for every node in the cluster (both primary node and replica nodes, if configured)
+      #
+      # - Different instance sizes have different memory and network capabilities.
+      # - Instance size can be changed without interrupting the cluster or losing the data.
+      # - To learn more, and see a detailed list of available instances, refer to [AWS pricing page](https://aws.amazon.com/elasticache/pricing/)
+      #
+      # - Type: enum: [cache.m4.10xlarge, cache.m4.2xlarge, cache.m4.4xlarge, cache.m4.large, cache.m4.xlarge, cache.m5.12xlarge, cache.m5.24xlarge, cache.m5.2xlarge, cache.m5.4xlarge, cache.m5.large, cache.m5.xlarge, cache.m6g.12xlarge, cache.m6g.16xlarge, cache.m6g.2xlarge, cache.m6g.4xlarge, cache.m6g.8xlarge, cache.m6g.large, cache.m6g.xlarge, cache.m7g.12xlarge, cache.m7g.16xlarge, cache.m7g.2xlarge, cache.m7g.4xlarge, cache.m7g.8xlarge, cache.m7g.large, cache.m7g.xlarge, cache.r4.16xlarge, cache.r4.2xlarge, cache.r4.4xlarge, cache.r4.8xlarge, cache.r4.large, cache.r4.xlarge, cache.r5.12xlarge, cache.r5.24xlarge, cache.r5.2xlarge, cache.r5.4xlarge, cache.r5.large, cache.r5.xlarge, cache.r6g.12xlarge, cache.r6g.16xlarge, cache.r6g.2xlarge, cache.r6g.4xlarge, cache.r6g.8xlarge, cache.r6g.large, cache.r6g.xlarge, cache.r7g.12xlarge, cache.r7g.16xlarge, cache.r7g.2xlarge, cache.r7g.4xlarge, cache.r7g.8xlarge, cache.r7g.large, cache.r7g.xlarge, cache.t2.medium, cache.t2.micro, cache.t2.small, cache.t3.medium, cache.t3.micro, cache.t3.small, cache.t4g.medium, cache.t4g.micro, cache.t4g.small]
+      # - Required: true
+      # - Allowed values: [cache.m4.10xlarge, cache.m4.2xlarge, cache.m4.4xlarge, cache.m4.large, cache.m4.xlarge, cache.m5.12xlarge, cache.m5.24xlarge, cache.m5.2xlarge, cache.m5.4xlarge, cache.m5.large, cache.m5.xlarge, cache.m6g.12xlarge, cache.m6g.16xlarge, cache.m6g.2xlarge, cache.m6g.4xlarge, cache.m6g.8xlarge, cache.m6g.large, cache.m6g.xlarge, cache.m7g.12xlarge, cache.m7g.16xlarge, cache.m7g.2xlarge, cache.m7g.4xlarge, cache.m7g.8xlarge, cache.m7g.large, cache.m7g.xlarge, cache.r4.16xlarge, cache.r4.2xlarge, cache.r4.4xlarge, cache.r4.8xlarge, cache.r4.large, cache.r4.xlarge, cache.r5.12xlarge, cache.r5.24xlarge, cache.r5.2xlarge, cache.r5.4xlarge, cache.r5.large, cache.r5.xlarge, cache.r6g.12xlarge, cache.r6g.16xlarge, cache.r6g.2xlarge, cache.r6g.4xlarge, cache.r6g.8xlarge, cache.r6g.large, cache.r6g.xlarge, cache.r7g.12xlarge, cache.r7g.16xlarge, cache.r7g.2xlarge, cache.r7g.4xlarge, cache.r7g.8xlarge, cache.r7g.large, cache.r7g.xlarge, cache.t2.medium, cache.t2.micro, cache.t2.small, cache.t3.medium, cache.t3.micro, cache.t3.small, cache.t4g.medium, cache.t4g.micro, cache.t4g.small]
+      instanceSize: cache.m4.10xlarge
+      # Configures logging behavior and logging format
+      #
+      # - [Slow log](https://redis.io/commands/slowlog) is sent to a pre-created Cloudwatch log group.
+      # - By default, logs are retained for 180 days.
+      # - You can browse your logs in 2 ways:
+      # - go to the log group page in the AWS CloudWatch console. You can use `stacktape stack-info` command to get a
+      # direct link.
+      # - use [stacktape logs command](https://docs.stacktape.com/cli/commands/logs/) to print logs to the console
+      #
+      # - Type: object
+      # - Required: false
+      logging:
+        # Disables the collection of [slow logs](https://redis.io/commands/slowlog-get) to CloudWatch
+        #
+        # - Type: boolean
+        # - Required: false
+        # - Default: false
+        disabled: false
+        # Configures the log format
+        #
+        # - Type: enum: [json, text]
+        # - Required: false
+        # - Default: json
+        # - Allowed values: [json, text]
+        format: json
+        # Amount of days the logs will be retained in the log group
+        #
+        # - Type: enum: [1, 120, 14, 150, 180, 1827, 3, 30, 365, 3653, 400, 5, 545, 60, 7, 731, 90]
+        # - Required: false
+        # - Default: 90
+        # - Allowed values: [1, 120, 14, 150, 180, 1827, 3, 30, 365, 3653, 400, 5, 545, 60, 7, 731, 90]
+        retentionDays: 90
+        # Configures forwarding of logs to specified destination
+        #
+        # - Log forwarding is done using [Amazon Kinesis Data Firehose](https://aws.amazon.com/kinesis/data-firehose/) delivery stream.
+        # - When using log forwarding, you will incur costs based on the amount of data being transferred to the destination (~$0.03 per transferred GB).
+        # Refer to [AWS Kinesis Firehose Pricing](https://aws.amazon.com/kinesis/data-firehose/pricing/?nc=sn&loc=3) page to see details.
+        # - Currently supported destinations for logs:
+        # - `http-endpoint`
+        # - delivers logs to any HTTP endpoint.
+        # - The endpoint must follow [Firehose request and response specifications](https://docs.aws.amazon.com/firehose/latest/dev/httpdeliveryrequestresponse.html).
+        # (Many of the third party vendors are compliant with this specifications out of the box.)
+        # - `datadog`
+        # - delivers logs to [Datadog](https://www.datadoghq.com/).
+        # - `highlight`
+        # - delivers logs to [Highlight.io](https://www.highlight.io/) project.
+        #
+        # Refer to [our docs](https://docs.stacktape.com/configuration/log-forwarding/) for more information.
+        #
+        # > Logs that fail to be delivered to the destination even after multiple retries (time spend on retries can be configured) are put into bucket with name `{stackName}-{resourceName}-logs-{generatedHash}`
+        #
+        # - Type: union (anyOf)
+        # - Required: false
+        #
+        # - Type: object
+        # - Required: false
+        logForwarding:
+          #
+          # - Type: string
+          # - Required: true
+          type: http-endpoint
+          #
+          # - Type: object
+          # - Required: true
+          properties:
+            # HTTPS endpoint where logs will be forwarded
+            #
+            # - Type: string
+            # - Required: true
+            endpointUrl: https://example.com
+            # Specifies whether to use GZIP compression for the request
+            #
+            # - When enabled, Firehose uses the content encoding to compress the body of a request before sending the request to the destination
+            #
+            # - Type: boolean
+            # - Required: false
+            gzipEncodingEnabled: true
+            # Parameters included in each call to HTTP endpoint
+            #
+            # - Key/Value pairs containing additional metadata you wish to send to the HTTP endpoint.
+            # - Parameters are delivered within **X-Amz-Firehose-Common-Attributes** header as a JSON object with following format: `{"commonAttributes":{"param1":"val1", "param2":"val2"}}`
+            #
+            # - Type: object
+            # - Required: false
+            # Amount of time spend on retries.
+            #
+            # - The total amount of time that Kinesis Data Firehose spends on retries.
+            # - This duration starts after the initial attempt to send data to the custom destination via HTTPS endpoint fails.
+            # - Logs that fail to be delivered to the HTTP endpoint even after multiple retries (time spend on retries can be configured) are put into bucket with name `{stackName}-{resourceName}-logs-{generatedHash}`
+            #
+            # - Type: number
+            # - Required: false
+            retryDuration: 100
+            # Access key (credentials), needed for authenticating with endpoint
+            #
+            # - Access key is carried within a **X-Amz-Firehose-Access-Key** header
+            # - The configured key is copied verbatim into the value of this header.The contents can be arbitrary and can potentially represent a JWT token or an ACCESS_KEY.
+            # - It is recommended to use [secret](https://docs.stacktape.com/resources/secrets/) for storing your access key.
+            #
+            # - Type: string
+            # - Required: false
+            accessKey: example-value
+      # Configures the retention period for automated backups
+      #
+      # - When set to 0, automatic backups are disabled.
+      # - You can also take manual backup snapshots (in the AWS console or using the API).
+      # The retention period is not applied to manual backup snapshots.
+      #
+      # - Type: number
+      # - Required: false
+      # - Default: 0
+      automatedBackupRetentionDays: 7
+      # Port on which the redis-cluster should listen for connections
+      #
+      # - Type: number
+      # - Required: false
+      # - Default: 6379
+      port: 3000
+      # Password for the default cluster user.
+      #
+      # - Redis clusters are password protected. To communicate with the cluster, you must configure
+      # a password for the default user.
+      # - Communication with the cluster is encrypted in-transit.
+      # - You should not input the password directly. The recommended way is using [secrets](/resources/secrets/).
+      # - Password constraints:
+      # - Must be only printable ASCII characters.
+      # - Must be at least 16 characters and no more than 128 characters in length.
+      # - Cannot contain any of the following characters: '/', '"', or '@'.
+      #
+      # - Type: string
+      # - Required: true
+      defaultUserPassword: $Secret(my_password)
+      # Configures which resources and hosts can access your cluster
+      #
+      # - Type: object
+      # - Required: false
+      accessibility:
+        # Configures the accessibility mode for this cluster
+        #
+        # The following modes are supported:
+        # - **vpc** - The cluster can be accessed only from resources within your VPC. This
+        # means any [function](https://docs.stacktape.com/compute-resources/lambda-functions) (provided it has `joinDefaultVpc` set to true),
+        # [batch job](https://docs.stacktape.com/compute-resources/batch-jobs)
+        # [container workload](https://docs.stacktape.com/compute-resources/multi-container-workloads) or container services within your stack can access the cluster.
+        # - **scoping-workloads-in-vpc** - similar to **vpc** mode, but even more restrictive. In addition to being in the same VPC, the resources and hosts
+        # accessing your redis cluster must also have sufficient security group permissions (for functions, batch jobs and container services, these permissions
+        # can be granted using `connectTo` in their configuration).
+        #
+        # Redis clusters do not support public IP addresses. Therefore, you cannot connect to them from your own computer. To avoid this shortcoming,
+        # you can use a bastion server. Native support for bastion servers in Stacktape will be available soon.
+        #
+        # To learn more about VPCs, refer to [VPC Docs](https://docs.stacktape.com/user-guides/vpcs/).
+        #
+        # - Type: enum: [scoping-workloads-in-vpc, vpc]
+        # - Required: true
+        # - Default: vpc
+        # - Allowed values: [scoping-workloads-in-vpc, vpc]
+        accessibilityMode: vpc
+      # Specified engine version to use
+      #
+      #
+      # - Type: enum: [6.0, 6.2, 7.0, 7.1]
+      # - Required: false
+      # - Default: 6.2
+      # - Allowed values: [6.0, 6.2, 7.0, 7.1]
+      engineVersion: 14.9
+```
+
+# LogForwarding alternatives
+
+## http-endpoint
+
+This example shows how to configure logforwarding using http-endpoint. 
+
+```yml
+resources:
+  myRedisCluster:
+    type: redis-cluster
+    properties:
+      logging:
+        # Configures forwarding of logs to specified destination
+        #
+        # - Log forwarding is done using [Amazon Kinesis Data Firehose](https://aws.amazon.com/kinesis/data-firehose/) delivery stream.
+        # - When using log forwarding, you will incur costs based on the amount of data being transferred to the destination (~$0.03 per transferred GB).
+        # Refer to [AWS Kinesis Firehose Pricing](https://aws.amazon.com/kinesis/data-firehose/pricing/?nc=sn&loc=3) page to see details.
+        # - Currently supported destinations for logs:
+        # - `http-endpoint`
+        # - delivers logs to any HTTP endpoint.
+        # - The endpoint must follow [Firehose request and response specifications](https://docs.aws.amazon.com/firehose/latest/dev/httpdeliveryrequestresponse.html).
+        # (Many of the third party vendors are compliant with this specifications out of the box.)
+        # - `datadog`
+        # - delivers logs to [Datadog](https://www.datadoghq.com/).
+        # - `highlight`
+        # - delivers logs to [Highlight.io](https://www.highlight.io/) project.
+        #
+        # Refer to [our docs](https://docs.stacktape.com/configuration/log-forwarding/) for more information.
+        #
+        # > Logs that fail to be delivered to the destination even after multiple retries (time spend on retries can be configured) are put into bucket with name `{stackName}-{resourceName}-logs-{generatedHash}`
+        #
+        # - Type: object
+        # - Required: true
+        logForwarding:
+          #
+          # - Type: string
+          # - Required: true
+          type: http-endpoint
+          #
+          # - Type: object
+          # - Required: true
+          properties:
+            # HTTPS endpoint where logs will be forwarded
+            #
+            # - Type: string
+            # - Required: true
+            endpointUrl: https://example.com
+            # Specifies whether to use GZIP compression for the request
+            #
+            # - When enabled, Firehose uses the content encoding to compress the body of a request before sending the request to the destination
+            #
+            # - Type: boolean
+            # - Required: false
+            gzipEncodingEnabled: true
+            # Parameters included in each call to HTTP endpoint
+            #
+            # - Key/Value pairs containing additional metadata you wish to send to the HTTP endpoint.
+            # - Parameters are delivered within **X-Amz-Firehose-Common-Attributes** header as a JSON object with following format: `{"commonAttributes":{"param1":"val1", "param2":"val2"}}`
+            #
+            # - Type: object
+            # - Required: false
+            # Amount of time spend on retries.
+            #
+            # - The total amount of time that Kinesis Data Firehose spends on retries.
+            # - This duration starts after the initial attempt to send data to the custom destination via HTTPS endpoint fails.
+            # - Logs that fail to be delivered to the HTTP endpoint even after multiple retries (time spend on retries can be configured) are put into bucket with name `{stackName}-{resourceName}-logs-{generatedHash}`
+            #
+            # - Type: number
+            # - Required: false
+            retryDuration: 100
+            # Access key (credentials), needed for authenticating with endpoint
+            #
+            # - Access key is carried within a **X-Amz-Firehose-Access-Key** header
+            # - The configured key is copied verbatim into the value of this header.The contents can be arbitrary and can potentially represent a JWT token or an ACCESS_KEY.
+            # - It is recommended to use [secret](https://docs.stacktape.com/resources/secrets/) for storing your access key.
+            #
+            # - Type: string
+            # - Required: false
+            accessKey: example-value
+```
+
+## highlight
+
+This example shows how to configure logforwarding using highlight. 
+
+```yml
+resources:
+  myRedisCluster:
+    type: redis-cluster
+    properties:
+      logging:
+        # Configures forwarding of logs to specified destination
+        #
+        # - Log forwarding is done using [Amazon Kinesis Data Firehose](https://aws.amazon.com/kinesis/data-firehose/) delivery stream.
+        # - When using log forwarding, you will incur costs based on the amount of data being transferred to the destination (~$0.03 per transferred GB).
+        # Refer to [AWS Kinesis Firehose Pricing](https://aws.amazon.com/kinesis/data-firehose/pricing/?nc=sn&loc=3) page to see details.
+        # - Currently supported destinations for logs:
+        # - `http-endpoint`
+        # - delivers logs to any HTTP endpoint.
+        # - The endpoint must follow [Firehose request and response specifications](https://docs.aws.amazon.com/firehose/latest/dev/httpdeliveryrequestresponse.html).
+        # (Many of the third party vendors are compliant with this specifications out of the box.)
+        # - `datadog`
+        # - delivers logs to [Datadog](https://www.datadoghq.com/).
+        # - `highlight`
+        # - delivers logs to [Highlight.io](https://www.highlight.io/) project.
+        #
+        # Refer to [our docs](https://docs.stacktape.com/configuration/log-forwarding/) for more information.
+        #
+        # > Logs that fail to be delivered to the destination even after multiple retries (time spend on retries can be configured) are put into bucket with name `{stackName}-{resourceName}-logs-{generatedHash}`
+        #
+        # - Type: object
+        # - Required: true
+        logForwarding:
+          #
+          # - Type: string
+          # - Required: true
+          type: highlight
+          #
+          # - Type: object
+          # - Required: true
+          properties:
+            # Id of a [highlight.io](https://www.highlight.io/) project.
+            #
+            # - You can get the id of your project in your [highlight.io console](https://app.highlight.io/).
+            #
+            # - Type: string
+            # - Required: true
+            projectId: example-value
+            # HTTPS endpoint where logs will be forwarded
+            #
+            # - By default Stacktape uses `https://pub.highlight.io/v1/logs/firehose`
+            #
+            # - Type: string
+            # - Required: false
+            # - Default: https://pub.highlight.io/v1/logs/firehose
+            endpointUrl: https://pub.highlight.io/v1/logs/firehose
+```
+
+## datadog
+
+This example shows how to configure logforwarding using datadog. 
+
+```yml
+resources:
+  myRedisCluster:
+    type: redis-cluster
+    properties:
+      logging:
+        # Configures forwarding of logs to specified destination
+        #
+        # - Log forwarding is done using [Amazon Kinesis Data Firehose](https://aws.amazon.com/kinesis/data-firehose/) delivery stream.
+        # - When using log forwarding, you will incur costs based on the amount of data being transferred to the destination (~$0.03 per transferred GB).
+        # Refer to [AWS Kinesis Firehose Pricing](https://aws.amazon.com/kinesis/data-firehose/pricing/?nc=sn&loc=3) page to see details.
+        # - Currently supported destinations for logs:
+        # - `http-endpoint`
+        # - delivers logs to any HTTP endpoint.
+        # - The endpoint must follow [Firehose request and response specifications](https://docs.aws.amazon.com/firehose/latest/dev/httpdeliveryrequestresponse.html).
+        # (Many of the third party vendors are compliant with this specifications out of the box.)
+        # - `datadog`
+        # - delivers logs to [Datadog](https://www.datadoghq.com/).
+        # - `highlight`
+        # - delivers logs to [Highlight.io](https://www.highlight.io/) project.
+        #
+        # Refer to [our docs](https://docs.stacktape.com/configuration/log-forwarding/) for more information.
+        #
+        # > Logs that fail to be delivered to the destination even after multiple retries (time spend on retries can be configured) are put into bucket with name `{stackName}-{resourceName}-logs-{generatedHash}`
+        #
+        # - Type: object
+        # - Required: true
+        logForwarding:
+          #
+          # - Type: string
+          # - Required: true
+          type: datadog
+          #
+          # - Type: object
+          # - Required: true
+          properties:
+            # API key required to enable delivery of logs to Datadog
+            #
+            # - You can get your Datadog API key in [Datadog console](https://app.datadoghq.com/organization-settings/api-keys)
+            # - It is recommended to use [secret](https://docs.stacktape.com/resources/secrets/) for storing your api key.
+            #
+            # - Type: string
+            # - Required: true
+            apiKey: example-value
+            # HTTPS endpoint where logs will be forwarded
+            #
+            # - By default Stacktape uses `https://aws-kinesis-http-intake.logs.datadoghq.com/v1/input`
+            # - If your Datadog site is in EU you should probably use `https://aws-kinesis-http-intake.logs.datadoghq.eu/v1/input`
+            #
+            # - Type: string
+            # - Required: false
+            # - Default: https://aws-kinesis-http-intake.logs.datadoghq.com/v1/input
+            endpointUrl: https://aws-kinesis-http-intake.logs.datadoghq.com/v1/input
+```

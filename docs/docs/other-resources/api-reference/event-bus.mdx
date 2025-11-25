@@ -1,0 +1,48 @@
+---
+title: "Event Bus"
+order: 225
+---
+
+This example shows a basic event bus configuration.
+
+Event bus resource
+
+- Bus for your application events.
+- Other compute resources can subscribe to events published to the bus.
+
+# Basic example
+
+```yml
+resources:
+  myEventBus:
+    type: event-bus
+    properties:
+      # Specifies the partner event source that the new event bus will be matched with.
+      #
+      # - Required only if you are using a partner event bus (3rd party)
+      #
+      # - Type: string
+      # - Required: false
+      eventSourceName: myEventSourceName
+      # Enables event archivation and sets retention to provided value
+      #
+      # - Archivation can be used to safely store and re-process past events
+      #
+      # - Type: object
+      # - Required: false
+      archivation:
+        # Enables event archivation
+        #
+        # - Disabling of archive results in deletion of the archive
+        #
+        # - Type: boolean
+        # - Required: true
+        enabled: true
+        # Configures retention period for events in this event bus
+        #
+        # - By default event are retained indefinitely
+        #
+        # - Type: number
+        # - Required: false
+        retentionDays: 100
+```

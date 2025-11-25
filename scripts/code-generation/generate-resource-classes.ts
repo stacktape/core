@@ -60,7 +60,7 @@ function formatConstructorJSDoc(description: JSDocComment | undefined, className
  * Supports both:
  * - new Resource(properties) - name derived from object key
  * - new Resource(name, properties) - explicit name (backwards compatible)
- * 
+ *
  * The description is added to the constructor so it shows when hovering over `new ClassName()`
  */
 function generateResourceClass(

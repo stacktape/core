@@ -1,0 +1,29 @@
+---
+title: "Upstash Redis"
+order: 251
+---
+
+This example shows a basic upstash redis configuration.
+
+Upstash Redis resource
+
+- Serverless redis database designed for the edge
+
+# Basic example
+
+```yml
+resources:
+  myUpstashRedis:
+    type: upstash-redis
+    properties:
+      # Enables automatic eviction of keys when memory is full
+      #
+      # - When enabled, Redis will automatically evict keys when memory limit is reached.
+      # - Uses optimistic-volatile algorithm (combination of volatile-random and allkeys-random policies).
+      # - Allows older data to be automatically removed to make room for new data.
+      #
+      # - Type: boolean
+      # - Required: false
+      # - Default: false
+      enableEviction: false
+```
