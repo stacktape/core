@@ -366,8 +366,14 @@ const getLoggingParameters = ({
   // normalizing engine type means that serverless is removed from aurora serverless engines
   const normalizedEngineType = normalizeEngineType(resource.engine.type);
   if (normalizedEngineType === 'aurora-postgresql' || normalizedEngineType === 'postgres') {
+    const useNewLogging = resource.engine.type === 'postgres' && resource.engine.properties?.version?.startsWith('18');
     return {
-      log_connections: (resource.logging?.engineSpecificOptions as PostgresLoggingOptions)?.log_connections ? '1' : '0',
+      // @todo Postgres 18 requires different value for log_connections parameter, not 1 and 0, but anything from: receipt, authentication, authorization, setup_durations, all
+      log_connections: useNewLogging
+        ? ((resource.logging?.engineSpecificOptions as PostgresLoggingOptions)?.log_connections ?? 'all')
+        : (resource.logging?.engineSpecificOptions as PostgresLoggingOptions)?.log_connections
+          ? '1'
+          : '0',
       log_disconnections: (resource.logging?.engineSpecificOptions as PostgresLoggingOptions)?.log_disconnections
         ? '1'
         : '0',
@@ -478,6 +484,7 @@ const engineVersionConfigurationData = [
   { family: 'postgres15', majorVersion: '15' },
   { family: 'postgres16', majorVersion: '16' },
   { family: 'postgres17', majorVersion: '17' },
+  { family: 'postgres18', majorVersion: '18' },
   { family: 'sqlserver-ee-11.0', majorVersion: '11.00' },
   { family: 'sqlserver-ee-12.0', majorVersion: '12.00' },
   { family: 'sqlserver-ee-13.0', majorVersion: '13.00' },

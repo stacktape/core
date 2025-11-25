@@ -1,9 +1,9 @@
-import { defineConfig, LambdaFunction, StacktapeLambdaBuildpackPackaging } from '../__release-npm';
+import { defineConfig, LambdaFunction, StacktapeLambdaBuildpackPackaging } from '../../__release-npm';
 
 export default defineConfig(() => {
-  const lambda = new LambdaFunction('simple-lambda', {
+  const lambda = new LambdaFunction({
     packaging: new StacktapeLambdaBuildpackPackaging({
-      entryfilePath: './lambdas/throwing.ts'
+      entryfilePath: './src/throwing.ts'
     }),
     url: {
       enabled: true,

@@ -6,21 +6,23 @@ const getParamReferenceSymbol = Symbol.for('stacktape:getParamReference');
 const getTypeSymbol = Symbol.for('stacktape:getType');
 const getPropertiesSymbol = Symbol.for('stacktape:getProperties');
 const getOverridesSymbol = Symbol.for('stacktape:getOverrides');
+const setResourceNameSymbol = Symbol.for('stacktape:setResourceName');
 
 /**
- * A reference to a resource parameter that will be resolved at runtime
+ * A reference to a resource parameter that will be resolved at runtime.
+ * Stores a reference to the resource for lazy name resolution.
  */
 export class ResourceParamReference {
-  private __resourceName: string;
+  private __resource: BaseResource;
   private __param: string;
 
-  constructor(resourceName: string, param: string) {
-    this.__resourceName = resourceName;
+  constructor(resource: BaseResource, param: string) {
+    this.__resource = resource;
     this.__param = param;
   }
 
   toString(): string {
-    return `$ResourceParam('${this.__resourceName}', '${this.__param}')`;
+    return `$ResourceParam('${this.__resource.resourceName}', '${this.__param}')`;
   }
 
   toJSON(): string {
@@ -51,42 +53,77 @@ export class BaseTypeProperties {
  */
 export class BaseResource {
   private readonly _type: string;
-  private readonly _properties: any;
-  private readonly _overrides?: any;
-  private readonly _resourceName: string;
+  private _properties: any;
+  private _overrides?: any;
+  private _resourceName: string | undefined;
+  private _explicitName: boolean;
 
-  constructor(name: string, type: string, properties: any, overrides?: any) {
+  constructor(name: string | undefined, type: string, properties: any, overrides?: any) {
     this._resourceName = name;
+    this._explicitName = name !== undefined;
     this._type = type;
 
-    // Extract overrides from properties if present
-    let finalProperties = properties;
-    let finalOverrides = overrides;
+    // Store properties and overrides initially - they'll be processed when name is set
+    this._properties = properties;
+    this._overrides = overrides;
 
+    // If name is already set, process overrides now
+    if (name !== undefined) {
+      this._processOverrides();
+    }
+  }
+
+  /**
+   * Process overrides extraction from properties.
+   * Called when the resource name is available.
+   */
+  private _processOverrides(): void {
+    const properties = this._properties;
     if (properties && typeof properties === 'object' && 'overrides' in properties) {
       // Clone properties without overrides
-      finalProperties = { ...properties };
+      const finalProperties = { ...properties };
       const propertiesOverrides = finalProperties.overrides;
       delete finalProperties.overrides;
 
       // Transform overrides using cfLogicalNames
       if (propertiesOverrides && typeof propertiesOverrides === 'object') {
-        finalOverrides = transformOverridesToLogicalNames(name, type, propertiesOverrides);
+        this._overrides = transformOverridesToLogicalNames(this._resourceName!, this._type, propertiesOverrides);
       }
-    }
 
-    this._properties = finalProperties;
-    this._overrides = finalOverrides;
+      this._properties = finalProperties;
+    }
   }
 
   // Public getter for resource name (used for referencing resources)
   get resourceName(): string {
+    if (this._resourceName === undefined) {
+      throw new Error(
+        'Resource name not set. Make sure to add the resource to the resources object in your config. ' +
+          'The resource name is automatically derived from the object key.'
+      );
+    }
     return this._resourceName;
+  }
+
+  /**
+   * Internal method to set the resource name from the object key.
+   * Called by transformConfigWithResources.
+   */
+  [setResourceNameSymbol](name: string): void {
+    if (this._explicitName && this._resourceName !== name) {
+      // If an explicit name was provided and it differs from the key, use the explicit name
+      return;
+    }
+    if (this._resourceName === undefined) {
+      this._resourceName = name;
+      // Now that we have a name, process overrides
+      this._processOverrides();
+    }
   }
 
   // Private methods using symbols - not accessible from outside or in autocomplete
   [getParamReferenceSymbol](paramName: string): ResourceParamReference {
-    return new ResourceParamReference(this._resourceName, paramName);
+    return new ResourceParamReference(this, paramName);
   }
 
   [getTypeSymbol](): string {
@@ -217,7 +254,18 @@ export const transformConfigWithResources = (config: any): any => {
     return config;
   }
 
-  // Transform the config, marking resources and scripts sections specially
+  // First pass: set all resource names from object keys
+  // This must happen before any transformation so that ResourceParamReferences can resolve names
+  if (config.resources && typeof config.resources === 'object') {
+    for (const key in config.resources) {
+      const resource = config.resources[key];
+      if (resource instanceof BaseResource) {
+        (resource as any)[setResourceNameSymbol](key);
+      }
+    }
+  }
+
+  // Second pass: transform the config
   const result: any = {};
   for (const key in config) {
     if (key === 'resources') {

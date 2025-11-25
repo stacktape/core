@@ -5,13 +5,22 @@ import { REFERENCEABLE_PARAMS } from './resource-metadata';
 const getParamReferenceSymbol = Symbol.for('stacktape:getParamReference');
 
 /**
- * Factory function to create a resource class with referenceable parameters
+ * Factory function to create a resource class with referenceable parameters.
+ * Supports two calling conventions:
+ * - new Resource(properties) - name derived from object key in resources
+ * - new Resource(name, properties) - explicit name (backwards compatible)
  */
 function createResourceClass(className: string, resourceType: string): any {
   // Create the class dynamically
   const ResourceClass = class extends BaseResource {
-    constructor(name: string, properties: any, overrides?: any) {
-      super(name, resourceType, properties, overrides);
+    constructor(nameOrProperties: string | any, properties?: any) {
+      if (typeof nameOrProperties === 'string') {
+        // Old style: (name, properties) - explicit name
+        super(nameOrProperties, resourceType, properties);
+      } else {
+        // New style: (properties) - name will be set from object key
+        super(undefined, resourceType, nameOrProperties);
+      }
     }
   };
 

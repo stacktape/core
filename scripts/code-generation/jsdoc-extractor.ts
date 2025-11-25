@@ -182,3 +182,85 @@ export function getSDKPropertyInfo(typeName: string, propertyName: string): Prop
 
   return extractPropertyInfo(typeName, propertyName, searchPaths);
 }
+
+/**
+ * Finds an interface declaration and extracts its JSDoc
+ */
+function findInterfaceJSDoc(interfaceName: string, sourceFile: ts.SourceFile): JSDocComment | undefined {
+  let result: JSDocComment | undefined;
+
+  function visit(node: ts.Node) {
+    if (ts.isInterfaceDeclaration(node) && node.name.text === interfaceName) {
+      result = extractJSDocFromNode(node);
+      return;
+    }
+    ts.forEachChild(node, visit);
+  }
+
+  visit(sourceFile);
+  return result;
+}
+
+/**
+ * Mapping of resource class names to their interface names and source files
+ */
+const RESOURCE_INTERFACE_MAP: Record<string, { interfaceName: string; file: string }> = {
+  // Compute resources
+  LambdaFunction: { interfaceName: 'LambdaFunction', file: 'functions.d.ts' },
+  WebService: { interfaceName: 'WebService', file: 'web-services.d.ts' },
+  PrivateService: { interfaceName: 'PrivateService', file: 'private-services.d.ts' },
+  WorkerService: { interfaceName: 'WorkerService', file: 'worker-services.d.ts' },
+  MultiContainerWorkload: { interfaceName: 'MultiContainerWorkload', file: 'multi-container-workloads.d.ts' },
+  BatchJob: { interfaceName: 'BatchJob', file: 'batch-jobs.d.ts' },
+
+  // Storage
+  Bucket: { interfaceName: 'Bucket', file: 'buckets.d.ts' },
+  HostingBucket: { interfaceName: 'HostingBucket', file: 'hosting-buckets.d.ts' },
+  DynamoDbTable: { interfaceName: 'DynamoDbTable', file: 'dynamo-db-tables.d.ts' },
+  EfsFilesystem: { interfaceName: 'EfsFilesystem', file: 'efs-filesystem.d.ts' },
+
+  // Databases
+  RelationalDatabase: { interfaceName: 'RelationalDatabase', file: 'relational-databases.d.ts' },
+  RedisCluster: { interfaceName: 'RedisCluster', file: 'redis-cluster.d.ts' },
+  MongoDbAtlasCluster: { interfaceName: 'MongoDbAtlasCluster', file: 'mongo-db-atlas-clusters.d.ts' },
+  UpstashRedis: { interfaceName: 'UpstashRedis', file: 'upstash-redis.d.ts' },
+  OpenSearchDomain: { interfaceName: 'OpenSearchDomain', file: 'open-search.d.ts' },
+
+  // Networking
+  HttpApiGateway: { interfaceName: 'HttpApiGateway', file: 'http-api-gateways.d.ts' },
+  ApplicationLoadBalancer: { interfaceName: 'ApplicationLoadBalancer', file: 'application-load-balancers.d.ts' },
+  NetworkLoadBalancer: { interfaceName: 'NetworkLoadBalancer', file: 'network-load-balancer.d.ts' },
+
+  // Events & Messaging
+  EventBus: { interfaceName: 'EventBus', file: 'event-buses.d.ts' },
+  SqsQueue: { interfaceName: 'SqsQueue', file: 'sqs-queues.d.ts' },
+  SnsTopic: { interfaceName: 'SnsTopic', file: 'sns-topic.d.ts' },
+
+  // Other
+  StateMachine: { interfaceName: 'StateMachine', file: 'state-machines.d.ts' },
+  UserAuthPool: { interfaceName: 'UserAuthPool', file: 'user-pools.d.ts' },
+  WebAppFirewall: { interfaceName: 'WebAppFirewall', file: 'web-app-firewall.d.ts' },
+  NextjsWeb: { interfaceName: 'NextjsWeb', file: 'nextjs-web.d.ts' },
+  Bastion: { interfaceName: 'Bastion', file: 'bastion.d.ts' }
+};
+
+/**
+ * Extracts the JSDoc description for a resource class from its interface definition
+ * @param className - The resource class name (e.g., 'LambdaFunction')
+ * @returns The JSDoc comment or undefined if not found
+ */
+export function getResourceClassDescription(className: string): JSDocComment | undefined {
+  const mapping = RESOURCE_INTERFACE_MAP[className];
+  if (!mapping) {
+    return undefined;
+  }
+
+  const filePath = join(process.cwd(), 'types', 'stacktape-config', mapping.file);
+  const sourceFile = getSourceFile(filePath);
+
+  if (!sourceFile) {
+    return undefined;
+  }
+
+  return findInterfaceJSDoc(mapping.interfaceName, sourceFile);
+}

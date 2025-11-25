@@ -1,5 +1,6 @@
-import type { ReferenceableParam, ReferenceableParamsMap } from './types';
+import type { JSDocComment, ReferenceableParam, ReferenceableParamsMap } from './types';
 import { getResourcesWithAugmentedProps, RESOURCES } from '../../src/api/npm/ts/resource-metadata';
+import { getResourceClassDescription } from './jsdoc-extractor';
 
 /**
  * Generates getter declarations for a resource's referenceable parameters
@@ -24,21 +25,61 @@ function determinePropsType(propsType: string, hasAugmentedProps: boolean): stri
 }
 
 /**
- * Generates a single resource class declaration
+ * Formats a JSDoc comment for a constructor (with indentation)
+ */
+function formatConstructorJSDoc(description: JSDocComment | undefined, className: string): string {
+  const lines: string[] = ['  /**'];
+
+  if (description?.description) {
+    // Split description into lines and add proper indentation
+    const descriptionLines = description.description.split('\n');
+    for (const line of descriptionLines) {
+      lines.push(`   * ${line}`);
+    }
+  } else {
+    lines.push(`   * Create a ${className} resource`);
+  }
+
+  // Add tags if any
+  if (description?.tags) {
+    for (const tag of description.tags) {
+      if (tag.value) {
+        lines.push(`   * @${tag.tag} ${tag.value}`);
+      } else {
+        lines.push(`   * @${tag.tag}`);
+      }
+    }
+  }
+
+  lines.push('   */');
+  return lines.join('\n');
+}
+
+/**
+ * Generates a single resource class declaration with constructor overloads.
+ * Supports both:
+ * - new Resource(properties) - name derived from object key
+ * - new Resource(name, properties) - explicit name (backwards compatible)
+ * 
+ * The description is added to the constructor so it shows when hovering over `new ClassName()`
  */
 function generateResourceClass(
   className: string,
   propsType: string,
   resourceType: string,
   hasAugmentedProps: boolean,
-  referenceableParams: ReferenceableParam[]
+  referenceableParams: ReferenceableParam[],
+  description: JSDocComment | undefined
 ): string {
   const finalPropsType = determinePropsType(propsType, hasAugmentedProps);
   const getters = generateGetters(referenceableParams);
+  const constructorJsDoc = formatConstructorJSDoc(description, className);
 
   const parts = [
     '',
     `export declare class ${className} extends BaseResource {`,
+    constructorJsDoc,
+    `  constructor(properties: ${finalPropsType});`,
     `  constructor(name: string, properties: ${finalPropsType});`,
     getters,
     '}'
@@ -57,8 +98,9 @@ export function generateResourceClassDeclarations(REFERENCEABLE_PARAMS: Referenc
   const classDeclarations = RESOURCES.map(({ className, resourceType, propsType }) => {
     const params = REFERENCEABLE_PARAMS[resourceType] || [];
     const hasAugmentedProps = augmentedPropsTypes.has(propsType);
+    const description = getResourceClassDescription(className);
 
-    return generateResourceClass(className, propsType, resourceType, hasAugmentedProps, params);
+    return generateResourceClass(className, propsType, resourceType, hasAugmentedProps, params, description);
   });
 
   return classDeclarations.join('\n');
