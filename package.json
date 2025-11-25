@@ -23,6 +23,7 @@
     "gen:res:descriptions": "bun scripts/generate-resource-descriptions.ts",
     "gen:price:info": "bun scripts/generate-static-aws-price-info.ts",
     "gen:sp": "bun scripts/generate-starter-project.ts",
+    "gen:db:engines": "bun scripts/generate-db-engine-versions-json.ts",
     "lint:gen:sp": "bun scripts/lint-generated-starter-projects.ts",
     "analyze:bundle": "bun scripts/analyze-bundle.ts",
     "pkg:hl": "bun scripts/package-helper-lambdas.ts",

@@ -2,7 +2,8 @@ import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { CF_TEMPLATE_FILE_NAME, INITIAL_CF_TEMPLATE_FILE_NAME, IS_DEV, STP_TEMPLATE_FILE_NAME } from '@config';
 import { getHomeDir } from '@shared/utils/misc';
-import { HELPER_LAMBDAS_DIST_FOLDER_PATH } from './project-fs-paths';
+import { existsSync } from 'fs-extra';
+import { DEV_TMP_FOLDER_PATH, HELPER_LAMBDAS_FOLDER_NAME } from './project-fs-paths';
 
 // Get the directory of the current module
 // Works in both Bun compiled executables and Node.js/npm installations
@@ -71,7 +72,7 @@ export const fsPaths = {
   },
   helperLambdasDir() {
     if (IS_DEV) {
-      return HELPER_LAMBDAS_DIST_FOLDER_PATH;
+      return join(DEV_TMP_FOLDER_PATH, HELPER_LAMBDAS_FOLDER_NAME);
     }
 
     // In production, try multiple locations to find helper-lambdas
@@ -92,11 +93,10 @@ export const fsPaths = {
     ];
 
     // Return the first location that exists
-    // eslint-disable-next-line ts/no-require-imports
-    const fs = require('node:fs');
+
     for (const location of possibleLocations) {
       try {
-        if (fs.existsSync(location)) {
+        if (existsSync(location)) {
           return location;
         }
       } catch {

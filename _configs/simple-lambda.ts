@@ -10,7 +10,8 @@ export default defineConfig(() => {
       cors: {
         enabled: true
       }
-    }
+    },
+    overrides: {}
   });
 
   return {
