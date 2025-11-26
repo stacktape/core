@@ -168,7 +168,7 @@ async function ensureBinary() {
 
   let cacheDir;
   try {
-    const localDir = join(__dirname, '..', '.stacktape', 'bin', version);
+    const localDir = join(__dirname, '..', 'bin');
     mkdirSync(localDir, { recursive: true });
     accessSync(localDir, constants.W_OK);
     cacheDir = localDir;
