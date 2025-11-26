@@ -59,6 +59,12 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-bun-
 
+      - name: Clean node_modules on Windows (workaround for nested path issues)
+        if: matrix.platform == 'win'
+        run: |
+          if (Test-Path node_modules) { Remove-Item -Recurse -Force node_modules }
+        shell: pwsh
+
       - name: Install dependencies
         run: bun install
 

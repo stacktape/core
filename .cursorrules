@@ -22,3 +22,7 @@ Be extremely concise. Sacrifice grammar for the sake of concision.
 - To run scripts not in `package.json` use `bun run <<script-name.ts>>`.
 - Always run scripts from root project directory
 - If you want to install or remove a package, always use `bun`, not `npm`
+
+# Stacktape Configuration
+
+When editing `stacktape.yml`, `stacktape.ts` or any file, which defines Stacktape configuration, always look into Stacktape docs to learn how Stacktape works. Never write without consulting the docs first. The documentation
