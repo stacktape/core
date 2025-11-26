@@ -24,6 +24,7 @@
     "gen:price:info": "bun scripts/generate-static-aws-price-info.ts",
     "gen:sp": "bun scripts/generate-starter-project.ts",
     "gen:db:engines": "bun scripts/generate-db-engine-versions-json.ts",
+    "gen:cf:types": "bun scripts/generate-cloudformation-types.ts",
     "lint:gen:sp": "bun scripts/lint-generated-starter-projects.ts",
     "analyze:bundle": "bun scripts/analyze-bundle.ts",
     "pkg:hl": "bun scripts/package-helper-lambdas.ts",
@@ -168,6 +169,7 @@
     "@types/object-hash": "^2.2.1",
     "@types/prompts": "^2.4.9",
     "@types/semver": "^7.7.0",
+    "@types/unzipper": "^0.10.11",
     "bun-types": "^1.3.2",
     "eslint": "^9.36.0",
     "eslint-config-prettier": "^10.1.8",
@@ -180,6 +182,7 @@
     "semver": "^7.7.2",
     "tar": "^7.4.3",
     "taze": "^19.1.0",
-    "typescript-json-schema": "0.58.1"
+    "typescript-json-schema": "0.58.1",
+    "unzipper": "^0.12.3"
   }
 }

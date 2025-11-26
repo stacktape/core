@@ -323,7 +323,58 @@ export function generateStacktapeConfigType(): string {
 // Accepts both class instances and plain objects
 import type { StacktapeResourceDefinition } from './sdk';
 
-export type StacktapeConfig = Omit<import('./sdk').StacktapeConfig, 'resources'> & {
+/**
+ * CloudFormation template structure
+ */
+export type CloudFormationTemplate = {
+  AWSTemplateFormatVersion?: string;
+  Description?: string;
+  Transform?: string[];
+  Parameters?: Record<string, unknown>;
+  Mappings?: Record<string, unknown>;
+  Conditions?: Record<string, unknown>;
+  Resources: { [logicalName: string]: CloudFormationResource };
+  Outputs?: Record<string, { Value: unknown; Description?: string; Export?: { Name: string } }>;
+  Hooks?: Record<string, unknown>;
+};
+
+export type StacktapeConfig = Omit<import('./sdk').StacktapeConfig, 'resources' | 'cloudformationResources'> & {
   resources: { [resourceName: string]: ${resourceClassNames.join(' | ')} | StacktapeResourceDefinition };
+  /**
+   * #### Raw CloudFormation resources that will be deployed in this stack.
+   *
+   * ---
+   *
+   * These resources will be merged with the resources managed by Stacktape.
+   * Each CloudFormation resource consists of a logical name and its definition.
+   *
+   * To avoid logical name conflicts, you can see all logical names for resources deployed by Stacktape using the \`stacktape stack-info --detailed\` command.
+   * Resources specified here do not count towards your resource limit.
+   *
+   * For a list of all supported AWS CloudFormation resources, see the [AWS documentation](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-template-resource-type-ref.html).
+   */
+  cloudformationResources?: { [resourceName: string]: CloudFormationResource };
+  /**
+   * #### Final transform function for the entire CloudFormation template.
+   *
+   * ---
+   *
+   * This function is called after all other processing (including resource transforms and overrides) is complete.
+   * It receives the entire CloudFormation template and must return the modified template.
+   *
+   * Use this for advanced customizations that need access to the full template structure.
+   *
+   * @example
+   * finalTransform: (template) => {
+   *   // Add a global tag to all resources
+   *   for (const resource of Object.values(template.Resources)) {
+   *     if (resource.Properties?.Tags) {
+   *       resource.Properties.Tags.push({ Key: 'Environment', Value: 'production' });
+   *     }
+   *   }
+   *   return template;
+   * }
+   */
+  finalTransform?: (template: CloudFormationTemplate) => CloudFormationTemplate;
 };`;
 }

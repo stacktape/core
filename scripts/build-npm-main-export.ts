@@ -15,6 +15,7 @@ import {
   generateStacktapeConfigType
 } from './code-generation/generate-augmented-props';
 import { generatePropertiesInterfaces } from './code-generation/generate-cf-properties';
+import { generateCloudFormationResourceType } from './code-generation/generate-cloudformation-resource-type';
 import { generateOverrideTypes, generateTransformsTypes } from './code-generation/generate-overrides';
 import { generateResourceClassDeclarations } from './code-generation/generate-resource-classes';
 import {
@@ -282,6 +283,7 @@ export async function generateTypeDeclarations(): Promise<void> {
   const propertiesInterfaces = generatePropertiesInterfaces(CHILD_RESOURCES);
   const overridesTypes = generateOverrideTypes(CHILD_RESOURCES);
   const transformsTypes = generateTransformsTypes(CHILD_RESOURCES);
+  const cloudFormationResourceType = generateCloudFormationResourceType();
 
   // Compile source files
   logInfo('Compiling TypeScript source files...');
@@ -386,6 +388,12 @@ ${typePropertiesClassDeclarations}
 ${propertiesInterfaces}
 
 // ==========================================
+// CLOUDFORMATION RESOURCE TYPE
+// ==========================================
+
+${cloudFormationResourceType}
+
+// ==========================================
 // ADDITIONAL GENERATED TYPES
 // ==========================================
 
@@ -414,6 +422,7 @@ export async function buildNpmMainExport(): Promise<void> {
 }
 
 // Run if executed directly
-if (import.meta.main) {
+const isMain = process.argv[1]?.includes('build-npm-main-export');
+if (isMain) {
   buildNpmMainExport();
 }

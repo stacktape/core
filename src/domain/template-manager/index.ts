@@ -132,7 +132,13 @@ export class TemplateManager {
       for (const [logicalName, transform] of Object.entries(configManager.transforms)) {
         this.template.Resources[logicalName].Properties = transform(this.template.Resources[logicalName].Properties);
       }
+      // Apply the final transform if provided
+      if (configManager.finalTransform) {
+        this.template = configManager.finalTransform(this.template);
+      }
     }
+
+    // final transform of template
 
     // if overrides added some directives, resolve them too
     this.template = await configManager.resolveDirectives<CloudformationTemplate>({

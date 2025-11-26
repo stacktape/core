@@ -58,15 +58,21 @@ export class ConfigResolver {
   };
 
   /**
-   * Strips transforms from the config object.
+   * Strips transforms and finalTransform from the config object.
    * Transforms are functions and cannot be serialized.
    * They are extracted separately by TransformsResolver.
    */
   private stripTransformsFromConfig = (config: StacktapeConfig) => {
+    // Strip finalTransform from the root config
+    if ('finalTransform' in (config as any)) {
+      delete (config as any).finalTransform;
+    }
+
     if (!config?.resources) {
       return;
     }
 
+    // Strip transforms from each resource
     for (const resourceName in config.resources) {
       const resource = config.resources[resourceName] as Record<string, any>;
       if (resource && 'transforms' in resource) {

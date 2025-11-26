@@ -3,9 +3,11 @@ import { globalStateManager } from '@application-services/global-state-manager';
 import { getTypescriptExport } from '@utils/file-loaders';
 
 export type CfResourceTransform = (props: Record<string, any>) => Partial<Record<string, any>>;
+export type FinalTransform = (template: CloudformationTemplate) => CloudformationTemplate;
 
 export class TransformsResolver {
   #transforms: { [logicalName: string]: CfResourceTransform } = {};
+  #finalTransform: FinalTransform | null = null;
 
   /**
    * Checks if the config file is a TypeScript file with defineConfig-style default export.
@@ -32,9 +34,6 @@ export class TransformsResolver {
   };
 
   /**
-   * Loads transforms from a TypeScript config file.
-   * Returns a flat map of CloudFormation logical names to transform functions.
-   *
    * The transforms are extracted from each resource definition in the config.
    * They are already keyed by CloudFormation logical names (transformed in the npm package).
    *
@@ -42,12 +41,16 @@ export class TransformsResolver {
    */
   loadTransforms = async (
     typescriptConfigFilePath: string
-  ): Promise<{ [logicalName: string]: CfResourceTransform }> => {
+  ): Promise<{
+    transforms: { [logicalName: string]: CfResourceTransform };
+    finalTransform: FinalTransform | null;
+  }> => {
     this.#transforms = {};
+    this.#finalTransform = null;
 
     // Only process TypeScript config files
     if (!typescriptConfigFilePath?.endsWith('.ts')) {
-      return this.#transforms;
+      return { transforms: this.#transforms, finalTransform: this.#finalTransform };
     }
 
     try {
@@ -60,7 +63,7 @@ export class TransformsResolver {
 
       // Only defineConfig pattern supports transforms (uses TypeScript classes)
       if (!defaultExport || typeof defaultExport !== 'function') {
-        return this.#transforms;
+        return { transforms: this.#transforms, finalTransform: this.#finalTransform };
       }
 
       const configParams: GetConfigParams = {
@@ -79,18 +82,23 @@ export class TransformsResolver {
 
       const config: StacktapeConfig = defaultExport(configParams);
 
+      // Extract finalTransform if present
+      if (typeof (config as any).finalTransform === 'function') {
+        this.#finalTransform = (config as any).finalTransform;
+      }
+
       if (!config?.resources) {
-        return this.#transforms;
+        return { transforms: this.#transforms, finalTransform: this.#finalTransform };
       }
 
       // Extract transforms from each resource
       this.extractTransformsFromResources(config.resources);
     } catch {
       // If loading fails, return empty transforms (config might be YAML or invalid)
-      return this.#transforms;
+      return { transforms: this.#transforms, finalTransform: this.#finalTransform };
     }
 
-    return this.#transforms;
+    return { transforms: this.#transforms, finalTransform: this.#finalTransform };
   };
 
   /**

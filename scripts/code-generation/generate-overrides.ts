@@ -26,7 +26,7 @@ function generateOverrideProperties(childResources: ChildResourceMetadata[]): st
       continue;
     }
 
-    properties.push(`  ${propertyName}?: Partial<${mapping.interface}>;`);
+    properties.push(`  ${propertyName}?: Partial<${mapping.typeName}>;`);
   }
 
   return properties;
@@ -55,7 +55,7 @@ function generateTransformProperties(childResources: ChildResourceMetadata[]): s
       continue;
     }
 
-    properties.push(`  ${propertyName}?: (props: Partial<${mapping.interface}>) => Partial<${mapping.interface}>;`);
+    properties.push(`  ${propertyName}?: (props: Partial<${mapping.typeName}>) => Partial<${mapping.typeName}>;`);
   }
 
   return properties;

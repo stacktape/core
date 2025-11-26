@@ -41,7 +41,7 @@ import {
 } from './utils/lambdas';
 import { cleanConfigForMinimalTemplateCompilerMode, mergeStacktapeDefaults } from './utils/misc';
 import { runInitialValidations, validateConfigStructure } from './utils/validation';
-import { CfResourceTransform, TransformsResolver } from './transforms-resolver';
+import { CfResourceTransform, FinalTransform, TransformsResolver } from './transforms-resolver';
 
 export class ConfigManager {
   config: StacktapeConfig;
@@ -53,6 +53,7 @@ export class ConfigManager {
   globalConfigDeploymentNotifications: DeploymentNotificationDefinition[] = [];
   globalConfigAlarms: AlarmDefinition[] = [];
   transforms: { [logicalName: string]: CfResourceTransform } = {};
+  finalTransform: FinalTransform | null = null;
 
   init = async ({ configRequired = true }: { configRequired: boolean }) => {
     const { templateId } = globalStateManager.args;
@@ -75,7 +76,9 @@ export class ConfigManager {
     if (shouldLoadConfig) {
       // Only load transforms for TypeScript configs with defineConfig pattern
       if (this.transformsResolver.isDefineConfigStyle(globalStateManager.configPath)) {
-        this.transforms = await this.transformsResolver.loadTransforms(globalStateManager.configPath);
+        const { transforms, finalTransform } = await this.transformsResolver.loadTransforms(globalStateManager.configPath);
+        this.transforms = transforms;
+        this.finalTransform = finalTransform;
       }
       await this.configResolver.loadConfig();
       if (globalStateManager.invokedFrom !== 'server') {

@@ -23,6 +23,28 @@ export default defineConfig(() => {
   });
 
   return {
-    resources: { lambda }
+    resources: { lambda },
+    cloudformationResources: {
+      mySnsTopic: {
+        Type: 'AWS::SNS::Topic',
+        Properties: {
+          TopicName: 'my-test-topic',
+          DisplayName: 'My Test Topic'
+        }
+      }
+    },
+    finalTransform: (template) => {
+      // Example: Add a global tag to all Lambda functions
+      for (const logicalName of Object.keys(template.Resources)) {
+        const resource = template.Resources[logicalName];
+        if (resource.Type === 'AWS::Lambda::Function' && resource.Properties) {
+          (resource.Properties as any).Tags = [
+            ...((resource.Properties as any).Tags || []),
+            { Key: 'ManagedBy', Value: 'Stacktape' }
+          ];
+        }
+      }
+      return template;
+    }
   };
 });
