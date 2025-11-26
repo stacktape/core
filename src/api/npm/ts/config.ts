@@ -6,6 +6,7 @@ const getParamReferenceSymbol = Symbol.for('stacktape:getParamReference');
 const getTypeSymbol = Symbol.for('stacktape:getType');
 const getPropertiesSymbol = Symbol.for('stacktape:getProperties');
 const getOverridesSymbol = Symbol.for('stacktape:getOverrides');
+const getTransformsSymbol = Symbol.for('stacktape:getTransforms');
 const setResourceNameSymbol = Symbol.for('stacktape:setResourceName');
 
 /**
@@ -55,6 +56,7 @@ export class BaseResource {
   private readonly _type: string;
   private _properties: any;
   private _overrides?: any;
+  private _transforms?: any;
   private _resourceName: string | undefined;
   private _explicitName: boolean;
 
@@ -67,27 +69,42 @@ export class BaseResource {
     this._properties = properties;
     this._overrides = overrides;
 
-    // If name is already set, process overrides now
+    // If name is already set, process overrides and transforms now
     if (name !== undefined) {
-      this._processOverrides();
+      this._processOverridesAndTransforms();
     }
   }
 
   /**
-   * Process overrides extraction from properties.
+   * Process overrides and transforms extraction from properties.
    * Called when the resource name is available.
    */
-  private _processOverrides(): void {
+  private _processOverridesAndTransforms(): void {
     const properties = this._properties;
-    if (properties && typeof properties === 'object' && 'overrides' in properties) {
-      // Clone properties without overrides
+    if (properties && typeof properties === 'object') {
+      // Clone properties without overrides and transforms
       const finalProperties = { ...properties };
-      const propertiesOverrides = finalProperties.overrides;
-      delete finalProperties.overrides;
 
-      // Transform overrides using cfLogicalNames
-      if (propertiesOverrides && typeof propertiesOverrides === 'object') {
-        this._overrides = transformOverridesToLogicalNames(this._resourceName!, this._type, propertiesOverrides);
+      // Handle overrides
+      if ('overrides' in finalProperties) {
+        const propertiesOverrides = finalProperties.overrides;
+        delete finalProperties.overrides;
+
+        // Transform overrides using cfLogicalNames
+        if (propertiesOverrides && typeof propertiesOverrides === 'object') {
+          this._overrides = transformOverridesToLogicalNames(this._resourceName!, this._type, propertiesOverrides);
+        }
+      }
+
+      // Handle transforms
+      if ('transforms' in finalProperties) {
+        const propertiesTransforms = finalProperties.transforms;
+        delete finalProperties.transforms;
+
+        // Transform transforms using cfLogicalNames (same mapping as overrides)
+        if (propertiesTransforms && typeof propertiesTransforms === 'object') {
+          this._transforms = transformTransformsToLogicalNames(this._resourceName!, this._type, propertiesTransforms);
+        }
       }
 
       this._properties = finalProperties;
@@ -116,8 +133,8 @@ export class BaseResource {
     }
     if (this._resourceName === undefined) {
       this._resourceName = name;
-      // Now that we have a name, process overrides
-      this._processOverrides();
+      // Now that we have a name, process overrides and transforms
+      this._processOverridesAndTransforms();
     }
   }
 
@@ -136,6 +153,10 @@ export class BaseResource {
 
   [getOverridesSymbol](): any | undefined {
     return this._overrides;
+  }
+
+  [getTransformsSymbol](): any | undefined {
+    return this._transforms;
   }
 }
 
@@ -196,6 +217,66 @@ Remove the override, run 'stacktape compile:template' command, and find the logi
   }
 
   return transformedOverrides;
+}
+
+/**
+ * Transform user-friendly transforms (with property names like 'lambda', 'lambdaLogGroup')
+ * to CloudFormation logical names using cfLogicalNames
+ * Similar to overrides but the values are functions instead of objects
+ */
+function transformTransformsToLogicalNames(resourceName: string, resourceType: string, transforms: any): any {
+  // Get child resources for this resource type
+  const childResources = CHILD_RESOURCES[resourceType] || [];
+
+  // Build a map of property names to child resources
+  const propertyNameMap = new Map<string, any>();
+
+  for (const childResource of childResources) {
+    // The logicalName function has a name property that matches the property name
+    if (childResource.logicalName && childResource.logicalName.name) {
+      propertyNameMap.set(childResource.logicalName.name, childResource);
+    }
+  }
+
+  // Transform transforms object
+  const transformedTransforms: any = {};
+  const errorMessage = `Transform of property {propertyName} of resource ${resourceName} is not supported.\n
+Remove the transform, run 'stacktape compile:template' command, and find the logical name of the resource you want to transform manually. Then add it to the transforms object.`;
+
+  for (const propertyName in transforms) {
+    const childResource = propertyNameMap.get(propertyName);
+
+    // Skip unresolvable resources
+    if (childResource?.unresolvable) {
+      throw new Error(errorMessage.replace('{propertyName}', propertyName));
+    }
+
+    if (childResource) {
+      const logicalNameFn = childResource.logicalName;
+      // Call the cfLogicalNames function to get the actual CloudFormation logical name
+      // Try with resourceName first (most common), then try without arguments
+      let logicalName: string;
+      try {
+        logicalName = logicalNameFn(resourceName);
+      } catch {
+        try {
+          logicalName = logicalNameFn();
+        } catch {
+          // If both fail, use property name as-is
+          logicalName = propertyName;
+        }
+      }
+      if (logicalName.includes('undefined')) {
+        throw new Error(errorMessage.replace('{propertyName}', propertyName));
+      }
+      transformedTransforms[logicalName] = transforms[propertyName];
+    } else {
+      // If not found in map, use property name as-is (shouldn't happen with proper types)
+      transformedTransforms[propertyName] = transforms[propertyName];
+    }
+  }
+
+  return transformedTransforms;
 }
 
 export type GetConfigParams = {
@@ -311,10 +392,12 @@ const transformResourceDefinitions = (resources: any): any => {
       const type = (resource as any)[getTypeSymbol]();
       const properties = (resource as any)[getPropertiesSymbol]();
       const overrides = (resource as any)[getOverridesSymbol]();
+      const transforms = (resource as any)[getTransformsSymbol]();
       result[key] = {
         type,
         properties: transformValue(properties),
-        ...(overrides !== undefined && { overrides: transformValue(overrides) })
+        ...(overrides !== undefined && { overrides: transformValue(overrides) }),
+        ...(transforms !== undefined && { transforms })
       };
     } else {
       result[key] = transformValue(resource);

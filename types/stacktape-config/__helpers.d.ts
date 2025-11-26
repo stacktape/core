@@ -340,6 +340,17 @@ interface NamedScriptLifecycleHook extends LifecycleHookBase {
   scriptName: string;
 }
 
+/**
+ * #### A local script with secure tunneling through a bastion host.
+ *
+ * ---
+ *
+ * This script type runs locally but tunnels connections to resources through a bastion server.
+ * It provides a secure, encrypted connection to resources that are only accessible within the VPC,
+ * such as private databases or Redis clusters.
+ *
+ * The environment variables injected by `connectTo` are automatically adjusted to use the tunneled endpoints.
+ */
 interface LocalScriptWithBastionTunneling {
   type: 'local-script-with-bastion-tunneling';
   properties: LocalScriptWithBastionTunnelingProps;
@@ -356,6 +367,17 @@ interface LocalScriptWithBastionTunnelingProps extends LocalScriptProps {
   bastionResource?: string;
 }
 
+/**
+ * #### A script that runs remotely on a bastion server.
+ *
+ * ---
+ *
+ * Bastion scripts are executed on a bastion server within your VPC, not on your local machine.
+ * Logs from the script's execution are streamed in real-time to your terminal.
+ *
+ * This is useful for running commands that need direct access to VPC resources
+ * or for ensuring consistent execution environments across different machines.
+ */
 interface BastionScript {
   type: 'bastion-script';
   properties: BastionScriptProps;
@@ -402,6 +424,16 @@ interface BastionScriptProps extends ScriptEnvProps {
   cwd?: string;
 }
 
+/**
+ * #### A script that runs on your local machine.
+ *
+ * ---
+ *
+ * Local scripts are executed on the same machine where the Stacktape command is run.
+ * They are useful for tasks like building your application, running database migrations, or other automation.
+ *
+ * The script must define one of the following: `executeCommand`, `executeScript`, `executeCommands`, or `executeScripts`.
+ */
 interface LocalScript {
   type: 'local-script';
   properties: LocalScriptProps;

@@ -57,6 +57,24 @@ export class ConfigResolver {
     this.resolvedConfig = null;
   };
 
+  /**
+   * Strips transforms from the config object.
+   * Transforms are functions and cannot be serialized.
+   * They are extracted separately by TransformsResolver.
+   */
+  private stripTransformsFromConfig = (config: StacktapeConfig) => {
+    if (!config?.resources) {
+      return;
+    }
+
+    for (const resourceName in config.resources) {
+      const resource = config.resources[resourceName] as Record<string, any>;
+      if (resource && 'transforms' in resource) {
+        delete resource.transforms;
+      }
+    }
+  };
+
   getRawConfig = async () => {
     if (globalStateManager.presetConfig) {
       return globalStateManager.presetConfig;
@@ -148,6 +166,10 @@ export class ConfigResolver {
           throw stpErrors.e129({ configPath: globalStateManager.configPath, config });
         }
       }
+
+      // Strip transforms from config (they are functions and can't be serialized)
+      // Transforms are extracted separately by TransformsResolver
+      this.stripTransformsFromConfig(config);
 
       return config;
     } catch (err) {

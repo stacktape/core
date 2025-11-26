@@ -11,7 +11,15 @@ export default defineConfig(() => {
         enabled: true
       }
     },
-    overrides: {}
+    transforms: {
+      lambda: (props) => {
+        return {
+          ...props,
+          MemorySize: (props.MemorySize ?? 128) * 2,
+          Description: 'This is a test lambda',
+        }
+      }
+    }
   });
 
   return {

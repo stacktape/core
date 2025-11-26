@@ -131,21 +131,65 @@ interface SharedEngineProperties {
   disableAutoMinorVersionUpgrade?: boolean;
 }
 
+/**
+ * #### A high-performance Aurora clustered database engine.
+ *
+ * ---
+ *
+ * Aurora is a fully managed, MySQL and PostgreSQL-compatible database developed by AWS.
+ * It offers up to 5x the throughput of standard MySQL and 3x the throughput of standard PostgreSQL.
+ *
+ * Aurora automatically replicates data across multiple Availability Zones for high availability
+ * and provides automatic failover with read replicas.
+ */
 interface AuroraEngine {
   type: 'aurora-mysql' | 'aurora-postgresql';
   properties: AuroraEngineProperties;
 }
 
+/**
+ * #### An Aurora Serverless v1 database engine.
+ *
+ * ---
+ *
+ * Aurora Serverless v1 automatically scales compute capacity based on your application's needs.
+ * It can pause during periods of inactivity and resume when traffic arrives, making it cost-effective
+ * for variable or unpredictable workloads.
+ *
+ * **Note:** For new projects, consider using Aurora Serverless v2 which offers better scaling.
+ */
 interface AuroraServerlessEngine {
   type: 'aurora-mysql-serverless' | 'aurora-postgresql-serverless';
   properties?: AuroraServerlessEngineProperties;
 }
 
+/**
+ * #### An Aurora Serverless v2 database engine (recommended serverless option).
+ *
+ * ---
+ *
+ * Aurora Serverless v2 provides instant, fine-grained scaling from 0.5 to 128 ACUs.
+ * It scales in increments as small as 0.5 ACUs for more precise capacity matching.
+ *
+ * This is the recommended serverless engine for most use cases, offering better performance
+ * and more granular scaling than v1.
+ */
 interface AuroraServerlessV2Engine {
   type: 'aurora-mysql-serverless-v2' | 'aurora-postgresql-serverless-v2';
   properties: AuroraServerlessV2EngineProperties;
 }
 
+/**
+ * #### A standard RDS single-instance database engine.
+ *
+ * ---
+ *
+ * RDS engines are fully managed, single-node databases ideal for standard workloads.
+ * Supported engines include PostgreSQL, MySQL, MariaDB, Oracle, and SQL Server.
+ *
+ * RDS handles routine database tasks such as provisioning, patching, backup, recovery,
+ * and failure detection. For high availability, enable multi-AZ deployment.
+ */
 interface RdsEngine {
   type:
     | 'postgres'

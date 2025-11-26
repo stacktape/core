@@ -212,6 +212,18 @@ interface StpBuildpackLambdaPackagingProps extends StpBuildpackSharedProps {
   handlerFunction?: string;
 }
 
+/**
+ * #### A zero-config buildpack that packages your code for AWS Lambda.
+ *
+ * ---
+ *
+ * The `stacktape-lambda-buildpack` automatically bundles your code and dependencies into an optimized Lambda deployment package.
+ *
+ * **Supported languages:** JavaScript, TypeScript, Python, Java, and Go.
+ *
+ * For JS/TS, your code is bundled into a single file using esbuild. Source maps are automatically generated.
+ * Packages are cached based on a checksum, so unchanged code is not re-packaged.
+ */
 interface StpBuildpackLambdaPackaging {
   type: 'stacktape-lambda-buildpack';
   properties: StpBuildpackLambdaPackagingProps;
@@ -238,6 +250,16 @@ interface CustomArtifactLambdaPackagingProps {
   handler?: string;
 }
 
+/**
+ * #### Uses a pre-built artifact for Lambda deployment.
+ *
+ * ---
+ *
+ * With `custom-artifact`, you provide a path to your own pre-built deployment package.
+ * If the specified path is a directory or an unzipped file, Stacktape will automatically zip it.
+ *
+ * This is useful when you have custom build processes or need full control over the packaging.
+ */
 interface CustomArtifactLambdaPackaging {
   type: 'custom-artifact';
   properties: CustomArtifactLambdaPackagingProps;
@@ -291,6 +313,16 @@ interface PrebuiltBjImagePackaging {
   properties: PrebuiltImageBjPackagingProps;
 }
 
+/**
+ * #### Uses a pre-built container image.
+ *
+ * ---
+ *
+ * With `prebuilt-image`, you provide a reference to an existing container image.
+ * This can be a public image from Docker Hub or a private image from any container registry.
+ *
+ * For private registries, configure `repositoryCredentialsSecretArn` with credentials stored in AWS Secrets Manager.
+ */
 interface PrebuiltCwImagePackaging {
   type: 'prebuilt-image';
   properties: PrebuiltImageCwPackagingProps;
@@ -343,6 +375,16 @@ interface CustomDockerfileBjImagePackaging {
   properties: CustomDockerfileBjImagePackagingProps;
 }
 
+/**
+ * #### Builds a container image from your own Dockerfile.
+ *
+ * ---
+ *
+ * With `custom-dockerfile`, you provide a path to your Dockerfile and build context.
+ * Stacktape builds the image and uploads it to a managed ECR repository.
+ *
+ * This gives you full control over the container environment and is ideal for complex setups.
+ */
 interface CustomDockerfileCwImagePackaging {
   type: 'custom-dockerfile';
   properties: CustomDockerfileCwImagePackagingProps;
@@ -386,6 +428,17 @@ interface ExternalBuildpackBjImagePackaging {
   properties: ExternalBuildpackBjImagePackagingProps;
 }
 
+/**
+ * #### Builds a container image using an external buildpack.
+ *
+ * ---
+ *
+ * External buildpacks (buildpacks.io) automatically detect your application type
+ * and build an optimized container image with zero configuration.
+ *
+ * The default builder is `paketobuildpacks/builder-jammy-base`.
+ * You can find buildpacks for almost any language or framework.
+ */
 interface ExternalBuildpackCwImagePackaging {
   type: 'external-buildpack';
   properties: ExternalBuildpackCwImagePackagingProps;
@@ -476,6 +529,16 @@ interface NixpacksBjImagePackaging {
   properties: NixpacksBjImagePackagingProps;
 }
 
+/**
+ * #### Builds a container image using Nixpacks.
+ *
+ * ---
+ *
+ * Nixpacks automatically detects your application type and builds an optimized container image.
+ * In most cases, no configuration is required.
+ *
+ * It supports a wide range of languages and frameworks out of the box.
+ */
 interface NixpacksCwImagePackaging {
   type: 'nixpacks';
   properties: NixpacksCwImagePackagingProps;
@@ -524,6 +587,18 @@ interface StpBuildpackBjImagePackaging {
   properties: StpBuildpackBjImagePackagingProps;
 }
 
+/**
+ * #### A zero-config buildpack that creates a container image from your source code.
+ *
+ * ---
+ *
+ * The `stacktape-image-buildpack` automatically bundles your code and dependencies into an optimized container image.
+ *
+ * **Supported languages:** JavaScript, TypeScript, Python, Java, and Go.
+ *
+ * For JS/TS, your code is bundled into a single file using esbuild with source maps.
+ * The resulting image is uploaded to a managed ECR repository.
+ */
 interface StpBuildpackCwImagePackaging {
   type: 'stacktape-image-buildpack';
   properties: StpBuildpackCwImagePackagingProps;

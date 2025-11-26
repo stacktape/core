@@ -264,3 +264,83 @@ export function getResourceClassDescription(className: string): JSDocComment | u
 
   return findInterfaceJSDoc(mapping.interfaceName, sourceFile);
 }
+
+/**
+ * Mapping of type-properties class names to their interface names and source files
+ */
+const TYPE_PROPERTIES_INTERFACE_MAP: Record<string, { interfaceName: string; file: string }> = {
+  // Database Engines
+  RdsEnginePostgres: { interfaceName: 'RdsEngine', file: 'relational-databases.d.ts' },
+  RdsEngineMariadb: { interfaceName: 'RdsEngine', file: 'relational-databases.d.ts' },
+  RdsEngineMysql: { interfaceName: 'RdsEngine', file: 'relational-databases.d.ts' },
+  RdsEngineOracleEE: { interfaceName: 'RdsEngine', file: 'relational-databases.d.ts' },
+  RdsEngineOracleSE2: { interfaceName: 'RdsEngine', file: 'relational-databases.d.ts' },
+  RdsEngineSqlServerEE: { interfaceName: 'RdsEngine', file: 'relational-databases.d.ts' },
+  RdsEngineSqlServerEX: { interfaceName: 'RdsEngine', file: 'relational-databases.d.ts' },
+  RdsEngineSqlServerSE: { interfaceName: 'RdsEngine', file: 'relational-databases.d.ts' },
+  RdsEngineSqlServerWeb: { interfaceName: 'RdsEngine', file: 'relational-databases.d.ts' },
+  AuroraEnginePostgresql: { interfaceName: 'AuroraEngine', file: 'relational-databases.d.ts' },
+  AuroraEngineMysql: { interfaceName: 'AuroraEngine', file: 'relational-databases.d.ts' },
+  AuroraServerlessEnginePostgresql: { interfaceName: 'AuroraServerlessEngine', file: 'relational-databases.d.ts' },
+  AuroraServerlessEngineMysql: { interfaceName: 'AuroraServerlessEngine', file: 'relational-databases.d.ts' },
+  AuroraServerlessV2EnginePostgresql: { interfaceName: 'AuroraServerlessV2Engine', file: 'relational-databases.d.ts' },
+  AuroraServerlessV2EngineMysql: { interfaceName: 'AuroraServerlessV2Engine', file: 'relational-databases.d.ts' },
+
+  // Lambda Packaging
+  StacktapeLambdaBuildpackPackaging: { interfaceName: 'StpBuildpackLambdaPackaging', file: 'deployment-artifacts.d.ts' },
+  CustomArtifactLambdaPackaging: { interfaceName: 'CustomArtifactLambdaPackaging', file: 'deployment-artifacts.d.ts' },
+
+  // Container Packaging
+  PrebuiltImagePackaging: { interfaceName: 'PrebuiltCwImagePackaging', file: 'deployment-artifacts.d.ts' },
+  CustomDockerfilePackaging: { interfaceName: 'CustomDockerfileCwImagePackaging', file: 'deployment-artifacts.d.ts' },
+  ExternalBuildpackPackaging: { interfaceName: 'ExternalBuildpackCwImagePackaging', file: 'deployment-artifacts.d.ts' },
+  NixpacksPackaging: { interfaceName: 'NixpacksCwImagePackaging', file: 'deployment-artifacts.d.ts' },
+  StacktapeImageBuildpackPackaging: { interfaceName: 'StpBuildpackCwImagePackaging', file: 'deployment-artifacts.d.ts' },
+
+  // Scripts
+  LocalScriptWithCommand: { interfaceName: 'LocalScript', file: '__helpers.d.ts' },
+  LocalScriptWithCommands: { interfaceName: 'LocalScript', file: '__helpers.d.ts' },
+  LocalScriptWithFileScript: { interfaceName: 'LocalScript', file: '__helpers.d.ts' },
+  LocalScriptWithFileScripts: { interfaceName: 'LocalScript', file: '__helpers.d.ts' },
+  BastionScriptWithCommand: { interfaceName: 'BastionScript', file: '__helpers.d.ts' },
+  BastionScriptWithCommands: { interfaceName: 'BastionScript', file: '__helpers.d.ts' },
+  LocalScriptWithBastionTunnelingCommand: { interfaceName: 'LocalScriptWithBastionTunneling', file: '__helpers.d.ts' },
+  LocalScriptWithBastionTunnelingCommands: { interfaceName: 'LocalScriptWithBastionTunneling', file: '__helpers.d.ts' },
+  LocalScriptWithBastionTunnelingFileScript: { interfaceName: 'LocalScriptWithBastionTunneling', file: '__helpers.d.ts' },
+  LocalScriptWithBastionTunnelingFileScripts: { interfaceName: 'LocalScriptWithBastionTunneling', file: '__helpers.d.ts' },
+
+  // Lambda Events/Integrations
+  HttpApiIntegration: { interfaceName: 'HttpApiIntegration', file: 'events.d.ts' },
+  S3Integration: { interfaceName: 'S3Integration', file: 'events.d.ts' },
+  ScheduleIntegration: { interfaceName: 'ScheduleIntegration', file: 'events.d.ts' },
+  SnsIntegration: { interfaceName: 'SnsIntegration', file: 'events.d.ts' },
+  SqsIntegration: { interfaceName: 'SqsIntegration', file: 'events.d.ts' },
+  KinesisIntegration: { interfaceName: 'KinesisIntegration', file: 'events.d.ts' },
+  DynamoDbIntegration: { interfaceName: 'DynamoDbIntegration', file: 'events.d.ts' },
+  CloudwatchLogIntegration: { interfaceName: 'CloudwatchLogIntegration', file: 'events.d.ts' },
+  ApplicationLoadBalancerIntegration: { interfaceName: 'ApplicationLoadBalancerIntegration', file: 'events.d.ts' },
+  EventBusIntegration: { interfaceName: 'EventBusIntegration', file: 'events.d.ts' },
+  KafkaTopicIntegration: { interfaceName: 'KafkaTopicIntegration', file: 'events.d.ts' },
+  AlarmIntegration: { interfaceName: 'AlarmIntegration', file: 'events.d.ts' }
+};
+
+/**
+ * Extracts the JSDoc description for a type-properties class from its interface definition
+ * @param className - The type-properties class name (e.g., 'StacktapeLambdaBuildpackPackaging')
+ * @returns The JSDoc comment or undefined if not found
+ */
+export function getTypePropertiesDescription(className: string): JSDocComment | undefined {
+  const mapping = TYPE_PROPERTIES_INTERFACE_MAP[className];
+  if (!mapping) {
+    return undefined;
+  }
+
+  const filePath = join(process.cwd(), 'types', 'stacktape-config', mapping.file);
+  const sourceFile = getSourceFile(filePath);
+
+  if (!sourceFile) {
+    return undefined;
+  }
+
+  return findInterfaceJSDoc(mapping.interfaceName, sourceFile);
+}

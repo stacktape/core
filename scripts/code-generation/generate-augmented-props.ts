@@ -68,6 +68,16 @@ Allows fine-grained control over the generated infrastructure.`,
 };
 
 /**
+ * Default JSDoc for transforms property
+ */
+const DEFAULT_TRANSFORMS_JSDOC = {
+  description: `Transform functions for underlying CloudFormation resources.
+Each function receives the current properties and returns modified properties.
+Unlike overrides, transforms allow dynamic modification based on existing values.`,
+  tags: []
+};
+
+/**
  * Generates a property declaration with JSDoc
  */
 function generatePropertyWithJSDoc(propertyInfo: PropertyInfo, indent: string = '  '): string {
@@ -124,6 +134,18 @@ function getOverridesPropertyInfo(overridesTypeName: string): PropertyInfo {
 }
 
 /**
+ * Gets transforms property info with JSDoc
+ */
+function getTransformsPropertyInfo(transformsTypeName: string): PropertyInfo {
+  return {
+    name: 'transforms',
+    type: transformsTypeName,
+    optional: true,
+    jsdoc: DEFAULT_TRANSFORMS_JSDOC
+  };
+}
+
+/**
  * Generates a ConnectTo type alias for a resource
  */
 function generateConnectToType(resourceType: string, canConnectTo: readonly string[]): string {
@@ -143,7 +165,7 @@ function generateAugmentedPropsType(
   originalPropsType: string,
   resourceType: string,
   connectToType: string,
-  includeOverrides: boolean
+  includeOverridesAndTransforms: boolean
 ): string {
   const lines: string[] = [];
 
@@ -158,10 +180,13 @@ function generateAugmentedPropsType(
   const environmentProperty = getEnvironmentPropertyInfo(originalPropsType);
   lines.push(generatePropertyWithJSDoc(environmentProperty));
 
-  // Add overrides if needed
-  if (includeOverrides) {
+  // Add overrides and transforms if needed
+  if (includeOverridesAndTransforms) {
     const overridesProperty = getOverridesPropertyInfo(`${resourceType}Overrides`);
     lines.push(generatePropertyWithJSDoc(overridesProperty));
+
+    const transformsProperty = getTransformsPropertyInfo(`${resourceType}Transforms`);
+    lines.push(generatePropertyWithJSDoc(transformsProperty));
   }
 
   lines.push('};');
@@ -171,14 +196,18 @@ function generateAugmentedPropsType(
 
 /**
  * Generates a WithOverrides type for resources without augmented props
+ * Also includes transforms
  */
-function generateWithOverridesType(propsType: string, className: string): string {
+function generateWithOverridesAndTransformsType(propsType: string, className: string): string {
   const lines: string[] = [];
 
   lines.push(`export type ${propsType}WithOverrides = ${propsType} & {`);
 
   const overridesProperty = getOverridesPropertyInfo(`${className}Overrides`);
   lines.push(generatePropertyWithJSDoc(overridesProperty));
+
+  const transformsProperty = getTransformsPropertyInfo(`${className}Transforms`);
+  lines.push(generatePropertyWithJSDoc(transformsProperty));
 
   lines.push('};');
 
@@ -219,7 +248,7 @@ export function generateAugmentedPropsTypes(): string {
   }
 
   result.push('');
-  result.push('// Augmented props types with connectTo, environment, and overrides');
+  result.push('// Augmented props types with connectTo, environment, overrides, and transforms');
   result.push('');
 
   // Generate augmented props for resources
@@ -229,7 +258,7 @@ export function generateAugmentedPropsTypes(): string {
       `Sdk${resource.propsType}`,
       resource.className,
       `${resource.className}ConnectTo`,
-      true // includeOverrides
+      true // includeOverridesAndTransforms
     );
     result.push(augmentedType);
     result.push('');
@@ -242,7 +271,7 @@ export function generateAugmentedPropsTypes(): string {
       `Sdk${scriptPropsType}`,
       'Script',
       'ScriptConnectTo',
-      false // Scripts don't have overrides
+      false // Scripts don't have overrides or transforms
     );
     result.push(augmentedType);
     result.push('');
@@ -257,7 +286,7 @@ export function generateAugmentedPropsTypes(): string {
   const resourcesWithOverrides = getResourcesWithOverrides();
   for (const resource of resourcesWithOverrides) {
     if (!augmentedPropsNames.includes(resource.propsType)) {
-      const withOverridesType = generateWithOverridesType(resource.propsType, resource.className);
+      const withOverridesType = generateWithOverridesAndTransformsType(resource.propsType, resource.className);
       result.push(withOverridesType);
       result.push('');
     }

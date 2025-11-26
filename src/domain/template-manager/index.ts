@@ -129,6 +129,9 @@ export class TemplateManager {
       for (const fn of this.templateOverrideFunctions) {
         await fn(this.template);
       }
+      for (const [logicalName, transform] of Object.entries(configManager.transforms)) {
+        this.template.Resources[logicalName].Properties = transform(this.template.Resources[logicalName].Properties);
+      }
     }
 
     // if overrides added some directives, resolve them too

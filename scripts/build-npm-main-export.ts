@@ -15,7 +15,7 @@ import {
   generateStacktapeConfigType
 } from './code-generation/generate-augmented-props';
 import { generatePropertiesInterfaces } from './code-generation/generate-cf-properties';
-import { generateOverrideTypes } from './code-generation/generate-overrides';
+import { generateOverrideTypes, generateTransformsTypes } from './code-generation/generate-overrides';
 import { generateResourceClassDeclarations } from './code-generation/generate-resource-classes';
 import {
   generateTypePropertiesClassDeclarations,
@@ -281,6 +281,7 @@ export async function generateTypeDeclarations(): Promise<void> {
   logInfo('Extracting Properties interfaces from CloudFormation files...');
   const propertiesInterfaces = generatePropertiesInterfaces(CHILD_RESOURCES);
   const overridesTypes = generateOverrideTypes(CHILD_RESOURCES);
+  const transformsTypes = generateTransformsTypes(CHILD_RESOURCES);
 
   // Compile source files
   logInfo('Compiling TypeScript source files...');
@@ -353,6 +354,12 @@ ${augmentedPropsTypes}
 // ==========================================
 
 ${overridesTypes}
+
+// ==========================================
+// CLOUDFORMATION TRANSFORMS
+// ==========================================
+
+${transformsTypes}
 
 // ==========================================
 // RESOURCE CLASS DECLARATIONS
