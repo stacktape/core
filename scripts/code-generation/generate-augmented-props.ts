@@ -169,8 +169,14 @@ function generateAugmentedPropsType(
 ): string {
   const lines: string[] = [];
 
+  // Special handling for ContainerWorkloadProps - also omit 'containers' to replace with augmented container type
+  const isContainerWorkload = resourceType === 'MultiContainerWorkload';
+  const omitFields = isContainerWorkload
+    ? "'connectTo' | 'environment' | 'containers'"
+    : "'connectTo' | 'environment'";
+
   // Start the type declaration
-  lines.push(`export type ${propsType} = Omit<${originalPropsType}, 'connectTo' | 'environment'> & {`);
+  lines.push(`export type ${propsType} = Omit<${originalPropsType}, ${omitFields}> & {`);
 
   // Add connectTo property with JSDoc
   const connectToProperty = getConnectToPropertyInfo(originalPropsType, connectToType);
@@ -179,6 +185,15 @@ function generateAugmentedPropsType(
   // Add environment property with JSDoc
   const environmentProperty = getEnvironmentPropertyInfo(originalPropsType);
   lines.push(generatePropertyWithJSDoc(environmentProperty));
+
+  // Add containers with augmented type for ContainerWorkload
+  if (isContainerWorkload) {
+    lines.push(`  /**
+   * A list of containers that will run in this workload.
+   * Containers within the same workload share computing resources and scale together.
+   */
+  containers: ContainerWithObjectEnv[];`);
+  }
 
   // Add overrides and transforms if needed
   if (includeOverridesAndTransforms) {
@@ -192,6 +207,25 @@ function generateAugmentedPropsType(
   lines.push('};');
 
   return lines.join('\n');
+}
+
+/**
+ * Generates augmented container types with object-style environment
+ */
+function generateContainerAugmentedTypes(): string {
+  return `// Augmented container types with object-style environment
+/**
+ * Container configuration with object-style environment variables.
+ * Environment is specified as { KEY: 'value' } for better developer experience.
+ */
+export type ContainerWithObjectEnv = Omit<import('./sdk').ContainerWorkloadContainer, 'environment'> & {
+  /**
+   * Environment variables to inject into the container.
+   * Specified as key-value pairs: { PORT: '3000', NODE_ENV: 'production' }
+   */
+  environment?: { [envVarName: string]: string | number | boolean };
+};
+`;
 }
 
 /**
@@ -248,6 +282,10 @@ export function generateAugmentedPropsTypes(): string {
   }
 
   result.push('');
+
+  // Generate augmented container types (for MultiContainerWorkload)
+  result.push(generateContainerAugmentedTypes());
+
   result.push('// Augmented props types with connectTo, environment, overrides, and transforms');
   result.push('');
 

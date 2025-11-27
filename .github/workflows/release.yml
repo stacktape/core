@@ -158,7 +158,7 @@ jobs:
           registry-url: 'https://registry.npmjs.org'
 
       - name: Update npm to latest
-        run: npm install -g npm@latest
+        run: bun install -g npm@latest
 
       - name: Create GitHub Release
         id: create_release
