@@ -5,7 +5,6 @@ import { logInfo, logSuccess } from '@shared/utils/logging';
 import { archiveItem } from '@shared/utils/zip';
 import { remove } from 'fs-extra';
 import yargsParser from 'yargs-parser';
-import { generateAiDocs } from './generate-ai-docs';
 import { generateStarterProjectsMetadata } from './generate-starter-projects-metadata';
 import { packageHelperLambdas } from './package-helper-lambdas';
 import { getCliArgs } from './release/args';
@@ -56,7 +55,6 @@ const buildEverything = async () => {
     packageHelperLambdas({ isDev: false, distFolderPath: platformDistFolderPath }),
     createReleaseDataFile({ distFolderPath: platformDistFolderPath, version }),
     generateSourceMapInstall({ distFolderPath: platformDistFolderPath }),
-    generateAiDocs(join(platformDistFolderPath, 'ai-docs'))
   ]);
   // await copyLegalComments({ distFolderPath: platformDistFolderPath });
 
