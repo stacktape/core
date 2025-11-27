@@ -150,15 +150,23 @@ export const getLambdaFunctionRole = ({
 };
 
 export const getLambdaAliasResource = ({
-  lambdaProps
+  lambdaProps,
+  provisionedConcurrency
 }: {
   lambdaProps: StpLambdaFunction | StpHelperLambdaFunction;
+  provisionedConcurrency?: number;
 }) => {
   const resource = new Alias({
     FunctionName: Ref(lambdaProps.cfLogicalName),
     FunctionVersion: GetAtt(cfLogicalNames.lambdaVersionPublisherCustomResource(lambdaProps.name), 'version'),
     Name: awsResourceNames.lambdaStpAlias()
   });
+  const effectiveProvisionedConcurrency = provisionedConcurrency ?? lambdaProps.provisionedConcurrency;
+  if (effectiveProvisionedConcurrency) {
+    resource.Properties.ProvisionedConcurrencyConfig = {
+      ProvisionedConcurrentExecutions: effectiveProvisionedConcurrency
+    };
+  }
   if (lambdaProps.deployment) {
     resource.UpdatePolicy = {
       CodeDeployLambdaAliasUpdate: {

@@ -148,6 +148,47 @@ interface LambdaFunctionProps extends ResourceAccessProps {
    */
   logging?: LambdaFunctionLogging;
   /**
+   * #### Configures the provisioned concurrency for the function.
+   *
+   * ---
+   *
+   * This is the number of pre-initialized execution environments allocated to your function.
+   * These execution environments are ready to respond immediately to incoming function requests.
+   * Provisioned concurrency is useful for reducing cold start latencies for functions and designed to make functions available with double-digit millisecond response times.
+   * Generally, interactive workloads benefit the most from the feature.
+   * Those are applications with users initiating requests, such as web and mobile applications, and are the most sensitive to latency.
+   * Asynchronous workloads, such as data processing pipelines, are often less latency sensitive and so do not usually need provisioned concurrency.
+   * Configuring provisioned concurrency incurs additional charges to your AWS account.
+   */
+  provisionedConcurrency?: number;
+  /**
+   * #### Configures the reserved concurrency for the function.
+   *
+   * ---
+   *
+   * This sets both the maximum and minimum number of concurrent instances allocated to your function.
+   * When a function has reserved concurrency, no other function can use that concurrency.
+   * Reserved concurrency is useful for ensuring that your most critical functions always have enough concurrency to handle incoming requests.
+   * Additionally, reserved concurrency can be used for limiting concurrency to prevent overwhelming downstream resources, like database connections.
+   * Reserved concurrency acts as both a lower and upper bound - it reserves the specified capacity exclusively for your function while also preventing it from scaling beyond that limit.
+   * Configuring reserved concurrency for a function incurs no additional charges.
+   */
+  reservedConcurrency?: number;
+  /**
+   * #### A list of layers to add to the function.
+   *
+   * ---
+   *
+   * A Lambda layer is a .zip file archive that contains supplementary code or data.
+   * Layers usually contain library dependencies, a custom runtime, or configuration files.
+   *
+   * Using layers:
+   * 1. Package your layer content. This means creating a .zip file archive. For more information, see [Packaging your layer content](https://docs.aws.amazon.com/lambda/latest/dg/packaging-layers.html).
+   * 2. Create the layer in Lambda. For more information, see [Creating and deleting layers in Lambda](https://docs.aws.amazon.com/lambda/latest/dg/creating-deleting-layers.html)
+   * 3. Get the layer ARN and put it in the `layers` property of the function.
+  */
+  layers?: string[];
+  /**
    * #### Configures the deployment strategy for updating the function.
    *
    * ---

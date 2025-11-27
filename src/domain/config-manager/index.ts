@@ -274,7 +274,7 @@ export class ConfigManager {
         handler: getLambdaHandler({ name, packaging }),
         resourceName: awsResourceNames.lambda(name, globalStateManager.targetStack.stackName),
         cfLogicalName: cfLogicalNames.lambda(name),
-        aliasLogicalName: definition.deployment && cfLogicalNames.lambdaStpAlias(name),
+        aliasLogicalName: (definition.deployment || definition.provisionedConcurrency) && cfLogicalNames.lambdaStpAlias(name),
         events: definition.events || [],
         configParentResourceType: 'function'
       } as StpLambdaFunction;

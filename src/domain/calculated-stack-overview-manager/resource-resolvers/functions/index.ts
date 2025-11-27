@@ -101,7 +101,10 @@ export const resolveFunction = ({ lambdaProps }: { lambdaProps: StpLambdaFunctio
     volumeMounts,
     type,
     cdn,
-    architecture
+    architecture,
+    provisionedConcurrency,
+    reservedConcurrency,
+    layers
   } = lambdaProps;
 
   if (nameChain[0] !== PARENT_IDENTIFIER_SHARED_GLOBAL) {
@@ -277,6 +280,27 @@ export const resolveFunction = ({ lambdaProps }: { lambdaProps: StpLambdaFunctio
         nameChain
       });
     }
+  }
+  if (layers) {
+    lambdaFunctionResource.Properties.Layers = layers;
+  }
+  if (reservedConcurrency) {
+    lambdaFunctionResource.Properties.ReservedConcurrentExecutions = reservedConcurrency;
+  }
+  // Provisioned concurrency requires an alias pointing to a specific version.
+  // If deployment is configured, alias is already created (with code deploy), so we just add provisioned concurrency to it.
+  // If no deployment, we create version + alias specifically for provisioned concurrency.
+  if (provisionedConcurrency && !deployment) {
+    calculatedStackOverviewManager.addCfChildResource({
+      nameChain,
+      cfLogicalName: cfLogicalNames.lambdaVersionPublisherCustomResource(name),
+      resource: getLambdaVersionPublisherCustomResource({ lambdaProps })
+    });
+    calculatedStackOverviewManager.addCfChildResource({
+      nameChain,
+      cfLogicalName: cfLogicalNames.lambdaStpAlias(name),
+      resource: getLambdaAliasResource({ lambdaProps, provisionedConcurrency })
+    });
   }
   if (
     !joinDefaultVpc &&
