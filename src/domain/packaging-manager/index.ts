@@ -378,7 +378,6 @@ export class PackagingManager {
               ? nodeVersionFromUser || DEFAULT_CONTAINER_NODE_VERSION
               : nodeVersionFromUser || nodeVersionFromRuntime || DEFAULT_LAMBDA_NODE_VERSION;
           const useEsm = languageSpecificConfig?.outputModuleFormat === 'esm' || nodeVersion >= 24;
-          console.log('useEsm', useEsm);
           const sharedStpBuildpackProps = {
             ...packaging.properties,
             minify: false,
