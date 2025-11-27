@@ -1,8 +1,8 @@
 {
   "name": "web",
+  "type": "module",
   "version": "0.1.0",
   "private": true,
-  "type": "module",
   "scripts": {
     "dev": "concurrently -k -n next,watch -c cyan,yellow \"next dev --port 9001\" \"bun scripts/watch-content.ts\"",
     "dev:next": "next dev --port 9001",
