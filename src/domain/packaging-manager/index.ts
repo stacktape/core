@@ -1,6 +1,7 @@
 import { join } from 'node:path';
 import { eventManager } from '@application-services/event-manager';
 import { globalStateManager } from '@application-services/global-state-manager';
+import { DEFAULT_CONTAINER_NODE_VERSION, DEFAULT_LAMBDA_NODE_VERSION } from '@config';
 import { configManager } from '@domain-services/config-manager';
 import { deployedStackOverviewManager } from '@domain-services/deployed-stack-overview-manager';
 import { deploymentArtifactManager } from '@domain-services/deployment-artifact-manager';
@@ -368,16 +369,23 @@ export class PackagingManager {
         case 'jsx':
         case 'mjs':
         case 'tsx': {
-          // Extract Node.js version from runtime (e.g., 'nodejs24.x' -> '24')
-          const nodeVersion = runtime?.match(/nodejs(\d+)/)?.[1] || '22';
-          const useEsm = Number(nodeVersion) >= 24;
+          const languageSpecificConfig =
+            (packaging.properties.languageSpecificConfig as EsLanguageSpecificConfig) || undefined;
+          const nodeVersionFromRuntime = Number(runtime?.match(/nodejs(\d+)/)?.[1]) || null;
+          const nodeVersionFromUser = languageSpecificConfig?.nodeVersion;
+          const nodeVersion =
+            packagingType === 'stacktape-image-buildpack'
+              ? nodeVersionFromUser || DEFAULT_CONTAINER_NODE_VERSION
+              : nodeVersionFromUser || nodeVersionFromRuntime || DEFAULT_LAMBDA_NODE_VERSION;
+          const useEsm = languageSpecificConfig?.outputModuleFormat === 'esm' || nodeVersion >= 24;
+          console.log('useEsm', useEsm);
           const sharedStpBuildpackProps = {
             ...packaging.properties,
-            nodeTarget: nodeVersion,
             minify: false,
             keepNames: true,
+            nodeTarget: String(nodeVersion),
             entryfilePath: join(globalStateManager.workingDir, packaging.properties.entryfilePath),
-            // Node.js 24+ requires (and properly supports) ESM for proper default export handling
+            // Node.js 24+ on lambda only works with ESM. It has interoperability with CJS, so we always use ESM
             ...(useEsm && { outputModuleFormat: 'esm' as const })
           };
           const additionalDigestInput = objectHash(sharedStpBuildpackProps);

@@ -1,3 +1,4 @@
+import type { CfResourceTransform, FinalTransform } from './transforms-resolver';
 import { isAbsolute, join } from 'node:path';
 import { eventManager } from '@application-services/event-manager';
 import { globalStateManager } from '@application-services/global-state-manager';
@@ -26,6 +27,7 @@ import { getApexDomain } from '@utils/domains';
 import { getConfigPath } from '@utils/file-loaders';
 import { builtInDirectives } from './built-in-directives';
 import { ConfigResolver } from './config-resolver';
+import { TransformsResolver } from './transforms-resolver';
 import { getAlarmsToBeAppliedToResource, isGlobalAlarmEligibleForStack } from './utils/alarms';
 import { DEFAULT_TEST_LISTENER_PORT } from './utils/application-load-balancers';
 import { getStacktapeOriginRequestLambdaIamStatement } from './utils/iam';
@@ -41,7 +43,6 @@ import {
 } from './utils/lambdas';
 import { cleanConfigForMinimalTemplateCompilerMode, mergeStacktapeDefaults } from './utils/misc';
 import { runInitialValidations, validateConfigStructure } from './utils/validation';
-import { CfResourceTransform, FinalTransform, TransformsResolver } from './transforms-resolver';
 
 export class ConfigManager {
   config: StacktapeConfig;
@@ -76,7 +77,9 @@ export class ConfigManager {
     if (shouldLoadConfig) {
       // Only load transforms for TypeScript configs with defineConfig pattern
       if (this.transformsResolver.isDefineConfigStyle(globalStateManager.configPath)) {
-        const { transforms, finalTransform } = await this.transformsResolver.loadTransforms(globalStateManager.configPath);
+        const { transforms, finalTransform } = await this.transformsResolver.loadTransforms(
+          globalStateManager.configPath
+        );
         this.transforms = transforms;
         this.finalTransform = finalTransform;
       }
@@ -274,7 +277,8 @@ export class ConfigManager {
         handler: getLambdaHandler({ name, packaging }),
         resourceName: awsResourceNames.lambda(name, globalStateManager.targetStack.stackName),
         cfLogicalName: cfLogicalNames.lambda(name),
-        aliasLogicalName: (definition.deployment || definition.provisionedConcurrency) && cfLogicalNames.lambdaStpAlias(name),
+        aliasLogicalName:
+          (definition.deployment || definition.provisionedConcurrency) && cfLogicalNames.lambdaStpAlias(name),
         events: definition.events || [],
         configParentResourceType: 'function'
       } as StpLambdaFunction;

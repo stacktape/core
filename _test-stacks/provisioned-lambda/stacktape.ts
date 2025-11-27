@@ -11,11 +11,10 @@ export default defineConfig(() => {
         enabled: true
       }
     },
-    runtime: 'nodejs24.x',
     provisionedConcurrency: 1
   });
 
   return {
-    resources: { lambda },
+    resources: { lambda }
   };
 });
