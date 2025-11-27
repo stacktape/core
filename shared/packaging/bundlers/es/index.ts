@@ -2,6 +2,7 @@ import type { Plugin } from 'esbuild';
 import type { PackageJsonDepsInfo } from './utils';
 import { existsSync } from 'node:fs';
 import { dirname, isAbsolute, join, resolve } from 'node:path';
+import { NODE_RUNTIME_VERSIONS_WITH_SKIPPED_SDK_V3_PACKAGING } from '@config';
 import { SOURCE_MAP_INSTALL_DIST_PATH } from '@shared/naming/project-fs-paths';
 import { dependencyInstaller } from '@shared/utils/dependency-installer';
 import {
@@ -112,12 +113,9 @@ export const buildEsCode = async ({
   // @todo add option to use exact version (as-is in user's package json)
   const skipAwsSdkV3Deps =
     isLambda &&
-    (nodeTarget.includes('18') ||
-      String(nodeTarget) === '18' ||
-      nodeTarget.includes('20') ||
-      String(nodeTarget) === '20' ||
-      nodeTarget.includes('22') ||
-      String(nodeTarget) === '22');
+    NODE_RUNTIME_VERSIONS_WITH_SKIPPED_SDK_V3_PACKAGING.some(
+      (v) => nodeTarget.includes(String(v)) || String(nodeTarget) === String(v)
+    );
 
   const runBuild = async ({ dynamicallyImportedModules = [] }: { dynamicallyImportedModules?: string[] }) => {
     const allDependenciesToInstallInDocker: ModuleInfo[] = [];

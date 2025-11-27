@@ -34,15 +34,16 @@ interface EdgeLambdaFunctionProps {
    * Edge Lambda functions support a specific set of runtimes.
    */
   runtime?:
-    | 'nodejs22.x'
-    | 'nodejs20.x'
-    | 'nodejs18.x'
-    | 'python3.13'
-    | 'python3.12'
-    | 'python3.11'
-    | 'python3.10'
-    | 'python3.9'
-    | 'python3.8';
+  | 'nodejs24.x'
+  | 'nodejs22.x'
+  | 'nodejs20.x'
+  | 'nodejs18.x'
+  | 'python3.13'
+  | 'python3.12'
+  | 'python3.11'
+  | 'python3.10'
+  | 'python3.9'
+  | 'python3.8';
   /**
    * #### The amount of memory (in MB) allocated to the function.
    *
@@ -135,15 +136,15 @@ type StpHelperEdgeLambdaFunction = Omit<StpEdgeLambdaFunction, 'packaging'> & {
   packaging: HelperLambdaPackaging;
   artifactPath: string;
   runtime:
-    | 'nodejs22.x'
-    | 'nodejs20.x'
-    | 'nodejs18.x'
-    | 'python3.13'
-    | 'python3.12'
-    | 'python3.11'
-    | 'python3.10'
-    | 'python3.9'
-    | 'python3.8';
+  | 'nodejs22.x'
+  | 'nodejs20.x'
+  | 'nodejs18.x'
+  | 'python3.13'
+  | 'python3.12'
+  | 'python3.11'
+  | 'python3.10'
+  | 'python3.9'
+  | 'python3.8';
 };
 
 type EdgeLambdaFunctionReferencableParam = 'arn';

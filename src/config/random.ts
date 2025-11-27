@@ -36,20 +36,22 @@ export const possiblySupportedLangExtensions = [
   'tsx'
 ] as const;
 
+export const NODE_RUNTIME_VERSIONS_WITH_SKIPPED_SDK_V3_PACKAGING = [24, 22, 20, 18];
+
 export const lambdaRuntimesForFileExtension: {
   [_ext in (typeof possiblySupportedLangExtensions)[number]]: string[];
 } = {
-  js: ['nodejs22.x', 'nodejs20.x', 'nodejs18.x', 'nodejs16.x'], // 'nodejs14.x', 'nodejs12.x'],
-  ts: ['nodejs22.x', 'nodejs20.x', 'nodejs18.x', 'nodejs16.x'], // 'nodejs14.x', 'nodejs12.x'],
-  mjs: ['nodejs22.x', 'nodejs20.x', 'nodejs18.x', 'nodejs16.x'], // 'nodejs14.x', 'nodejs12.x'],
-  mts: ['nodejs22.x', 'nodejs20.x', 'nodejs18.x', 'nodejs16.x'], // 'nodejs14.x', 'nodejs12.x'],
-  jsx: ['nodejs22.x', 'nodejs20.x', 'nodejs18.x', 'nodejs16.x'], // 'nodejs14.x', 'nodejs12.x'],
-  tsx: ['nodejs22.x', 'nodejs20.x', 'nodejs18.x', 'nodejs16.x'], // 'nodejs14.x', 'nodejs12.x'],
-  py: ['python3.13', 'python3.12', 'python3.11', 'python3.10', 'python3.9', 'python3.8'],
-  java: ['java11', 'java8.al2', 'java8'],
-  rb: ['ruby3.2'],
+  js: ['nodejs24.x', 'nodejs22.x', 'nodejs20.x', 'nodejs18.x'],
+  ts: ['nodejs24.x', 'nodejs22.x', 'nodejs20.x', 'nodejs18.x'],
+  mjs: ['nodejs24.x', 'nodejs22.x', 'nodejs20.x', 'nodejs18.x'],
+  mts: ['nodejs24.x', 'nodejs22.x', 'nodejs20.x', 'nodejs18.x'],
+  jsx: ['nodejs24.x', 'nodejs22.x', 'nodejs20.x', 'nodejs18.x'],
+  tsx: ['nodejs24.x', 'nodejs22.x', 'nodejs20.x', 'nodejs18.x'],
+  py: ['python3.13', 'python3.12', 'python3.11', 'python3.10'],
+  java: ['java21', 'java17', 'java11'],
+  rb: ['ruby3.3'],
   go: ['provided.al2', 'provided.al2023'],
-  cs: ['dotnet6', 'dotnet7']
+  cs: ['dotnet8', 'dotnet6']
 };
 export const supportedWorkloadExtensions: (typeof possiblySupportedLangExtensions)[number][] = [
   'js',
@@ -73,6 +75,7 @@ export const MONITORING_FREQUENCY_SECONDS = 3.5;
 export const SENTRY_CAPTURE_EXCEPTION_WAIT_TIME_MS = 1500;
 export const DEFAULT_MAXIMUM_PARALLEL_ARTIFACT_UPLOADS = 10;
 export const DEFAULT_MAXIMUM_PARALLEL_BUCKET_SYNCS = 10;
+export const DEFAULT_CONTAINER_NODE_VERSION = 24;
 
 // @todo
 export const linksMap = {

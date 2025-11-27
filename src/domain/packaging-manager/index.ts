@@ -57,12 +57,13 @@ export class PackagingManager {
     }
 
     await Promise.all([
-      ...configManager.allUserCodeLambdas.map(async ({ name, type, packaging, architecture }) => {
+      ...configManager.allUserCodeLambdas.map(async ({ name, type, packaging, architecture, runtime }) => {
         return this.packageWorkload({
           commandCanUseCache,
           jobName: getJobName({ workloadName: name, workloadType: type }),
           workloadName: name,
           packaging,
+          runtime,
           dockerBuildOutputArchitecture: architecture === 'arm64' ? 'linux/arm64' : 'linux/amd64'
         });
       }),
@@ -303,6 +304,7 @@ export class PackagingManager {
     workloadName,
     jobName,
     packaging,
+    runtime,
     dockerBuildOutputArchitecture = 'linux/amd64',
     parentEventType = 'PACKAGE_ARTIFACTS'
   }: {
@@ -314,6 +316,7 @@ export class PackagingManager {
       | LambdaPackaging
       | HelperLambdaPackaging;
     commandCanUseCache: boolean;
+    runtime?: LambdaRuntime;
     dockerBuildOutputArchitecture?: DockerBuildOutputArchitecture;
     parentEventType?: Subtype<LoggableEventType, 'PACKAGE_ARTIFACTS' | 'REPACKAGE_ARTIFACTS'>;
   }) => {
@@ -365,12 +368,17 @@ export class PackagingManager {
         case 'jsx':
         case 'mjs':
         case 'tsx': {
+          // Extract Node.js version from runtime (e.g., 'nodejs24.x' -> '24')
+          const nodeVersion = runtime?.match(/nodejs(\d+)/)?.[1] || '22';
+          const useEsm = Number(nodeVersion) >= 24;
           const sharedStpBuildpackProps = {
             ...packaging.properties,
-            nodeTarget: '22',
+            nodeTarget: nodeVersion,
             minify: false,
             keepNames: true,
-            entryfilePath: join(globalStateManager.workingDir, packaging.properties.entryfilePath)
+            entryfilePath: join(globalStateManager.workingDir, packaging.properties.entryfilePath),
+            // Node.js 24+ requires (and properly supports) ESM for proper default export handling
+            ...(useEsm && { outputModuleFormat: 'esm' as const })
           };
           const additionalDigestInput = objectHash(sharedStpBuildpackProps);
           if (packagingType === 'stacktape-lambda-buildpack') {

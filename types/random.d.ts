@@ -86,6 +86,7 @@ type CloudformationTemplate = import('../@generated/cloudform/template').default
 };
 
 type LambdaRuntime =
+  | 'nodejs24.x'
   | 'nodejs22.x'
   | 'nodejs20.x'
   | 'nodejs18.x'

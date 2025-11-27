@@ -5,6 +5,7 @@ import { getFolder } from '@shared/utils/fs-utils';
 import { outputFile } from 'fs-extra';
 import objectHash from 'object-hash';
 import { createEsBundle } from './bundlers/es';
+import { DEFAULT_CONTAINER_NODE_VERSION } from '@config';
 
 export const buildUsingStacktapeEsImageBuildpack = async ({
   progressLogger,
@@ -50,7 +51,7 @@ export const buildUsingStacktapeEsImageBuildpack = async ({
     languageSpecificBundleOutput: bundlingOutput.languageSpecificBundleOutput,
     requiresGlibcBinaries,
     customDockerBuildCommands: otherProps.customDockerBuildCommands,
-    nodeVersion: (languageSpecificConfig as EsLanguageSpecificConfig)?.nodeVersion || 18
+    nodeVersion: (languageSpecificConfig as EsLanguageSpecificConfig)?.nodeVersion || DEFAULT_CONTAINER_NODE_VERSION
   });
   await progressLogger.finishEvent({ eventType: 'CREATE_DOCKERFILE' });
 
