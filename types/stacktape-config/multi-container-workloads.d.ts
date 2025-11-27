@@ -323,7 +323,7 @@ interface ContainerWorkloadContainerBase {
    *
    * Environment variables are ideal for providing configuration details to your container, such as database connection strings, API keys, or other dynamic parameters.
    */
-  environment?: { [key: string]: string | number | boolean };
+  environment?: EnvironmentVar[];
   /**
    * #### Configures an internal health check to determine if the container is healthy.
    *

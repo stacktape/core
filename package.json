@@ -42,6 +42,7 @@
     "publish:schemas": "bun scripts/publish-schemas.ts",
     "publish:install:scripts": "bun scripts/publish-install-scripts.ts",
     "publish:install:scripts:preview": "bun scripts/publish-install-scripts-preview.ts",
+    "publish:ai:docs": "bun scripts/publish-ai-docs.ts",
     "esp": "bun scripts/execute-starter-project.ts",
     "run:script": "node",
     "rm:temp": "node_modules/.bin/rimraf .stacktape",

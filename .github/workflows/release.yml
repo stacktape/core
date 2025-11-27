@@ -192,6 +192,10 @@ jobs:
         env:
           STACKTAPE_API_KEY: ${{ secrets.STACKTAPE_API_KEY }}
         run: bun run publish:schemas
+      - name: Publish AI docs
+        env:
+          STACKTAPE_API_KEY: ${{ secrets.STACKTAPE_API_KEY }}
+        run: bun run publish:ai:docs
 
       - name: Update package.json versions
         run: |

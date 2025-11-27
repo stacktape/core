@@ -1,14 +1,12 @@
+import { AI_DOCS_FOLDER_PATH } from '@shared/naming/project-fs-paths';
+import { logInfo, logSuccess } from '@shared/utils/logging';
 import { readdir, readFile, writeFile, ensureDir, pathExists, emptyDir } from 'fs-extra';
 import { join, dirname, basename, relative } from 'path';
 
 const DOCS_DIR = 'docs/docs';
 const TYPES_DIR = 'types';
 const CODE_SNIPPETS_DIR = 'docs/code-snippets';
-const DEFAULT_OUTPUT_DIR = 'ai-docs';
 const IGNORED_FOLDERS = ['sdk', 'static'];
-
-// Configurable output directory
-let OUTPUT_DIR = DEFAULT_OUTPUT_DIR;
 
 const EXCLUDED_FILES = [
   'index.mdx',
@@ -397,7 +395,7 @@ const buildSectionMappings = async (mdxFiles: string[]): Promise<void> => {
   }
 };
 
-const processResourcePage = async (mdxPath: string): Promise<void> => {
+const processResourcePage = async ({ distFolderPath, mdxPath }: { mdxPath: string, distFolderPath: string }): Promise<void> => {
   const fullMdxPath = join(DOCS_DIR, mdxPath);
   const rawContent = await readFile(fullMdxPath, 'utf-8');
   const title = extractTitle(rawContent, mdxPath);
@@ -405,7 +403,7 @@ const processResourcePage = async (mdxPath: string): Promise<void> => {
   const cleanedContent = cleanContent(processedContent);
 
   const outputDirName = mdxPath.replace('.mdx', '');
-  const outputPath = join(OUTPUT_DIR, outputDirName);
+  const outputPath = join(distFolderPath, outputDirName);
   await ensureDir(outputPath);
 
   const sections = parseSections(cleanedContent);
@@ -460,7 +458,7 @@ const processResourcePage = async (mdxPath: string): Promise<void> => {
   await writeFile(indexPath, indexContent, 'utf-8');
 };
 
-const processSimplePage = async (mdxPath: string): Promise<void> => {
+const processSimplePage = async ({ distFolderPath, mdxPath }: { mdxPath: string, distFolderPath: string }): Promise<void> => {
   const fullMdxPath = join(DOCS_DIR, mdxPath);
   const rawContent = await readFile(fullMdxPath, 'utf-8');
   const title = extractTitle(rawContent, mdxPath);
@@ -474,33 +472,33 @@ const processSimplePage = async (mdxPath: string): Promise<void> => {
   }
 
   const outputFileName = mdxPath.replace('.mdx', '.md');
-  const outputPath = join(OUTPUT_DIR, outputFileName);
+  const outputPath = join(distFolderPath, outputFileName);
   await ensureDir(dirname(outputPath));
 
   const fullContent = `# ${title}\n\n${cleanedContent}`;
   await writeFile(outputPath, fullContent, 'utf-8');
 };
 
-const processMdxFile = async (mdxPath: string): Promise<void> => {
+const processMdxFile = async ({ distFolderPath, mdxPath }: { mdxPath: string, distFolderPath: string }): Promise<void> => {
   if (isResourcePage(mdxPath)) {
-    await processResourcePage(mdxPath);
+    await processResourcePage({ distFolderPath, mdxPath });
   } else {
-    await processSimplePage(mdxPath);
+    await processSimplePage({ distFolderPath, mdxPath: mdxPath });
   }
 };
 
-const generateMainIndex = async (mdxFiles: string[]): Promise<void> => {
+const generateMainIndex = async ({ distFolderPath, mdxPaths }: { mdxPaths: string[], distFolderPath: string }): Promise<void> => {
   const categories: Record<string, string[]> = {};
 
-  for (const file of mdxFiles) {
-    const parts = file.split('/');
+  for (const mdxPath of mdxPaths) {
+    const parts = mdxPath.split('/');
     if (parts.length > 1) {
       const category = parts[0];
       if (!categories[category]) categories[category] = [];
-      categories[category].push(file);
+      categories[category].push(mdxPath);
     } else {
       if (!categories['general']) categories['general'] = [];
-      categories['general'].push(file);
+      categories['general'].push(mdxPath);
     }
   }
 
@@ -567,36 +565,31 @@ This is the official documentation for Stacktape - a deployment platform for AWS
     content += '\n';
   }
 
-  await writeFile(join(OUTPUT_DIR, 'index.md'), content, 'utf-8');
+  await writeFile(join(distFolderPath, 'index.md'), content, 'utf-8');
 };
 
-export const generateAiDocs = async (outputDir?: string) => {
-  if (outputDir) {
-    OUTPUT_DIR = outputDir;
-  }
+export const generateAiDocs = async ({ distFolderPath }: { distFolderPath?: string }) => {
 
-  console.log('Generating AI documentation...');
 
-  await ensureDir(OUTPUT_DIR);
-  await emptyDir(OUTPUT_DIR);
+  logInfo('Generating AI documentation...');
+
+  await ensureDir(distFolderPath);
+  await emptyDir(distFolderPath);
 
   const mdxFiles = await getAllMdxFiles(DOCS_DIR);
-  console.log(`Found ${mdxFiles.length} MDX files`);
+  logInfo(`Found ${mdxFiles.length} MDX files`);
 
-  console.log('Building section mappings...');
   await buildSectionMappings(mdxFiles);
 
   for (const mdxFile of mdxFiles) {
-    console.log(`Processing: ${mdxFile}`);
-    await processMdxFile(mdxFile);
+    await processMdxFile({ distFolderPath, mdxPath: mdxFile });
   }
 
-  await generateMainIndex(mdxFiles);
+  await generateMainIndex({ distFolderPath, mdxPaths: mdxFiles });
 
-  console.log(`Done! Generated documentation in ${OUTPUT_DIR}/`);
+  logSuccess(`Done! Generated documentation in ${distFolderPath}/`);
 };
 
-const isMain = process.argv[1]?.includes('generate-ai-docs');
-if (isMain) {
-  generateAiDocs();
+if (import.meta.main) {
+  generateAiDocs({ distFolderPath: AI_DOCS_FOLDER_PATH });
 }
