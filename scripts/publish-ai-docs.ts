@@ -8,7 +8,7 @@ export const publishAiDocs = async () => {
   logInfo('Publishing AI docs to the AI docs hosting bucket...');
   await generateAiDocs({ distFolderPath: AI_DOCS_FOLDER_PATH });
   await syncBucket({ bucketName: AI_DOCS_BUCKET_NAME, sourcePath: AI_DOCS_FOLDER_PATH });
-  logSuccess('Schemas successfully published.');
+  logSuccess('AI docs successfully published.');
 };
 
 if (import.meta.main) {

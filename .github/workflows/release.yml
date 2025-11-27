@@ -68,6 +68,10 @@ jobs:
       - name: Install dependencies
         run: bun install
 
+      - name: Generate schemas
+        if: ${{ inputs.prerelease == false }}
+        run: bun run gen:schema
+
       - name: Build binary for ${{ matrix.platform }}
         if: matrix.platform != 'alpine'
         run: bun run scripts/build-dist-package.ts --platform ${{ matrix.platform }} --version ${{ inputs.version }}

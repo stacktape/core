@@ -569,8 +569,6 @@ This is the official documentation for Stacktape - a deployment platform for AWS
 };
 
 export const generateAiDocs = async ({ distFolderPath }: { distFolderPath?: string }) => {
-
-
   logInfo('Generating AI documentation...');
 
   await ensureDir(distFolderPath);
