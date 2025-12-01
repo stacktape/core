@@ -1,8 +1,3 @@
-/**
- * Generates augmented props types with modified connectTo and environment properties
- * Preserves JSDoc comments from original type definitions
- */
-
 import type { PropertyInfo } from './types';
 import {
   getResourcesWithAugmentedProps,
@@ -171,9 +166,7 @@ function generateAugmentedPropsType(
 
   // Special handling for ContainerWorkloadProps - also omit 'containers' to replace with augmented container type
   const isContainerWorkload = resourceType === 'MultiContainerWorkload';
-  const omitFields = isContainerWorkload
-    ? "'connectTo' | 'environment' | 'containers'"
-    : "'connectTo' | 'environment'";
+  const omitFields = isContainerWorkload ? "'connectTo' | 'environment' | 'containers'" : "'connectTo' | 'environment'";
 
   // Start the type declaration
   lines.push(`export type ${propsType} = Omit<${originalPropsType}, ${omitFields}> & {`);

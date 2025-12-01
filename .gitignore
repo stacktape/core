@@ -34,6 +34,7 @@ scripts/simon
 docs/node_modules
 docs/.next
 docs/public/_timestamps.json
+docs/out
 
 # Ignore Gradle project-specific cache directory
 .gradle

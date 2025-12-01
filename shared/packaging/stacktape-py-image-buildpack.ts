@@ -15,8 +15,14 @@ export const buildUsingStacktapePyImageBuildpack = async ({
   distFolderPath,
   requiresGlibcBinaries,
   dockerBuildOutputArchitecture,
+  cacheFromRef,
+  cacheToRef,
   ...otherProps
-}: StpBuildpackInput & { languageSpecificConfig: PyLanguageSpecificConfig }): Promise<PackagingOutput> => {
+}: StpBuildpackInput & {
+  languageSpecificConfig: PyLanguageSpecificConfig;
+  cacheFromRef?: string;
+  cacheToRef?: string;
+}): Promise<PackagingOutput> => {
   const handler = extname(entryfilePath).split(':')[1];
   const filePath = handler ? entryfilePath.substring(0, entryfilePath.length - handler.length - 1) : entryfilePath;
   const sourcePath = languageSpecificConfig?.packageManagerFile
@@ -65,7 +71,9 @@ export const buildUsingStacktapePyImageBuildpack = async ({
   const { size, dockerOutput, duration, created } = await buildDockerImage({
     imageTag: name,
     buildContextPath: distFolderPath,
-    dockerBuildOutputArchitecture
+    dockerBuildOutputArchitecture,
+    cacheFromRef,
+    cacheToRef
   });
 
   await progressLogger.finishEvent({

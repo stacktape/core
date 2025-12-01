@@ -1108,6 +1108,7 @@ export class AwsSdkManager {
         });
       }
     });
+    let maxProgressPercent = 0;
     const getStats = (): S3SyncInfo => {
       const {
         activeTransfers,
@@ -1119,7 +1120,12 @@ export class AwsSdkManager {
         filesFound,
         deleteAmount,
         deleteTotal
-      } = uploader;
+      } = uploader as any;
+      const rawPercent = (Number(progressAmount) / Number(progressTotal)) * 100;
+      // Ensure percentage never decreases (total can grow as files are discovered) and handle NaN
+      if (!Number.isNaN(rawPercent) && rawPercent > maxProgressPercent) {
+        maxProgressPercent = rawPercent;
+      }
       return {
         activeTransfers,
         progressAmount,
@@ -1130,8 +1136,7 @@ export class AwsSdkManager {
         filesFound,
         deleteAmount,
         deleteTotal,
-        progressPercent:
-          ((Number(uploader.progressAmount) / Number(uploader.progressTotal)) * 100).toFixed(2) || 'unknown'
+        progressPercent: maxProgressPercent > 0 ? maxProgressPercent.toFixed(2) : 'unknown'
       };
     };
     let lastStats = getStats();

@@ -21,12 +21,25 @@ import { buildUsingStacktapeJavaImageBuildpack } from '@shared/packaging/stackta
 import { buildUsingStacktapeJavaLambdaBuildpack } from '@shared/packaging/stacktape-java-lambda-buildpack';
 import { buildUsingStacktapePyImageBuildpack } from '@shared/packaging/stacktape-py-image-buildpack';
 import { buildUsingStacktapePyLambdaBuildpack } from '@shared/packaging/stacktape-py-lambda-buildpack';
-import { getDockerBuildxSupportedPlatforms, installDockerPlatforms, isDockerRunning } from '@shared/utils/docker';
+import {
+  ensureBuildxBuilderForCache,
+  getDockerBuildxSupportedPlatforms,
+  installDockerPlatforms,
+  isDockerRunning
+} from '@shared/utils/docker';
 import { getFileExtension } from '@shared/utils/fs-utils';
 import compose from '@utils/basic-compose-shim';
 import { cancelablePublicMethods, skipInitIfInitialized } from '@utils/decorators';
 import objectHash from 'object-hash';
 import { resolveEnvironmentDirectives } from 'src/commands/dev/utils';
+
+const getCacheRef = (jobName: string) => {
+  const repositoryUrl = deploymentArtifactManager.repositoryUrl;
+  if (!repositoryUrl) return undefined;
+  // Use jobName without hash for stable cache tag
+  const cacheTag = `${jobName}-cache`;
+  return `${repositoryUrl}:${cacheTag}`;
+};
 
 export class PackagingManager {
   #packagedJobs: PackageWorkloadOutput[] = [];
@@ -55,6 +68,10 @@ export class PackagingManager {
     // install only happens once on the given machine
     if (await isDockerRunning()) {
       await this.#installMissingDockerBuildPlatforms();
+      // Ensure buildx builder for remote cache is available (required for cache export)
+      if (!globalStateManager.args.disableDockerRemoteCache) {
+        await ensureBuildxBuilderForCache();
+      }
     }
 
     await Promise.all([
@@ -327,6 +344,11 @@ export class PackagingManager {
     const existingDigests = shouldUseCache ? deploymentArtifactManager.getExistingDigestsForJob(jobName) : [];
     const packagingType = packaging.type;
     const progressLogger = eventManager.getNamespacedInstance({ eventType: parentEventType, identifier: jobName });
+
+    // Docker remote cache refs (enabled by default, can be disabled with --disable-docker-remote-cache)
+    const useRemoteCache = !globalStateManager.args.disableDockerRemoteCache;
+    const cacheRef = useRemoteCache ? getCacheRef(jobName) : undefined;
+
     const sharedProps = {
       name: jobName,
       existingDigests,
@@ -334,7 +356,10 @@ export class PackagingManager {
       args: globalStateManager.args,
       progressLogger,
       invocationId: globalStateManager.invocationId,
-      dockerBuildOutputArchitecture
+      dockerBuildOutputArchitecture,
+      // Remote cache refs for Docker buildx
+      cacheFromRef: cacheRef,
+      cacheToRef: cacheRef
     };
 
     if (packagingType === 'custom-dockerfile') {

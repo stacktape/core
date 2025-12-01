@@ -8,6 +8,7 @@ import { configManager } from '@domain-services/config-manager';
 import { deployedStackOverviewManager } from '@domain-services/deployed-stack-overview-manager';
 import { inspectDockerContainer, listDockerContainers, stopDockerContainer } from '@shared/utils/docker';
 import { userPrompt } from '@shared/utils/user-prompt';
+import { getAugmentedEnvironment } from '@utils/environment';
 import { printer } from '@utils/printer';
 import { startPortForwardingSessions, substituteTunneledEndpointsInEnvironmentVars } from '@utils/ssm-session';
 import chokidar from 'chokidar';
@@ -115,11 +116,23 @@ export const getWorkloadEnvironmentVars = async (jobDetails: {
   workloadType: 'function' | 'batch-job' | 'multi-container-workload';
   jobName: string;
   workloadName: string;
-  jobEnvironment: Record<string, any>;
+  jobEnvironment: EnvironmentVar[];
   connectTo: string[];
   tunnels?: SsmPortForwardingTunnel[];
+  packagingType?: SupportedPackagingType;
+  entryfilePath?: string;
+  nodeVersion?: number;
 }): Promise<Record<string, any>> => {
-  const envVars = (jobDetails.jobEnvironment || []).reduce((acc, item) => {
+  // Augment environment with source maps and experimental flags for JS/TS workloads
+  const augmentedEnv = getAugmentedEnvironment({
+    environment: jobDetails.jobEnvironment || [],
+    workloadType: jobDetails.workloadType,
+    packagingType: jobDetails.packagingType,
+    entryfilePath: jobDetails.entryfilePath,
+    nodeVersion: jobDetails.nodeVersion
+  });
+
+  const envVars = augmentedEnv.reduce((acc, item) => {
     return { ...acc, [item.name]: item.value };
   }, {} as any);
 

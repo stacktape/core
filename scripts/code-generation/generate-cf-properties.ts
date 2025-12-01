@@ -1,5 +1,4 @@
 import fs from 'node:fs';
-import { join } from 'node:path';
 import { cfTypeToFilePath, cfTypeToInterface } from './cloudform-utils';
 
 /**

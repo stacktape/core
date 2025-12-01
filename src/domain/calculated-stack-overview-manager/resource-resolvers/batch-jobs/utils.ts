@@ -10,11 +10,13 @@ import IAMInstanceProfile from '@cloudform/iam/instanceProfile';
 import IAMRole from '@cloudform/iam/role';
 import LogGroup from '@cloudform/logs/logGroup';
 import CfStateMachine from '@cloudform/stepFunctions/stateMachine';
+import { DEFAULT_CONTAINER_NODE_VERSION } from '@config';
 import { stackManager } from '@domain-services/cloudformation-stack-manager';
 import { vpcManager } from '@domain-services/vpc-manager';
 import { awsResourceNames } from '@shared/naming/aws-resource-names';
 import { cfLogicalNames } from '@shared/naming/logical-names';
 import { getCfEnvironment } from '@utils/cloudformation';
+import { getAugmentedEnvironment } from '@utils/environment';
 import { getImageUrlForSingleTask } from '../_utils/image-urls';
 import { getPoliciesForRoles } from '../_utils/role-helpers';
 
@@ -214,10 +216,29 @@ export const getBatchJobDefinitionContainerProperties = ({
 }): ContainerProperties => {
   const logsEnabled = !workload.logging?.disabled;
 
+  // Get packaging info for environment augmentation
+  const packagingType = workload.container.packaging?.type as Parameters<
+    typeof getAugmentedEnvironment
+  >[0]['packagingType'];
+  const entryfilePath = (workload.container.packaging?.properties as { entryfilePath?: string })?.entryfilePath;
+  const languageSpecificConfig = (
+    workload.container.packaging?.properties as { languageSpecificConfig?: EsLanguageSpecificConfig }
+  )?.languageSpecificConfig;
+  const nodeVersion = languageSpecificConfig?.nodeVersion || DEFAULT_CONTAINER_NODE_VERSION;
+
+  // Augment environment with source maps and experimental flags for JS/TS workloads
+  const augmentedEnvironment = getAugmentedEnvironment({
+    environment: workload.container.environment,
+    workloadType: 'batch-job',
+    packagingType,
+    entryfilePath,
+    nodeVersion
+  });
+
   return {
     Command: (workload.container.packaging as CustomDockerfileBjImagePackaging | PrebuiltBjImagePackaging).properties
       .command,
-    Environment: getCfEnvironment(workload.container.environment),
+    Environment: getCfEnvironment(augmentedEnvironment),
     Image: getImageUrlForSingleTask(workload),
     // @todo set this cpu number properties consistently
     Vcpus: workload.resources.cpu,

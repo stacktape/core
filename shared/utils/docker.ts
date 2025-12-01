@@ -4,6 +4,8 @@ import { exec } from '@shared/utils/exec';
 import { getByteSize, getError } from '@shared/utils/misc';
 import { validateEnvVariableValue } from '@shared/utils/validation';
 
+const STACKTAPE_BUILDER_NAME = 'stacktape-builder';
+
 type ExecDockerOptions = {
   cwd?: string;
   skipHandleError?: boolean;
@@ -472,49 +474,24 @@ export const dockerRun = async ({
   });
 };
 
-const buildDockerImageUsingDockerode = async ({
-  buildContextPath,
-  dockerfilePath,
-  imageTag,
-  buildArgs
-}: {
-  buildContextPath: string;
-  dockerfilePath?: string;
-  imageTag: string;
-  buildArgs?: Record<string, string>;
-}) => {
-  const start = Date.now();
-  const contextPath = buildContextPath
-    ? isAbsolute(buildContextPath)
-      ? buildContextPath
-      : join(process.cwd(), buildContextPath)
-    : process.cwd();
-  const command = [
-    'build',
-    '-t',
-    imageTag,
-    ...(dockerfilePath ? ['-f', join(buildContextPath, dockerfilePath)] : []),
-    ...buildDockerBuildArgs(buildArgs),
-    contextPath
-  ];
-  const { stdout, stderr } = await execDocker(command);
-  const dockerOutput = [...splitLines(stdout), ...splitLines(stderr)].map((message) => ({ message }));
-  const imageDetails = await getDockerImageDetails(imageTag);
-  return { ...imageDetails, dockerOutput, duration: Date.now() - start };
-};
-
 export const buildDockerImage = async ({
   buildContextPath,
   buildArgs,
   imageTag,
   dockerfilePath,
-  dockerBuildOutputArchitecture
+  dockerBuildOutputArchitecture,
+  cacheFromRef,
+  cacheToRef
 }: {
   buildContextPath: string;
   dockerfilePath?: string;
   imageTag: string;
   buildArgs?: Record<string, string>;
   dockerBuildOutputArchitecture?: DockerBuildOutputArchitecture;
+  /** ECR image ref for pulling cache layers, e.g. "123456.dkr.ecr.us-east-1.amazonaws.com/repo:workload-cache" */
+  cacheFromRef?: string;
+  /** ECR image ref for pushing cache layers */
+  cacheToRef?: string;
 }) => {
   const start = Date.now();
   const contextPath = buildContextPath
@@ -522,11 +499,17 @@ export const buildDockerImage = async ({
       ? buildContextPath
       : join(process.cwd(), buildContextPath)
     : process.cwd();
+
+  const useRemoteCache = cacheFromRef || cacheToRef;
+
   const command = [
-    'build',
+    // Use buildx with docker-container builder when remote cache is enabled (required for cache export)
+    ...(useRemoteCache ? ['buildx', 'build', '--builder', STACKTAPE_BUILDER_NAME, '--load'] : ['build']),
     ...(dockerBuildOutputArchitecture ? ['--platform', dockerBuildOutputArchitecture] : []),
     '-t',
     imageTag,
+    ...(cacheFromRef ? ['--cache-from', `type=registry,ref=${cacheFromRef}`] : []),
+    ...(cacheToRef ? ['--cache-to', `type=registry,ref=${cacheToRef},image-manifest=true,mode=max`] : []),
     ...(dockerfilePath ? ['-f', join(buildContextPath, dockerfilePath)] : []),
     ...buildDockerBuildArgs(buildArgs),
     contextPath
@@ -580,6 +563,26 @@ export const isDockerRunning = async (): Promise<boolean> => {
     return true;
   } catch {
     return false;
+  }
+};
+
+/** Ensures a buildx builder with docker-container driver exists (required for cache export) */
+export const ensureBuildxBuilderForCache = async (): Promise<void> => {
+  try {
+    // Check if our builder already exists
+    const { stdout } = await execDocker(['buildx', 'ls']);
+    if (stdout.includes(STACKTAPE_BUILDER_NAME)) {
+      return;
+    }
+  } catch {
+    // buildx ls failed, try to create builder anyway
+  }
+
+  try {
+    // Create a new builder with docker-container driver (supports cache export)
+    await execDocker(['buildx', 'create', '--name', STACKTAPE_BUILDER_NAME, '--driver', 'docker-container']);
+  } catch {
+    // Builder might already exist, ignore error
   }
 };
 

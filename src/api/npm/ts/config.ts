@@ -87,11 +87,11 @@ export class BaseResource {
 
       // Handle overrides
       if ('overrides' in finalProperties) {
-      const propertiesOverrides = finalProperties.overrides;
-      delete finalProperties.overrides;
+        const propertiesOverrides = finalProperties.overrides;
+        delete finalProperties.overrides;
 
-      // Transform overrides using cfLogicalNames
-      if (propertiesOverrides && typeof propertiesOverrides === 'object') {
+        // Transform overrides using cfLogicalNames
+        if (propertiesOverrides && typeof propertiesOverrides === 'object') {
           this._overrides = transformOverridesToLogicalNames(this._resourceName!, this._type, propertiesOverrides);
         }
       }
@@ -104,10 +104,10 @@ export class BaseResource {
         // Transform transforms using cfLogicalNames (same mapping as overrides)
         if (propertiesTransforms && typeof propertiesTransforms === 'object') {
           this._transforms = transformTransformsToLogicalNames(this._resourceName!, this._type, propertiesTransforms);
+        }
       }
-    }
 
-    this._properties = finalProperties;
+      this._properties = finalProperties;
     }
   }
 

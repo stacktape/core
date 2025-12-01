@@ -1,11 +1,11 @@
 import { join } from 'node:path';
+import { DEFAULT_CONTAINER_NODE_VERSION } from '@config';
 import { buildDockerImage } from '@shared/utils/docker';
 import { buildEsDockerfile } from '@shared/utils/dockerfiles';
 import { getFolder } from '@shared/utils/fs-utils';
 import { outputFile } from 'fs-extra';
 import objectHash from 'object-hash';
 import { createEsBundle } from './bundlers/es';
-import { DEFAULT_CONTAINER_NODE_VERSION } from '@config';
 
 export const buildUsingStacktapeEsImageBuildpack = async ({
   progressLogger,
@@ -16,11 +16,15 @@ export const buildUsingStacktapeEsImageBuildpack = async ({
   nodeTarget,
   requiresGlibcBinaries,
   dockerBuildOutputArchitecture,
+  cacheFromRef,
+  cacheToRef,
   ...otherProps
 }: StpBuildpackInput & {
   requiresGlibcBinaries: boolean;
   nodeTarget: string;
   minify: boolean;
+  cacheFromRef?: string;
+  cacheToRef?: string;
 }): Promise<PackagingOutput> => {
   const bundlingOutput = await createEsBundle({
     ...otherProps,
@@ -59,7 +63,9 @@ export const buildUsingStacktapeEsImageBuildpack = async ({
   const { size, dockerOutput, duration, created } = await buildDockerImage({
     imageTag: name,
     buildContextPath,
-    dockerBuildOutputArchitecture
+    dockerBuildOutputArchitecture,
+    cacheFromRef,
+    cacheToRef
   });
 
   await progressLogger.finishEvent({

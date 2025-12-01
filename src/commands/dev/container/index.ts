@@ -3,6 +3,7 @@ import type { ExecaReturnBase } from 'execa';
 import { applicationManager } from '@application-services/application-manager';
 import { eventManager } from '@application-services/event-manager';
 import { globalStateManager } from '@application-services/global-state-manager';
+import { DEFAULT_CONTAINER_NODE_VERSION } from '@config';
 import { stackManager } from '@domain-services/cloudformation-stack-manager';
 import { configManager } from '@domain-services/config-manager';
 import { deployedStackOverviewManager } from '@domain-services/deployed-stack-overview-manager';
@@ -68,13 +69,23 @@ export const runDevContainer = async (): Promise<DevReturnValue> => {
       roleName: deployedStackOverviewManager.getIamRoleNameOfDeployedResource(containerDefinition.workloadName)
     })
   ]);
+  const packagingType = containerDefinition.packaging?.type;
+  const entryfilePath = (containerDefinition.packaging?.properties as { entryfilePath?: string })?.entryfilePath;
+  const languageSpecificConfig = (
+    containerDefinition.packaging?.properties as { languageSpecificConfig?: EsLanguageSpecificConfig }
+  )?.languageSpecificConfig;
+  const nodeVersion = languageSpecificConfig?.nodeVersion || DEFAULT_CONTAINER_NODE_VERSION;
+
   const environment = await getWorkloadEnvironmentVars({
     jobEnvironment: containerDefinition.environment,
     jobName,
     workloadName: containerDefinition.workloadName,
     connectTo: resource.connectTo,
     workloadType: 'multi-container-workload',
-    tunnels
+    tunnels,
+    packagingType,
+    entryfilePath,
+    nodeVersion
   });
   const run = async () => {
     await runDockerContainer(

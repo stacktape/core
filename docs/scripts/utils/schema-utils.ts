@@ -1,6 +1,6 @@
+import type { CommandArg } from '../../src/components/Mdx/SdkMethodsApiReference';
 import orderBy from 'lodash/orderBy.js';
 import { marked } from './marked-mdx-parser';
-import type { CommandArg } from '../../src/components/Mdx/SdkMethodsApiReference';
 
 export const parseDescription = async (description: string) => {
   const [sd, ld] = (description || '').split('---');

@@ -86,6 +86,7 @@ export const allowedCliArgs: { [_command in StacktapeCliCommand]: StacktapeCliAr
     'preserveTempFiles',
     'dockerArgs',
     'noCache',
+    'disableDockerRemoteCache',
     'disableAutoRollback',
     'autoConfirmOperation',
     'showSensitiveValues',
@@ -99,6 +100,7 @@ export const allowedCliArgs: { [_command in StacktapeCliCommand]: StacktapeCliAr
     'preserveTempFiles',
     'dockerArgs',
     'noCache',
+    'disableDockerRemoteCache',
     'disableAutoRollback',
     'autoConfirmOperation',
     'showSensitiveValues',
@@ -271,6 +273,7 @@ export const allowedSdkArgs: { [_command in StacktapeSdkCommand]: StacktapeSdkAr
     'preserveTempFiles',
     'dockerArgs',
     'noCache',
+    'disableDockerRemoteCache',
     'disableAutoRollback',
     'hotSwap'
   ],
@@ -282,6 +285,7 @@ export const allowedSdkArgs: { [_command in StacktapeSdkCommand]: StacktapeSdkAr
     'preserveTempFiles',
     'dockerArgs',
     'noCache',
+    'disableDockerRemoteCache',
     'disableAutoRollback',
     'hotSwap'
   ],
@@ -437,5 +441,6 @@ export const cliArgsAliases: { [_cliArg in StacktapeCliArg | StacktapeSdkArg]: s
   starterId: 'sid',
   assumeRoleOfResource: 'aror',
   configFormat: 'cf',
-  localTunnelingPort: 'ltp'
+  localTunnelingPort: 'ltp',
+  disableDockerRemoteCache: 'drc'
 };

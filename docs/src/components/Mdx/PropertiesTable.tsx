@@ -1,22 +1,22 @@
-import { Badge } from './Badge';
+import { kebabCase } from 'change-case';
+import sortBy from 'lodash/sortBy';
 import { Fragment, useRef, useState } from 'react';
+import useCollapse from 'react-hook-collapse';
+import { BiChevronDown, BiChevronUp } from 'react-icons/bi';
+import { typographyCss } from '@/styles/global';
+import { onMaxW500, onMaxW650 } from '@/styles/responsive';
+import { capitalizeFirstLetter } from '@/utils/helpers';
 import {
   getIsRequired,
   getPropertyTypeInfo,
   getSchemaReferer,
   getTypeNameFromReference
 } from '@/utils/schema-extractor';
-import { border, colors, box } from '../../styles/variables';
 import configSchema from '../../../../@generated/schemas/config-schema.json';
-import { onMaxW500, onMaxW650 } from '@/styles/responsive';
-import sortBy from 'lodash/sortBy';
-import useCollapse from 'react-hook-collapse';
-import { capitalizeFirstLetter } from '@/utils/helpers';
-import { kebabCase } from 'change-case';
-import { typographyCss } from '@/styles/global';
-import { BiChevronDown, BiChevronUp } from 'react-icons/bi';
+import { border, box, colors } from '../../styles/variables';
+import { Badge } from './Badge';
 
-export const buildApiReferenceTableId = ({ definitionName }: { definitionName: string }) => {
+const buildApiReferenceTableId = ({ definitionName }: { definitionName: string }) => {
   return `api-ref_${kebabCase(definitionName)}`;
 };
 
@@ -268,7 +268,7 @@ export function PropertyInfo({
               marginLeft: '2px',
               color: colors.fontColorPrimary,
               height: '100%',
-              border: border,
+              border,
               borderRadius: '4px',
               letterSpacing: 0.8,
               backgroundColor: '#292929',

@@ -13,12 +13,16 @@ export const buildUsingCustomDockerfile = async ({
   progressLogger,
   buildArgs,
   existingDigests,
-  dockerBuildOutputArchitecture
+  dockerBuildOutputArchitecture,
+  cacheFromRef,
+  cacheToRef
 }: {
   name: string;
   progressLogger: ProgressLogger;
   existingDigests: string[];
   dockerBuildOutputArchitecture?: DockerBuildOutputArchitecture;
+  cacheFromRef?: string;
+  cacheToRef?: string;
 } & CustomDockerfileCwImagePackagingProps &
   CustomDockerfileBjImagePackagingProps): Promise<PackagingOutput> => {
   const buildArgsObject = {};
@@ -64,7 +68,9 @@ export const buildUsingCustomDockerfile = async ({
     buildContextPath: absoluteBuildContextPath,
     dockerfilePath,
     buildArgs: buildArgsObject,
-    dockerBuildOutputArchitecture
+    dockerBuildOutputArchitecture,
+    cacheFromRef,
+    cacheToRef
   });
   await progressLogger.finishEvent({
     eventType: 'BUILD_IMAGE',

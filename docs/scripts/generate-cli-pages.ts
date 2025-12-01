@@ -1,9 +1,9 @@
-import { join } from 'path';
+import { join } from 'node:path';
+import cliArgsSchema from '@generated/schemas/cli-schema.json';
 import fsExtra from 'fs-extra';
 import { format } from 'prettier';
-import { getSortedArgs, getMdxDescription } from './utils/schema-utils';
 import { getSortedCliArgsSchema } from './utils/get-schema';
-import cliArgsSchema from '@generated/schemas/cli-schema.json';
+import { getMdxDescription, getSortedArgs } from './utils/schema-utils';
 
 const { readFile, readJson, writeFile } = fsExtra;
 

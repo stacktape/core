@@ -3,7 +3,7 @@ import { defineConfig, LambdaFunction, StacktapeLambdaBuildpackPackaging } from 
 export default defineConfig(() => {
   const lambda = new LambdaFunction({
     packaging: new StacktapeLambdaBuildpackPackaging({
-      entryfilePath: './src/throwing.ts'
+      entryfilePath: './src/simple-lambda.ts'
     }),
     url: {
       enabled: true,
@@ -16,8 +16,8 @@ export default defineConfig(() => {
         return {
           ...props,
           MemorySize: (props.MemorySize ?? 128) * 2,
-          Description: 'This is a test lambda',
-        }
+          Description: 'This is a test lambda'
+        };
       }
     }
   });

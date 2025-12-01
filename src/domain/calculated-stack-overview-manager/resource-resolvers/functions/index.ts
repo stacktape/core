@@ -4,6 +4,7 @@ import Application from '@cloudform/codeDeploy/application';
 import { GetAtt, Join, Ref } from '@cloudform/functions';
 import EventInvokeConfig from '@cloudform/lambda/eventInvokeConfig';
 import CfLambdaFunction from '@cloudform/lambda/function';
+import { DEFAULT_LAMBDA_NODE_VERSION } from '@config';
 import { calculatedStackOverviewManager } from '@domain-services/calculated-stack-overview-manager';
 import { stackManager } from '@domain-services/cloudformation-stack-manager';
 import { configManager } from '@domain-services/config-manager';
@@ -20,6 +21,7 @@ import { cfEvaluatedLinks } from '@shared/naming/cf-evaluated-links';
 import { cfLogicalNames } from '@shared/naming/logical-names';
 import { tagNames } from '@shared/naming/tag-names';
 import { PARENT_IDENTIFIER_SHARED_GLOBAL } from '@shared/utils/constants';
+import { getAugmentedEnvironment } from '@utils/environment';
 import { ExpectedError } from '@utils/errors';
 import { printer } from '@utils/printer';
 import { resolveAlarmsForResource } from '../_utils/alarms';
@@ -178,8 +180,21 @@ export const resolveFunction = ({ lambdaProps }: { lambdaProps: StpLambdaFunctio
     lambdaDependsOn.push(cfLogicalNames.atlasMongoUserAssociatedWithRole(name));
   }
 
+  const packagingType = packaging?.type as Parameters<typeof getAugmentedEnvironment>[0]['packagingType'];
+  const entryfilePath = (packaging?.properties as { entryfilePath?: string })?.entryfilePath;
+  const languageSpecificConfig = (packaging?.properties as { languageSpecificConfig?: EsLanguageSpecificConfig })
+    ?.languageSpecificConfig;
+  const nodeVersionFromRuntime = Number(runtime?.match(/nodejs(\d+)/)?.[1]) || null;
+  const nodeVersion = languageSpecificConfig?.nodeVersion || nodeVersionFromRuntime || DEFAULT_LAMBDA_NODE_VERSION;
+
   const transformedEnvVars = {};
-  (environment || []).forEach(({ name: varName, value: varVal }) => {
+  getAugmentedEnvironment({
+    environment: environment || [],
+    workloadType: 'function',
+    packagingType,
+    entryfilePath,
+    nodeVersion
+  }).forEach(({ name: varName, value: varVal }) => {
     transformedEnvVars[varName] = varVal;
   });
   const fileSystemConfigs = (volumeMounts || []).map((mount: any) => {

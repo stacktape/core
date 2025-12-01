@@ -28,7 +28,10 @@ type SupportedPackagingType =
   | PrebuiltBjImagePackaging['type']
   | PrebuiltCwImagePackaging['type']
   | CustomDockerfileBjImagePackaging['type']
-  | CustomDockerfileCwImagePackaging['type'];
+  | CustomDockerfileCwImagePackaging['type']
+  | NixpacksBjImagePackaging['type']
+  | NixpacksCwImagePackaging['type']
+  | LambdaPackaging['type'];
 
 type EsSpecificPackagingProps = EsLanguageSpecificConfig & {
   languageType: 'es';

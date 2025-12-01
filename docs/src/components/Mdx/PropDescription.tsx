@@ -1,5 +1,5 @@
 import { definitionHasProperty, getPropertyDescriptionInfo } from '@/utils/schema-extractor';
-import configSchema from '../../../../@generated/schemas/config-schema.json';
+import configSchema from '../../../../@generated/schemas/enhanced-config-schema.json';
 import { colors } from '../../styles/variables';
 
 const PropDescription = ({

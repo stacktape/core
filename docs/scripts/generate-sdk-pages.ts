@@ -1,11 +1,11 @@
-import { join } from 'path';
+import type { CommandArg } from '../src/components/Mdx/SdkMethodsApiReference.tsx';
+import { join } from 'node:path';
+import sdkArgsSchema from '@generated/schemas/sdk-schema.json';
+import { camelCase } from 'change-case';
 import { readFile, readJson, writeFile } from 'fs-extra';
 import { format } from 'prettier';
-import { camelCase } from 'change-case';
-import { getSortedArgs, getMdxDescription } from './utils/schema-utils';
 import { getSortedSdkArgsSchema } from './utils/get-schema';
-import config from '../config';
-import type { CommandArg } from '../src/components/Mdx/SdkMethodsApiReference.tsx';
+import { getMdxDescription, getSortedArgs } from './utils/schema-utils';
 
 const userContentSeparatorStart = '{/* WRITE ONLY BELOW THIS LINE */}';
 const userContentSeparatorStop = '{/* WRITE ONLY ABOVE THIS LINE */}';
@@ -81,7 +81,6 @@ stacktape.${camelCase(method)}(${getArgs(sortedArgs.filter((arg) => arg.required
 };
 
 export const generateSdkPages = async () => {
-  const schema = await readJson(config.projectPaths.currentSdkSchema);
   const { overrides, ...otherOpts } = await readJson(join(process.cwd(), '.prettierrc'));
   const prettierOptions = { ...otherOpts, ...overrides.find((o) => o.files === '*.mdx').options };
   const sortedSchema = await getSortedSdkArgsSchema();
@@ -96,7 +95,7 @@ export const generateSdkPages = async () => {
         method,
         description: methodSchema.description,
         order: idx++,
-        schema
+        schema: sdkArgsSchema
       });
 
       return writeFile(pagePath, await format(mdxContent, { parser: 'mdx', ...prettierOptions }));
@@ -106,5 +105,5 @@ export const generateSdkPages = async () => {
 };
 
 if (import.meta.main) {
-  generateSdkPages().catch(console.error);
+  generateSdkPages();
 }

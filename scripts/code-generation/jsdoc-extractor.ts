@@ -287,7 +287,10 @@ const TYPE_PROPERTIES_INTERFACE_MAP: Record<string, { interfaceName: string; fil
   AuroraServerlessV2EngineMysql: { interfaceName: 'AuroraServerlessV2Engine', file: 'relational-databases.d.ts' },
 
   // Lambda Packaging
-  StacktapeLambdaBuildpackPackaging: { interfaceName: 'StpBuildpackLambdaPackaging', file: 'deployment-artifacts.d.ts' },
+  StacktapeLambdaBuildpackPackaging: {
+    interfaceName: 'StpBuildpackLambdaPackaging',
+    file: 'deployment-artifacts.d.ts'
+  },
   CustomArtifactLambdaPackaging: { interfaceName: 'CustomArtifactLambdaPackaging', file: 'deployment-artifacts.d.ts' },
 
   // Container Packaging
@@ -295,7 +298,10 @@ const TYPE_PROPERTIES_INTERFACE_MAP: Record<string, { interfaceName: string; fil
   CustomDockerfilePackaging: { interfaceName: 'CustomDockerfileCwImagePackaging', file: 'deployment-artifacts.d.ts' },
   ExternalBuildpackPackaging: { interfaceName: 'ExternalBuildpackCwImagePackaging', file: 'deployment-artifacts.d.ts' },
   NixpacksPackaging: { interfaceName: 'NixpacksCwImagePackaging', file: 'deployment-artifacts.d.ts' },
-  StacktapeImageBuildpackPackaging: { interfaceName: 'StpBuildpackCwImagePackaging', file: 'deployment-artifacts.d.ts' },
+  StacktapeImageBuildpackPackaging: {
+    interfaceName: 'StpBuildpackCwImagePackaging',
+    file: 'deployment-artifacts.d.ts'
+  },
 
   // Scripts
   LocalScriptWithCommand: { interfaceName: 'LocalScript', file: '__helpers.d.ts' },
@@ -306,8 +312,14 @@ const TYPE_PROPERTIES_INTERFACE_MAP: Record<string, { interfaceName: string; fil
   BastionScriptWithCommands: { interfaceName: 'BastionScript', file: '__helpers.d.ts' },
   LocalScriptWithBastionTunnelingCommand: { interfaceName: 'LocalScriptWithBastionTunneling', file: '__helpers.d.ts' },
   LocalScriptWithBastionTunnelingCommands: { interfaceName: 'LocalScriptWithBastionTunneling', file: '__helpers.d.ts' },
-  LocalScriptWithBastionTunnelingFileScript: { interfaceName: 'LocalScriptWithBastionTunneling', file: '__helpers.d.ts' },
-  LocalScriptWithBastionTunnelingFileScripts: { interfaceName: 'LocalScriptWithBastionTunneling', file: '__helpers.d.ts' },
+  LocalScriptWithBastionTunnelingFileScript: {
+    interfaceName: 'LocalScriptWithBastionTunneling',
+    file: '__helpers.d.ts'
+  },
+  LocalScriptWithBastionTunnelingFileScripts: {
+    interfaceName: 'LocalScriptWithBastionTunneling',
+    file: '__helpers.d.ts'
+  },
 
   // Lambda Events/Integrations
   HttpApiIntegration: { interfaceName: 'HttpApiIntegration', file: 'events.d.ts' },

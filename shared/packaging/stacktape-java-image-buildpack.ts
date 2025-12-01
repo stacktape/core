@@ -13,8 +13,14 @@ export const buildUsingStacktapeJavaImageBuildpack = async ({
   entryfilePath,
   languageSpecificConfig,
   dockerBuildOutputArchitecture,
+  cacheFromRef,
+  cacheToRef,
   ...otherProps
-}: StpBuildpackInput & { languageSpecificConfig: JavaLanguageSpecificConfig }): Promise<PackagingOutput> => {
+}: StpBuildpackInput & {
+  languageSpecificConfig: JavaLanguageSpecificConfig;
+  cacheFromRef?: string;
+  cacheToRef?: string;
+}): Promise<PackagingOutput> => {
   const sourcePath = getFolder(entryfilePath);
   const rootSourcePath = sourcePath.substring(0, sourcePath.search(/src(\/|\\)main(\/|\\)java/));
 
@@ -57,7 +63,9 @@ export const buildUsingStacktapeJavaImageBuildpack = async ({
   const { size, dockerOutput, duration, created } = await buildDockerImage({
     imageTag: name,
     buildContextPath: distFolderPath,
-    dockerBuildOutputArchitecture
+    dockerBuildOutputArchitecture,
+    cacheFromRef,
+    cacheToRef
   });
 
   await progressLogger.finishEvent({

@@ -1,6 +1,6 @@
-import { existsSync, copySync } from 'fs-extra';
 import type { NextConfig } from 'next';
-import { join } from 'path';
+import { join } from 'node:path';
+import { copySync, existsSync } from 'fs-extra';
 
 // Copy static assets during config load (works for both webpack and turbopack)
 const staticSrc = join(process.cwd(), 'docs', 'static');

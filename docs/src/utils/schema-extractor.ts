@@ -57,7 +57,7 @@ const isUnspecifiedObject = ({ propertySpec }: { propertySpec: SchemaNode }) => 
 
 export const getIsRequired = ({ definition, propName }: { definition: SchemaNode; propName: string }) => {
   return (
-    definition.required?.some((requiredProp) => requiredProp === propName) ||
+    definition.required?.includes(propName) ||
     (definition.properties?.[propName] as any)?._MdxDesc?.ld?.includes('--stp-required--')
   );
 };
@@ -133,8 +133,8 @@ export const getPropertyDescriptionInfo = ({
   }
 
   if (!sd || !ld) {
-    console.warn(`No ${sd ? '' : 'short'} ${ld ? '' : 'long'} description on ${propertyName} in ${definitionName}`);
-    console.warn(definitions[definitionName]);
+    console.error(`No ${sd ? '' : 'short'} ${ld ? '' : 'long'} description on ${propertyName} in ${definitionName}`);
+    console.error(definitions[definitionName]);
   }
 
   ld = ld?.replaceAll('--stp-required--', '');

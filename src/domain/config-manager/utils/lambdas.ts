@@ -97,18 +97,6 @@ export const getStacktapeServiceLambdaEnvironment = ({
   ];
 };
 
-export const getLambdaFunctionEnvironment = (userEnvironment: StpLambdaFunction['environment'] = []) => {
-  const userNodeOptions = userEnvironment.find((e) => e.name === 'NODE_OPTIONS');
-
-  return [
-    ...userEnvironment,
-    {
-      name: 'NODE_OPTIONS',
-      value: userNodeOptions ? `${userNodeOptions.value},--enable-source-maps` : '--enable-source-maps'
-    }
-  ];
-};
-
 export const getStacktapeServiceLambdaCustomResourceInducedStatements = (): StpIamRoleStatement[] => {
   const serviceLambdaName: HelperLambdaName = 'stacktapeServiceLambda';
   const { allAuroraDatabases, allDatabasesWithInstancies, allResourcesRequiringVpc, deploymentScripts } = configManager;

@@ -502,6 +502,18 @@ interface StacktapeCliArgs {
    */
   noCache?: boolean;
   /**
+   * #### Disable Docker Remote Cache
+   *
+   * ---
+   *
+   * Disables Docker layer caching using ECR as remote cache storage.
+   * By default, remote caching is enabled to speed up Docker builds by reusing layers.
+   * Set to `true` to disable remote caching.
+   *
+   * @default false
+   */
+  disableDockerRemoteCache?: boolean;
+  /**
    * #### Starter ID
    *
    * ---

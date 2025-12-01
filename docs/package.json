@@ -4,10 +4,10 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "concurrently -k -n next,watch -c cyan,yellow \"next dev --port 9001\" \"bun scripts/watch-content.ts\"",
+    "dev": "bun enhance:config:schema && concurrently -k -n next,watch -c cyan,yellow \"next dev --port 9001\" \"bun scripts/watch-content.ts\"",
     "dev:next": "next dev --port 9001",
     "dev:watch": "bun scripts/watch-content.ts",
-    "build": "next build && next-sitemap --config next-sitemap.config.js",
+    "build": "bun enhance:config:schema && next build && next-sitemap --config next-sitemap.config.js",
     "start": "next start",
     "lint": "next lint",
     "serve": "bun run build && bunx serve@latest out",
@@ -18,6 +18,7 @@
     "gen:sdk": "bun scripts/generate-sdk-pages.ts",
     "gen": "bun gen:cli && bun gen:sdk",
     "check:links": "bunx check-html-links public",
+    "enhance:config:schema": "bun scripts/enhance-config-schema.ts",
     "gen:necessary": "bun scripts/generate-necessary.ts"
   },
   "dependencies": {
@@ -77,6 +78,7 @@
     "@types/node": "^24.0.14",
     "@types/react": "^19.1.8",
     "@types/react-dom": "^19.1.6",
+    "baseline-browser-mapping": "^2.8.32",
     "concurrently": "^9.2.1",
     "execa": "^9.6.0",
     "html-entities": "^2.6.0",

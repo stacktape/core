@@ -1,7 +1,7 @@
-import { marked } from 'marked';
 import { decode } from 'html-entities';
-import { ensureTrailingSlash } from './misc';
+import { marked } from 'marked';
 import config from '../../config';
+import { ensureTrailingSlash } from './misc';
 
 marked.use({
   renderer: {

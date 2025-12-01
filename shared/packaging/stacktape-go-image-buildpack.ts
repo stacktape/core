@@ -10,8 +10,13 @@ export const buildUsingStacktapeGoImageBuildpack = async ({
   name,
   entryfilePath,
   dockerBuildOutputArchitecture,
+  cacheFromRef,
+  cacheToRef,
   ...otherProps
-}: StpBuildpackInput): Promise<PackagingOutput> => {
+}: StpBuildpackInput & {
+  cacheFromRef?: string;
+  cacheToRef?: string;
+}): Promise<PackagingOutput> => {
   const sourcePath = getFolder(entryfilePath);
   const bundlingOutput = await buildGoArtifact({
     ...otherProps,
@@ -46,7 +51,9 @@ export const buildUsingStacktapeGoImageBuildpack = async ({
   const { size, dockerOutput, duration, created } = await buildDockerImage({
     imageTag: name,
     buildContextPath: distFolderPath,
-    dockerBuildOutputArchitecture
+    dockerBuildOutputArchitecture,
+    cacheFromRef,
+    cacheToRef
   });
 
   await progressLogger.finishEvent({

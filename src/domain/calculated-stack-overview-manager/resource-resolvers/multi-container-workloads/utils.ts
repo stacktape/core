@@ -24,6 +24,7 @@ import InstanceProfile from '@cloudform/iam/instanceProfile';
 import Role, { Policy } from '@cloudform/iam/role';
 import LogGroup from '@cloudform/logs/logGroup';
 import SchedulerRule from '@cloudform/scheduler/schedule';
+import { DEFAULT_CONTAINER_NODE_VERSION } from '@config';
 import { stackManager } from '@domain-services/cloudformation-stack-manager';
 import { configManager } from '@domain-services/config-manager';
 import {
@@ -43,6 +44,7 @@ import { tagNames } from '@shared/naming/tag-names';
 import { portMappingsPortName } from '@shared/naming/utils';
 import { definedValueOr } from '@shared/utils/misc';
 import { getCfEnvironment, transformIntoCloudformationSubstitutedString } from '@utils/cloudformation';
+import { getAugmentedEnvironment } from '@utils/environment';
 import uniqWith from 'lodash/uniqWith';
 import { getStpServiceCustomResource } from '../_utils/custom-resource';
 import { getImageUrlForMultiTask } from '../_utils/image-urls';
@@ -264,6 +266,23 @@ const getContainerWorkloadContainerDefinitions = (workload: StpContainerWorkload
     ).entryPoint;
     const isLoggingEnabled = !container.logging?.disabled;
 
+    // Get packaging info for environment augmentation
+    const packagingType = container.packaging?.type;
+    const entryfilePath = (container.packaging?.properties as { entryfilePath?: string })?.entryfilePath;
+    const languageSpecificConfig = (
+      container.packaging?.properties as { languageSpecificConfig?: EsLanguageSpecificConfig }
+    )?.languageSpecificConfig;
+    const nodeVersion = languageSpecificConfig?.nodeVersion || DEFAULT_CONTAINER_NODE_VERSION;
+
+    // Augment environment with source maps and experimental flags for JS/TS workloads
+    const augmentedEnvironment = getAugmentedEnvironment({
+      environment: container.environment,
+      workloadType: workload.configParentResourceType,
+      packagingType,
+      entryfilePath,
+      nodeVersion
+    });
+
     // Prepare MountPoints for EFS volumes
     const mountPoints: MountPoint[] = (container.volumeMounts || []).map((mount) => {
       // **USE HELPER**: Generate SourceVolume name using the helper function
@@ -287,7 +306,7 @@ const getContainerWorkloadContainerDefinitions = (workload: StpContainerWorkload
         RepositoryCredentials: { CredentialsParameter: repositoryCredentialsSecretArn }
       }),
       Essential: definedValueOr(container.essential, true),
-      Environment: getCfEnvironment(container.environment) as KeyValuePair[],
+      Environment: getCfEnvironment(augmentedEnvironment) as KeyValuePair[],
       EntryPoint: entryPoint,
       Command: command,
       StopTimeout: container.stopTimeout || 2,

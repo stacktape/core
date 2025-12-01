@@ -1,6 +1,5 @@
-import { watch } from 'fs';
-import { writeFileSync, readdirSync, statSync } from 'fs';
-import { join } from 'path';
+import { readdirSync, statSync, watch, writeFileSync } from 'node:fs';
+import { join } from 'node:path';
 
 const DOCS_DIR = join(process.cwd(), 'docs');
 const SNIPPETS_DIR = join(process.cwd(), 'code-snippets');
@@ -48,7 +47,7 @@ function updateTimestamps() {
   const maxTimestamp = Math.max(docsMax, snippetsMax);
 
   writeFileSync(OUTPUT_FILE, JSON.stringify({ maxTimestamp, updated: Date.now() }));
-  console.log(`📝 Timestamps updated: ${new Date(maxTimestamp).toLocaleTimeString()}`);
+  console.info(`📝 Timestamps updated: ${new Date(maxTimestamp).toLocaleTimeString()}`);
 }
 
 // Debounced update to avoid duplicate triggers
@@ -57,7 +56,7 @@ function debouncedUpdate(filename: string) {
     clearTimeout(debounceTimer);
   }
   debounceTimer = setTimeout(() => {
-    console.log(`🔄 Changed: ${filename}`);
+    console.info(`🔄 Changed: ${filename}`);
     updateTimestamps();
     debounceTimer = null;
   }, DEBOUNCE_MS);
@@ -67,9 +66,10 @@ function debouncedUpdate(filename: string) {
 updateTimestamps();
 
 // Watch both directories
-console.log('👀 Watching for content changes...');
-console.log(`   - ${DOCS_DIR}`);
-console.log(`   - ${SNIPPETS_DIR}`);
+console.info(`👀 Watching for content changes...
+  - ${DOCS_DIR}
+  - ${SNIPPETS_DIR}
+`);
 
 function setupWatcher(dir: string) {
   try {
@@ -96,7 +96,6 @@ setupWatcher(SNIPPETS_DIR);
 
 // Keep the process running
 process.on('SIGINT', () => {
-  console.log('\n👋 Stopping watcher...');
+  console.info('\n👋 Stopping watcher...');
   process.exit(0);
 });
-
