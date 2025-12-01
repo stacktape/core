@@ -340,12 +340,10 @@ export class PackagingManager {
   }) => {
     const shouldUseCache = this.#shouldWorkloadUseCache({ workloadName, commandCanUseCache });
 
-    // console.log(workloadName, shouldUseCache, deploymentArtifactManager.getExistingDigestsForJob(jobName));
     const existingDigests = shouldUseCache ? deploymentArtifactManager.getExistingDigestsForJob(jobName) : [];
     const packagingType = packaging.type;
     const progressLogger = eventManager.getNamespacedInstance({ eventType: parentEventType, identifier: jobName });
 
-    // Docker remote cache refs (enabled by default, can be disabled with --disable-docker-remote-cache)
     const useRemoteCache = !globalStateManager.args.disableDockerRemoteCache;
     const cacheRef = useRemoteCache ? getCacheRef(jobName) : undefined;
 
@@ -441,6 +439,7 @@ export class PackagingManager {
               }),
               additionalDigestInput
             });
+            console.dir({ sharedProps, result }, { depth: 5 });
             this.#packagedJobs.push({ ...result, skipped: result.outcome === 'skipped' });
             return result;
           }
