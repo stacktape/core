@@ -1,3 +1,4 @@
+/* eslint-disable jsdoc/check-param-names */
 type Language = 'javascript' | 'typescript' | 'python' | 'go' | 'java' | 'unknown';
 
 const JS_TS_EXTENSIONS = ['js', 'ts', 'mjs', 'mts', 'cjs', 'cts', 'jsx', 'tsx'];

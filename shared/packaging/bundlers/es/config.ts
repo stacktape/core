@@ -2,13 +2,17 @@ export const FILES_TO_INCLUDE_IN_DIGEST = [
   'pnpm-lock.yaml',
   'yarn.lock',
   'package-lock.json',
+  'bun.lockb',
+  'bun.lock',
+  'deno.lockb',
+  'deno.lock',
   'node_modules/.prisma/client/index.js',
   'tsconfig.json'
 ];
 
-const IGNORED_MISSING_DEPENDENCIES = ['.prisma'];
-
 export const SPECIAL_TREATMENT_PACKAGES = ['@prisma/client', 'chrome-aws-lambda', 'next'] as const;
+
+export const DEPENDENCIES_TO_IGNORE_FROM_DOCKER_INSTALLATION = 'pg';
 
 export const DEPENDENCIES_TO_EXCLUDE_FROM_BUNDLE = ['next'];
 
@@ -71,8 +75,6 @@ export const IGNORED_EXTENSIONS = [
 ];
 
 export const IGNORED_FILES = [
-  // @note prisma-related
-  // @imptodo add windows version
   'query-engine-darwin',
   'makefile',
   'gulpfile.js',

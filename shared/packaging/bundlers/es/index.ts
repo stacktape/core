@@ -20,6 +20,7 @@ import uniqWith from 'lodash/uniqWith';
 import objectHash from 'object-hash';
 import {
   DEPENDENCIES_TO_EXCLUDE_FROM_BUNDLE,
+  DEPENDENCIES_TO_IGNORE_FROM_DOCKER_INSTALLATION,
   FILES_TO_INCLUDE_IN_DIGEST,
   IGNORED_MODULES,
   IGNORED_OPTIONAL_PEER_DEPS_FROM_INSTALL_IN_DOCKER,
@@ -435,7 +436,9 @@ export const createEsBundle = async ({
       )
       .filter(Boolean),
     (a, b) => a.name === b.name
-  ).filter((dep) => !dependenciesToExcludeFromDeploymentPackage?.includes(dep.name));
+  )
+    .filter((dep) => !dependenciesToExcludeFromDeploymentPackage?.includes(dep.name))
+    .filter((dep) => !DEPENDENCIES_TO_IGNORE_FROM_DOCKER_INSTALLATION.includes(dep.name));
 
   if (debug) {
     console.info(
@@ -453,13 +456,14 @@ export const createEsBundle = async ({
     eventType: 'CALCULATE_CHECKSUM',
     description: 'Calculating checksum for caching'
   });
+  const explicitlyIncludedFilesDigestHex = explicitlyIncludedFilesDigest.digest('hex');
   const digest = await getBundleDigest({
     externalDependencies: dependenciesToInstallInDocker.map((dep) => ({ name: dep.name, version: dep.version })),
     cwd,
     workloadPath: distIndexFilePath,
     additionalDigestInput: [
       additionalDigestInput,
-      explicitlyIncludedFilesDigest.digest('hex'),
+      explicitlyIncludedFilesDigestHex,
       dockerBuildOutputArchitecture
     ].join('')
   });

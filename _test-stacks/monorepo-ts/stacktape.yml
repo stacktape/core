@@ -6,7 +6,7 @@ scripts:
   migrateDb:
     type: local-script
     properties:
-      executeCommand: npx prisma migrate --config ./packages/prisma/prisma.config.ts
+      executeCommand: npx prisma db push --config ./packages/prisma/prisma.config.ts
       connectTo:
         - mainDatabase
 

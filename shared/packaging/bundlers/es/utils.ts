@@ -6,8 +6,7 @@ import {
   getMatchingFilesByGlob,
   getPathRelativeTo,
   isDirAccessible,
-  isFileAccessible,
-  transformToUnixPath
+  isFileAccessible
 } from '@shared/utils/fs-utils';
 import { builtinModules, getError } from '@shared/utils/misc';
 import { findProjectRoot } from '@shared/utils/monorepo';
@@ -143,11 +142,6 @@ const hasBinary = (packageJsonContent: PackageJson): boolean => {
     packageJsonContent?.devDependencies?.['node-pre-gyp'] ||
     DEPENDENCIES_WITH_BINARIES.includes(packageJsonContent.name)
   );
-};
-
-const getEsPackageManager = (lockFilePath: string): SupportedEsPackageManager => {
-  const lockfile = basename(lockFilePath);
-  return PACKAGE_LOCKS[lockfile];
 };
 
 const PACKAGE_LOCKS = {
@@ -464,57 +458,6 @@ export const getAllJsDependenciesFromMultipleFiles = async ({
   return deps;
 };
 
-// export const resolveNextJs = async ({
-//   distFolderPath,
-//   workingDir,
-//   allDependenciesToInstallInDocker
-// }: {
-//   distFolderPath: string;
-//   workingDir: string;
-//   allDependenciesToInstallInDocker: ModuleInfo[];
-// }) => {
-//   const [allNextAppDeps] = await Promise.all([
-//     getAllDependenciesFromFolder({
-//       folderPath: join(workingDir, '.next'),
-//       distFolderPath,
-//       workingDir
-//     })
-//     // copy(join(workingDir, '.next'), join(distFolderPath, '.next'))
-//   ]);
-//   allDependenciesToInstallInDocker.push(...allNextAppDeps);
-// };
-
-const copyNodeModules = ({
-  distFolderPath,
-  workingDir,
-  moduleName
-}: {
-  distFolderPath: string;
-  workingDir: string;
-  moduleName: string;
-}) => {
-  return copyToDeploymentPackage({
-    from: join(workingDir, 'node_modules', moduleName),
-    to: join(distFolderPath, 'node_modules', moduleName)
-  });
-};
-
-// export const copyChromeAwsLambdaPackage = async ({
-//   distFolderPath,
-//   workingDir
-// }: {
-//   distFolderPath: string;
-//   workingDir: string;
-// }) => {
-//   return copyNodeModulesFromHost({
-//     bundledItemName: 'chrome-aws-lambda',
-//     dependencies: ['chrome-aws-lambda'],
-//     distFolderPath,
-//     workingDir
-//   });
-//   // return copyNodeModules({ distFolderPath, workingDir, moduleName: 'chrome-aws-lambda' });
-// };
-
 export const getLambdaRuntimeFromNodeTarget = (version: string) => Number(version.split('.')[0]);
 
 export const determineIfAlias = async ({
@@ -543,10 +486,6 @@ export const determineIfAlias = async ({
   }
   const promiseResults = await Promise.all(checkAliasPromises);
   return promiseResults.some(Boolean);
-};
-
-const getModuleNameFromPath = ({ path, workingDir }: { path: string; workingDir: string }) => {
-  return transformToUnixPath(path.slice(workingDir.length + 14)).split('/')[0];
 };
 
 const filterJunkFiles = (filePath: string) => {
@@ -586,19 +525,6 @@ export const getExternalDeps = (depsInfo: PackageJsonDepsInfo, depsList: Set<str
     getExternalDeps(dep, depsList);
   }
   return depsList;
-};
-
-const getModuleFromImporter = (importer: string) => {
-  let fullModulePath = transformToUnixPath(importer).split('node_modules')[1];
-  if (!fullModulePath) {
-    return null;
-  }
-  fullModulePath = fullModulePath.slice(1);
-  if (fullModulePath.startsWith('@')) {
-    const [p1, p2] = fullModulePath.split('/');
-    return `${p1}/${p2}`;
-  }
-  return fullModulePath.split('/')[0];
 };
 
 export const getFailedImportsFromEsbuildError = ({

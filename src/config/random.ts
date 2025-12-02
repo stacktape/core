@@ -68,7 +68,7 @@ export const supportedCodeConfigLanguages: (typeof possiblySupportedLangExtensio
 export const DEFAULT_CLOUDFORMATION_REGISTRY_BUCKET_NAME = 'stacktape-infrastructure-modules';
 export const DEFAULT_CLOUDFORMATION_REGISTRY_BUCKET_REGION = 'eu-west-1' as const;
 
-export const DEFAULT_KEEP_PREVIOUS_DEPLOYMENT_ARTIFACTS_COUNT = 10;
+export const DEFAULT_KEEP_PREVIOUS_DEPLOYMENT_ARTIFACTS_COUNT = 25;
 
 export const MONITORING_FREQUENCY_SECONDS = 3.5;
 export const SENTRY_CAPTURE_EXCEPTION_WAIT_TIME_MS = 1500;
