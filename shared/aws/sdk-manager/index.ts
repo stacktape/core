@@ -1121,10 +1121,15 @@ export class AwsSdkManager {
         deleteAmount,
         deleteTotal
       } = uploader as any;
-      const rawPercent = (Number(progressAmount) / Number(progressTotal)) * 100;
-      // Ensure percentage never decreases (total can grow as files are discovered) and handle NaN
-      if (!Number.isNaN(rawPercent) && rawPercent > maxProgressPercent) {
-        maxProgressPercent = rawPercent;
+      // Only calculate percentage when progressTotal is valid and > 0 to avoid NaN/Infinity
+      const total = Number(progressTotal);
+      const amount = Number(progressAmount);
+      if (total > 0 && Number.isFinite(amount)) {
+        const rawPercent = (amount / total) * 100;
+        // Ensure percentage never decreases (total can grow as files are discovered)
+        if (rawPercent > maxProgressPercent) {
+          maxProgressPercent = Math.min(rawPercent, 100);
+        }
       }
       return {
         activeTransfers,
@@ -1136,7 +1141,7 @@ export class AwsSdkManager {
         filesFound,
         deleteAmount,
         deleteTotal,
-        progressPercent: maxProgressPercent > 0 ? maxProgressPercent.toFixed(2) : 'unknown'
+        progressPercent: maxProgressPercent > 0 ? maxProgressPercent.toFixed(2) : '0'
       };
     };
     let lastStats = getStats();
