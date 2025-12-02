@@ -1,4 +1,4 @@
-import { tippyTooltipStyle } from '@/components/Utils/Tooltip';
+import { tippyTooltipStyle } from '@/components/Tooltip/tippy-styles';
 import { colors, fontFamily, fontFamilyMono, onMaxW750, prettyScrollBar } from './variables';
 
 export const typographyCss = {

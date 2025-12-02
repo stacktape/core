@@ -6,7 +6,7 @@ import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import PulseLoader from 'react-spinners/PulseLoader';
 import { boxShadow, colors, ellipsis } from '../../styles/variables';
-import { WithTooltip } from '../Utils/Tooltip';
+import { WithTooltip } from '../Tooltip/WithTooltip';
 
 export function Button({
   text,

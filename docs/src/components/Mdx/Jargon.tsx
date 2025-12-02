@@ -1,6 +1,6 @@
 import { merge } from 'lodash';
 import jargonData from '../../../docs/jargon.yml';
-import { WithTooltip } from '../Utils/Tooltip';
+import { WithTooltip } from '../Tooltip/WithTooltip';
 
 const validateProperty = (entry, property, key) => {
   const value = entry[property];

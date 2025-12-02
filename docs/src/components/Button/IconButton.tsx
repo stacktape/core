@@ -4,7 +4,7 @@ import { merge } from 'lodash';
 import { useEffect, useState } from 'react';
 import PulseLoader from 'react-spinners/PulseLoader';
 import { border, boxShadowDark, colors } from '../../styles/variables';
-import { WithTooltip } from '../Utils/Tooltip';
+import { WithTooltip } from '../Tooltip/WithTooltip';
 
 export function IconButton({
   icon,
