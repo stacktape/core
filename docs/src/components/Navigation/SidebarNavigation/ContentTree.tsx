@@ -1,7 +1,7 @@
-import { useState } from 'react';
-import { getNavigationTree } from './navigation-data';
-import { ContentTreeGroup } from './ContentTreeGroup';
 import { useRouter } from 'next/router';
+import { useState } from 'react';
+import { ContentTreeGroup } from './ContentTreeGroup';
+import { getNavigationTree } from './navigation-data';
 
 const getInitialExpandedNavItems = (treeData, pathname: string) => {
   const res = {};

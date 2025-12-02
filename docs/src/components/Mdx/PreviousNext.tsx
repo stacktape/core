@@ -1,6 +1,6 @@
 import { ChevronLeft, ChevronRight } from 'react-feather';
-import { Link } from './Link';
 import { border, boxShadow, colors, onMaxW500 } from '@/styles/variables';
+import { Link } from './Link';
 
 function LeftButton({ url, title, label }) {
   return (
@@ -17,8 +17,8 @@ function LeftButton({ url, title, label }) {
         backgroundColor: colors.elementBackground,
         borderRadius: '6px',
         padding: '0px 7px',
-        border: border,
-        boxShadow: boxShadow,
+        border,
+        boxShadow,
         textDecoration: 'none',
         visibility: url ? 'visible' : 'hidden',
         opacity: url ? 1 : 0,
@@ -115,8 +115,8 @@ function RightButton({ url, title, label }) {
         backgroundColor: colors.elementBackground,
         borderRadius: '6px',
         padding: '0px 7px',
-        border: border,
-        boxShadow: boxShadow,
+        border,
+        boxShadow,
         textDecoration: 'none',
         visibility: url ? 'visible' : 'hidden',
         opacity: url ? 1 : 0,
@@ -214,6 +214,7 @@ function RightButton({ url, title, label }) {
 
 type ButtonProps = { url?: string; title?: string; label?: string };
 
+// eslint-disable-next-line react/no-unstable-default-props
 export function PreviousNext({ left = {}, right = {} }: { left?: ButtonProps; right?: ButtonProps }) {
   return (
     <div

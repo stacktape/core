@@ -1,11 +1,12 @@
-import { CSSProperties, ReactNode, useEffect, useState } from 'react';
+import type { CSSProperties, ReactNode } from 'react';
+import type { Placement } from 'tippy.js';
 import merge from 'lodash/merge';
+import Image from 'next/image';
+import Link from 'next/link';
+import { useEffect, useState } from 'react';
 import PulseLoader from 'react-spinners/PulseLoader';
-import { Placement } from 'tippy.js';
 import { boxShadow, colors, ellipsis } from '../../styles/variables';
 import { WithTooltip } from '../Utils/Tooltip';
-import Link from 'next/link';
-import Image from 'next/image';
 
 export function Button({
   text,
@@ -170,6 +171,7 @@ export function Button({
         onClick={adjustedOnClick}
       >
         <button
+          type="button"
           className="stp-button"
           css={{ ...css, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
         >
@@ -191,7 +193,7 @@ export function Button({
         {...(!isDisabled ? { href: linkTo } : {})}
         onClick={adjustedOnClick}
       >
-        <button className="stp-button" css={css}>
+        <button type="button" className="stp-button" css={css}>
           {svgIconEl}
           {iconPosition === 'beginning' && iconEl}
           {textComponent}

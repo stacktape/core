@@ -1,5 +1,5 @@
 import { keyframes } from '@emotion/react';
-import { colors, onMaxW1300, onMaxW500 } from './variables';
+import { colors, onMaxW500, onMaxW1300 } from './variables';
 
 export const container: Css = {
   padding: '0px 20px',

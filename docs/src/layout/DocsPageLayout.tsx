@@ -1,13 +1,12 @@
+import { Footer } from '@/components/Footer/Footer';
 import { Header } from '@/components/Header/Header';
 import { Divider } from '@/components/Mdx/Divider';
-import { onMaxW720, onMaxW795 } from '@/styles/responsive';
-import { colors } from '@/styles/variables';
-import { pageLayout } from '@/styles/variables';
-import { useGlobalStore } from '../../global-state';
 import { MobileHamburgerNavigation } from '@/components/Navigation/MobileHamburgerNavigation/MobileHamburgerNavigation';
 import { SidebarNavigation } from '@/components/Navigation/SidebarNavigation/Sidebar';
 import { TableOfContents } from '@/components/TableOfContents/TableOfContents';
-import { Footer } from '@/components/Footer/Footer';
+import { onMaxW720, onMaxW795 } from '@/styles/responsive';
+import { colors, pageLayout } from '@/styles/variables';
+import { useGlobalStore } from '../../global-state';
 
 export default function DocsPageLayout({
   children,

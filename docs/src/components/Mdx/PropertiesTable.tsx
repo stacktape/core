@@ -50,7 +50,7 @@ function PropertyTypeBadgeLine({
 
         const badgeText = `${typeName}${isEnum ? ' ENUM' : ''}${exactValue ? ` "${exactValue}"` : ''}`;
         return (
-          <span key={idx}>
+          <span key={badgeText}>
             {isCompositeType ? (
               <a
                 onClick={(e) => {
@@ -174,8 +174,8 @@ function ExpandableView({
       {shouldShowPossibleValuesList && (
         <p css={{ paddingBottom: '6px', marginTop: '14px', lineHeight: 1.6, wordBreak: 'break-all' }}>
           <span css={{ paddingRight: '3px' }}>Possible values: </span>
-          {possibleValues.map((allowedType, idx) => (
-            <Badge key={idx} backgroundColor="#656565">
+          {possibleValues.map((allowedType) => (
+            <Badge key={allowedType} backgroundColor="#656565">
               {allowedType}
             </Badge>
           ))}

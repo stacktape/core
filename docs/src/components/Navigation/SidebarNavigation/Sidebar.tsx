@@ -1,8 +1,8 @@
-import { onMaxW795 } from '../../../styles/responsive';
-import { useSessionStorage } from 'react-use';
-import { useLayoutEffect, useRef } from 'react';
-import { border, growDownAnimation, pageLayout, prettyScrollBar } from '@/styles/variables';
 import { debounce } from 'lodash';
+import { useLayoutEffect, useRef } from 'react';
+import { useSessionStorage } from 'react-use';
+import { border, growDownAnimation, pageLayout, prettyScrollBar } from '@/styles/variables';
+import { onMaxW795 } from '../../../styles/responsive';
 import { ContentTree } from './ContentTree';
 
 export function SidebarNavigation({

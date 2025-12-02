@@ -1,14 +1,15 @@
-/* eslint-disable @typescript-eslint/no-require-imports */
-import { Highlight, Language, Prism, themes } from 'prism-react-renderer';
-import { colors, box, fontFamilyMono, prettyScrollBar } from '../../styles/variables';
-import { onMaxW500 } from '../../styles/responsive';
-import { CSSProperties, useEffect, useState } from 'react';
+import type { Language } from 'prism-react-renderer';
+import type { CSSProperties } from 'react';
+import { Highlight, Prism, themes } from 'prism-react-renderer';
+import { useEffect, useState } from 'react';
 import { BiCheck, BiCopy } from 'react-icons/bi';
+import { onMaxW500 } from '../../styles/responsive';
+import { box, colors, fontFamilyMono, prettyScrollBar } from '../../styles/variables';
 
-(typeof global !== 'undefined' ? global : window).Prism = Prism;
+(typeof globalThis !== 'undefined' ? globalThis : window).Prism = Prism;
 Prism.languages.prisma = Prism.languages.extend('clike', {
   keyword: /\b(?:datasource|enum|generator|model|type)\b/,
-  'type-class-name': /(\b()\s+)[\w.\\]+/
+  'type-class-name': /(\b(?:model|datasource|enum|generator|type)\s+)[\w.\\]+/
 });
 // Prism.languages.javascript['class-name'][0].pattern = /(\b(?:model|datasource|enum|generator|type)\s+)[\w.\\]+/;
 Prism.languages.insertBefore('prisma', 'function', {
@@ -23,9 +24,6 @@ Prism.languages.insertBefore('prisma', 'punctuation', {
 });
 Prism.languages.json5 = Prism.languages.js;
 Prism.languages.json = Prism.languages.json5;
-require('prismjs/components/prism-java');
-require('prismjs/components/prism-ini');
-require('prismjs/components/prism-groovy');
 
 type RendererToken = {
   types: string[];
@@ -282,7 +280,8 @@ export function CodeBlock({ tabs, lang }: { tabs: CodeTab[]; lang: string }) {
   const [isCopiedShown, setIsCopiedShown] = useState(false);
   const amountOfLines = activeTab.code.split('\n').length;
   useEffect(() => {
-    setActiveTab(tabs.find((tab) => tab.label === getPlatformName()) || tabs[0]);
+    const platformName = getPlatformName();
+    setActiveTab(tabs.find((tab) => tab.label === platformName) || tabs[0]);
   }, [tabs]);
 
   const language = activeTab?.lang || lang || tabs?.[0].lang || 'yaml';
@@ -436,7 +435,7 @@ export function CodeBlock({ tabs, lang }: { tabs: CodeTab[]; lang: string }) {
                                     })
                                   }
                                 });
-                                return <span {...tokenProps} />;
+                                return <span {...tokenProps} key={index} />;
                               });
                           }
                           const tokenProps = getTokenProps({

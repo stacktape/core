@@ -1,18 +1,18 @@
-import { Menu } from 'react-feather';
-import { onMaxW650, onMaxW795 } from '@/styles/responsive';
-import { IconButton } from '../Button/IconButton';
-import { colors, pageLayout } from '@/styles/variables';
-import StacktapeFullLogo from '../../../static/assets/logo-full-dark.svg';
-import StacktapeLogo from '../../../static/assets/logo.svg';
-import { BiRightArrowAlt } from 'react-icons/bi';
+import { merge } from 'lodash';
 import Image from 'next/image';
-import { trackAnalyticsEvent } from '@/utils/analytics';
-import { Button } from '../Button/Button';
-import { useGlobalStore } from '../../../global-state';
+import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { useEffect } from 'react';
-import Link from 'next/link';
-import { merge } from 'lodash';
+import { Menu } from 'react-feather';
+import { BiRightArrowAlt } from 'react-icons/bi';
+import { onMaxW650, onMaxW795 } from '@/styles/responsive';
+import { colors, pageLayout } from '@/styles/variables';
+import { trackAnalyticsEvent } from '@/utils/analytics';
+import { useGlobalStore } from '../../../global-state';
+import StacktapeFullLogo from '../../../static/assets/logo-full-dark.svg';
+import StacktapeLogo from '../../../static/assets/logo.svg';
+import { Button } from '../Button/Button';
+import { IconButton } from '../Button/IconButton';
 import { DocSearch } from '../Search/DocSearch';
 
 function SignUpButton() {

@@ -1,6 +1,6 @@
 import { onMaxW795 } from '@/styles/responsive';
-import { SidebarNavigation } from '../SidebarNavigation/Sidebar';
 import { DocSearch } from '../../Search/DocSearch';
+import { SidebarNavigation } from '../SidebarNavigation/Sidebar';
 
 export function MobileHamburgerNavigation({
   isOpen,

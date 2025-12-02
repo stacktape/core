@@ -1,6 +1,6 @@
-import { colors, box } from '../../styles/variables';
-import { PropertyInfo } from './PropertiesTable';
 import commandsSchema from '../../../../@generated/schemas/cli-schema.json';
+import { box, colors } from '../../styles/variables';
+import { PropertyInfo } from './PropertiesTable';
 
 type CommandArg = {
   name: string;

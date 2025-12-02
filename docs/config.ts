@@ -18,21 +18,16 @@ export default {
   domain: 'stacktape.com',
   metadata: {
     name: 'Stacktape documentation',
-    short_name: 'Docs',
-    description: 'DevOps-free cloud development',
+    description: 'Your AWS, 97% easier',
+    title: 'Stacktape | Your AWS, 97% easier',
     language: 'en',
     pathPrefix: '/',
     favicon: 'static/assets/favicon.png',
     themeColor: '#70C8B6', // Used for setting manifest and progress theme colors.
     backgroundColor: '#1B1B1B', // Used for setting manifest background color.
     url: 'https://docs.stacktape.com',
-    siteimage: 'https://docs.stacktape.com/images/opengraph-image.png',
+    siteimage: 'https://stacktape.com/cover-images/opengraph.png',
     copyright: 'Copyright © Stacktape 2025'
-  },
-  header: {
-    enabled: true,
-    logo: 'static/assets/favicon.png',
-    logoLink: '/'
   },
   sidebar: {
     forcedNavOrder: [
@@ -136,5 +131,8 @@ export default {
     appId: 'PFTWPISD3F',
     apiKey: 'b10d8ccfbb0cb544d1a42486e46ecc8f',
     indexName: 'Docs crawler'
+  },
+  crisp: {
+    id: '1d26554b-8e37-4cb0-8c95-e774099f4b74'
   }
 };

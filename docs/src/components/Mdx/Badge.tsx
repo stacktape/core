@@ -1,6 +1,6 @@
 import colorFn from 'color';
-import { colors } from '../../styles/variables';
 import { typographyCss } from '@/styles/global';
+import { colors } from '../../styles/variables';
 
 export function Badge({
   children,

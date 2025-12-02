@@ -1,5 +1,5 @@
-import config from '../../../config';
 import { onMaxW720 } from '@/styles/responsive';
+import config from '../../../config';
 
 export function Footer() {
   return (

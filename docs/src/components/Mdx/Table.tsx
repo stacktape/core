@@ -1,4 +1,4 @@
-import { colors, box } from '../../styles/variables';
+import { box, colors } from '../../styles/variables';
 
 export function Table(props) {
   return (

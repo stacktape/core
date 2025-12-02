@@ -65,11 +65,6 @@ Depending on the properties they provide, we group engine types into following g
   - Supported engines:
     - **aurora-postgresql-serverless-v2**
     - **aurora-mysql-serverless-v2**
-- [Aurora Serverless V1 Engine](#aurora-serverless-engine) - old generation serverless engine. We recommend using V2
-  instead.
-  - Supported engines:
-    - **aurora-postgresql-serverless**
-    - **aurora-mysql-serverless**
 
 ## Engine version
 
@@ -144,22 +139,6 @@ Scaling is measured in Aurora Capacity Units (ACUs), where each ACU provides app
 <PropertiesTable definitionName="AuroraServerlessV2Engine" searchForReferencesInDefinition="RelationalDatabaseProps" />
 
 `embed:relational-databases/engine-aurora-serverless-v2.stp.yml`
-
-<Divider />
-
-## Aurora Serverless V1 engine
-
-<Warning>
-
-We recommend using the newer [Aurora Serverless V2 engine](#aurora-serverless-v2-engine) instead of this one.
-
-</Warning>
-
-The Aurora Serverless V1 engine is the previous generation of the serverless Aurora engine. It also provides automatic, usage-based scaling and can scale to zero, but it is less responsive than the V2 engine.
-
-<PropertiesTable definitionName="AuroraServerlessEngine" searchForReferencesInDefinition="RelationalDatabaseProps" />
-
-`embed:relational-databases/engine-aurora-serverless.stp.yml`
 
 # Backups
 

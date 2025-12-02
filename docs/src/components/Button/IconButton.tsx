@@ -1,8 +1,9 @@
-import { merge } from 'lodash';
-import { ReactNode, useEffect, useState } from 'react';
-import PulseLoader from 'react-spinners/PulseLoader';
+import type { ReactNode } from 'react';
 import type { Placement } from 'tippy.js';
-import { colors, boxShadowDark, border } from '../../styles/variables';
+import { merge } from 'lodash';
+import { useEffect, useState } from 'react';
+import PulseLoader from 'react-spinners/PulseLoader';
+import { border, boxShadowDark, colors } from '../../styles/variables';
 import { WithTooltip } from '../Utils/Tooltip';
 
 export function IconButton({
@@ -14,8 +15,7 @@ export function IconButton({
   size,
   isLoading,
   tooltipPlacement,
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  disableHover
+  disableHover: _disableHover
 }: {
   onClick: AnyFunction;
   icon: ReactNode;
@@ -54,7 +54,7 @@ export function IconButton({
           display: 'flex',
           color: colors.fontColorPrimary,
           background: colors.elementBackground,
-          border: border,
+          border,
           justifyContent: 'center',
           alignItems: 'center',
           margin: '2px',

@@ -1,5 +1,5 @@
-import { geistFont, geistMonoFont } from '@/pages/_app';
 import { keyframes } from '@emotion/react';
+import { geistFont, geistMonoFont } from '@/styles/fonts';
 
 export const onMaxW330 = '@media (max-width: 330px)';
 export const onMaxW360 = '@media (max-width: 360px)';
@@ -267,3 +267,20 @@ const appearFromTop = keyframes`
 export const appearFromTopAnimation: Css = {
   animation: `${appearFromTop} 200ms ease-out`
 };
+
+export const interactiveBase: Css = {
+  border: 'none',
+  transition: 'all 250ms ease',
+  cursor: 'pointer',
+}
+
+export const interactiveGlow = {
+  default: {
+    boxShadow:
+      '0 4px 12px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(255, 255, 255, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.12)',
+  },
+  hover: {
+    boxShadow:
+      '0 6px 16px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.18)',
+  },
+} as const

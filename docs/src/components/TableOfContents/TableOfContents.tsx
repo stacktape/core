@@ -1,7 +1,7 @@
-import { AlignRight } from 'react-feather';
-import { colors, pageLayout, prettyScrollBar } from '@/styles/variables';
-import { onMaxW1200 } from '@/styles/responsive';
 import { useEffect, useState } from 'react';
+import { AlignRight } from 'react-feather';
+import { onMaxW1200 } from '@/styles/responsive';
+import { colors, pageLayout, prettyScrollBar } from '@/styles/variables';
 
 export function TableOfContents({ tableOfContents }: { tableOfContents: TableOfContentsItem[] }) {
   const [activeId, setActiveId] = useState<string>('');
@@ -48,8 +48,8 @@ export function TableOfContents({ tableOfContents }: { tableOfContents: TableOfC
       }
     };
 
-    // Set initial active heading
-    setInitialActiveHeading();
+    // Defer initial active heading to avoid direct setState in useEffect
+    const rafId = requestAnimationFrame(setInitialActiveHeading);
 
     const observer = new IntersectionObserver(
       (entries) => {
@@ -85,7 +85,10 @@ export function TableOfContents({ tableOfContents }: { tableOfContents: TableOfC
       if (element) observer.observe(element);
     });
 
-    return () => observer.disconnect();
+    return () => {
+      cancelAnimationFrame(rafId);
+      observer.disconnect();
+    };
   }, [tableOfContents]);
 
   return (

@@ -1,6 +1,6 @@
+import type { IconType } from 'react-icons';
 import { colors } from '../../../styles/variables';
 import { ContentTreeNode } from './ContentTreeNode';
-import { IconType } from 'react-icons';
 
 export function ContentTreeGroup({
   title,

@@ -1,37 +1,37 @@
 import {
-  ResourceAmazonSimpleStorageServiceS3Standard,
-  ResourceAWSLambdaLambdaFunction,
-  ResourceAmazonWorkSpacesFamilyAmazonWorkSpaces,
-  ResourceAmazonEC2Instance,
-  ResourceAmazonRoute53ResolverDNSFirewall,
-  ResourceAmazonElastiCacheElastiCacheforRedis,
-  ArchitectureServiceAWSStepFunctions,
-  ArchitectureServiceAmazonSimpleQueueService,
-  ArchitectureServiceAmazonSimpleNotificationService,
-  ArchitectureServiceAmazonRDS,
-  ArchitectureServiceAmazonElastiCache,
   ArchitectureServiceAmazonAPIGateway,
-  ResourceAmazonEventBridgeEvent,
-  ResourceAmazonCloudFrontFunctions,
+  ArchitectureServiceAmazonCognito,
   ArchitectureServiceAmazonDynamoDB,
+  ArchitectureServiceAmazonElastiCache,
+  ArchitectureServiceAmazonRDS,
+  ArchitectureServiceAmazonSimpleNotificationService,
+  ArchitectureServiceAmazonSimpleQueueService,
   ArchitectureServiceAWSBatch,
-  ArchitectureServiceElasticLoadBalancing,
   ArchitectureServiceAWSFargate,
-  ArchitectureServiceAmazonCognito
+  ArchitectureServiceAWSStepFunctions,
+  ArchitectureServiceElasticLoadBalancing,
+  ResourceAmazonCloudFrontFunctions,
+  ResourceAmazonEC2Instance,
+  ResourceAmazonElastiCacheElastiCacheforRedis,
+  ResourceAmazonEventBridgeEvent,
+  ResourceAmazonRoute53ResolverDNSFirewall,
+  ResourceAmazonSimpleStorageServiceS3Standard,
+  ResourceAmazonWorkSpacesFamilyAmazonWorkSpaces,
+  ResourceAWSLambdaLambdaFunction
 } from 'aws-react-icons';
-import { BiAtom } from 'react-icons/bi';
-import resources from '../../../.resources.json';
-import UpstashIconSvg from '../../../static/technology-icons/upstash-icon-dark-bg.svg';
-import NextJsIconSvg from '../../../static/technology-icons/nextjs-icon-dark-bg.svg';
-import MongoDbIconSvg from '../../../static/technology-icons/mongodb.svg';
 import { capitalCase } from 'change-case';
-import { GridList } from '../Misc/GridList';
-import { onMaxW650 } from '../../styles/responsive';
-import { NavBox } from './DeploymentOptions';
 import Image from 'next/image';
+import { BiAtom } from 'react-icons/bi';
 import { colors } from '@/styles/variables';
+import resources from '../../../.resources.json';
+import MongoDbIconSvg from '../../../static/technology-icons/mongodb.svg';
+import NextJsIconSvg from '../../../static/technology-icons/nextjs-icon-dark-bg.svg';
+import UpstashIconSvg from '../../../static/technology-icons/upstash-icon-dark-bg.svg';
+import { onMaxW650 } from '../../styles/responsive';
+import { GridList } from '../Misc/GridList';
+import { NavBox } from './DeploymentOptions';
 
-export const getPrettyResourceName = (resourceName: string) => {
+const getPrettyResourceName = (resourceName: string) => {
   return capitalCase(resourceName)
     .replaceAll(' Db', 'Db')
     .replace('Sqs', 'SQS')

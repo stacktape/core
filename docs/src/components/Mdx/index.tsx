@@ -1,27 +1,26 @@
 import { css } from '@emotion/react';
-import { AlertCircle, Info, AlertOctagon, AlertTriangle } from 'react-feather';
-import { Badge } from './Badge';
-import { StarterProjectList, StarterProjectListShort } from './StarterProjectList';
-import SdkMethodsApiReference from './SdkMethodsApiReference';
-import PropertiesTable from './PropertiesTable';
-import PropDescription from './PropDescription';
-import { ReferenceableParams } from './ReferenceableParams';
-import { Divider } from './Divider';
-import { colors } from '../../styles/variables';
-import { PreviousNext } from './PreviousNext';
-import { onMaxW795 } from '../../styles/responsive';
-import { Table } from './Table';
-import { Highlighter } from './Highlighter';
-import { ConfigEditor } from './ConfigEditor';
-import { DeploymentOptions, GettingStartedOptions } from './DeploymentOptions';
-import { ResourceList } from './ResourceList';
-import { Jargon } from './Jargon';
 import { kebabCase } from 'change-case';
-import { MdxImage } from './Image';
-import { EngineVersionsList } from './EngineVersionList';
-import { Link } from './Link';
-import { CodeBlock, MdxCodeBlock } from './CodeBlock';
+import { AlertCircle, AlertOctagon, AlertTriangle, Info } from 'react-feather';
+import { onMaxW795 } from '../../styles/responsive';
+import { colors } from '../../styles/variables';
+import { Badge } from './Badge';
 import { CliCommandsApiReference } from './CliCommandsApiReference';
+import { CodeBlock, MdxCodeBlock } from './CodeBlock';
+import { DeploymentOptions, GettingStartedOptions } from './DeploymentOptions';
+import { Divider } from './Divider';
+import { EngineVersionsList } from './EngineVersionList';
+import { Highlighter } from './Highlighter';
+import { MdxImage } from './Image';
+import { Jargon } from './Jargon';
+import { Link } from './Link';
+import { PreviousNext } from './PreviousNext';
+import PropDescription from './PropDescription';
+import PropertiesTable from './PropertiesTable';
+import { ReferenceableParams } from './ReferenceableParams';
+import { ResourceList } from './ResourceList';
+import SdkMethodsApiReference from './SdkMethodsApiReference';
+import { StarterProjectList, StarterProjectListShort } from './StarterProjectList';
+import { Table } from './Table';
 
 const getNameFromProps = (props) => {
   let name = props.children;
@@ -186,7 +185,6 @@ export const MdxComponents = {
   PropDescription,
   EngineVersionsList,
   ReferenceableParams,
-  ConfigEditor,
   Warning: (props) => <Highlighter props={props} type="warning" icon={AlertTriangle} />,
   Info: (props) => <Highlighter props={props} type="info" icon={Info} />,
   Error: (props) => <Highlighter props={props} type="error" icon={AlertOctagon} />,

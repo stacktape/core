@@ -1,4 +1,5 @@
-import { DocSearch as DocSearchComponent, DocSearchProps } from '@docsearch/react';
+import type { DocSearchProps } from '@docsearch/react';
+import { DocSearch as DocSearchComponent } from '@docsearch/react';
 import { Global } from '@emotion/react';
 import config from '../../../config';
 import { colors, fontFamily, onMaxW750 } from '../../styles/variables';

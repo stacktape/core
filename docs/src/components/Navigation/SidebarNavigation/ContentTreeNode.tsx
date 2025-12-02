@@ -1,9 +1,9 @@
-import config from '../../../../config';
-import { Fragment, useEffect, useState } from 'react';
+import { useRouter } from 'next/router';
+import { Fragment, useSyncExternalStore } from 'react';
 import { ChevronDown, ChevronRight } from 'react-feather';
 import { Link } from '@/components/Mdx/Link';
 import { colors } from '@/styles/variables';
-import { useRouter } from 'next/router';
+import config from '../../../../config';
 
 const COMING_SOON_PAGES = ['/resources/kubernetes-clusters', '/resources/opensearch', '/resources/nextjs-website'];
 
@@ -43,10 +43,11 @@ const NodeContent = ({
   isActive: boolean;
 }) => {
   // Only show activeNodeCss after client mount to avoid hydration issues
-  const [isClient, setIsClient] = useState(false);
-  useEffect(() => {
-    setIsClient(true);
-  }, []);
+  const isClient = useSyncExternalStore(
+    () => () => {},
+    () => true,
+    () => false
+  );
   const shouldShowActiveNodeCss = isClient && isActive;
 
   const activeNodeCss: Css = {

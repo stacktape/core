@@ -30,12 +30,7 @@ const nextConfig: NextConfig = {
     }
   }),
   turbopack: {
-    root: join(process.cwd(), '..'),
     rules: {
-      '*.svg': {
-        loaders: ['@svgr/webpack'],
-        as: '*.js'
-      },
       '*.yaml': {
         loaders: [{ loader: 'yaml-loader' }],
         as: '*.js'

@@ -1,7 +1,8 @@
-import { Html, Head, Main, NextScript } from 'next/document';
-import config from '../../config';
+/* eslint-disable react-dom/no-dangerously-set-innerhtml */
 import { Global } from '@emotion/react';
+import { Head, Html, Main, NextScript } from 'next/document';
 import { globalCss } from '@/styles/global';
+import config from '../../config';
 
 export default function Document() {
   return (
@@ -25,18 +26,18 @@ export default function Document() {
           }}
         />
         <meta property="og:title" content={config.metadata.name} />
-        <meta property="og:site_name" content="Stacktape" />
-        <meta property="og:url" content="https://stacktape.com" />
+        <meta property="og:site_name" content={config.metadata.name} />
+        <meta property="og:url" content={config.metadata.url} />
         <meta property="og:description" content={config.metadata.description} />
         <meta property="og:type" content="product" />
-        <meta property="og:image" content="https://stacktape.com/cover-images/opengraph.png" />
+        <meta property="og:image" content={config.metadata.siteimage} />
 
         <meta name="twitter:card" content="summary_large_image" />
-        <meta property="twitter:domain" content="stacktape.com" />
-        <meta property="twitter:url" content="https://stacktape.com" />
-        <meta name="twitter:title" content={'Stacktape | Your AWS, 97% easier'} />
-        <meta name="twitter:description" content="Your AWS, 97% easier" />
-        <meta name="twitter:image" content="https://stacktape.com/cover-images/opengraph.png" />
+        <meta property="twitter:domain" content="docs.stacktape.com" />
+        <meta property="twitter:url" content={config.metadata.url} />
+        <meta name="twitter:title" content={config.metadata.title} />
+        <meta name="twitter:description" content={config.metadata.description} />
+        <meta name="twitter:image" content={config.metadata.siteimage} />
 
         <meta name="description" content={config.metadata.description} />
         <link rel="icon" type="image/png" href="/favicon-96x96.png" sizes="96x96" />

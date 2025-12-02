@@ -33,6 +33,7 @@
     "change-case": "^5.4.4",
     "country-flag-icons": "^1.5.19",
     "crisp-sdk-web": "^1.0.25",
+    "framer-motion": "^12.23.25",
     "fs-extra": "^11.3.0",
     "gray-matter": "^4.0.3",
     "is-absolute-url": "^4.0.1",

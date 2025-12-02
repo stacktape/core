@@ -1,22 +1,9 @@
+import { getCalApi } from '@calcom/embed-react';
 import Head from 'next/head';
-import { Geist, Geist_Mono } from 'next/font/google';
 import Script from 'next/script';
 import { useEffect } from 'react';
-import { getCalApi } from '@calcom/embed-react';
-
-export const geistFont = Geist({
-  subsets: ['latin'],
-  display: 'swap',
-  weight: ['400', '500', '600', '700']
-});
-
-export const geistMonoFont = Geist_Mono({
-  subsets: ['latin'],
-  display: 'swap',
-  weight: ['400', '500', '600', '700']
-});
-
-const CRISP_ID = '1d26554b-8e37-4cb0-8c95-e774099f4b74';
+import { geistFont, geistMonoFont } from '@/styles/fonts';
+import config from '../../config';
 
 export default function MyApp({ Component, pageProps }) {
   useEffect(() => {
@@ -34,7 +21,7 @@ export default function MyApp({ Component, pageProps }) {
       <Script id="crisp" strategy="afterInteractive">
         {`
           window.$crisp = [];
-          window.CRISP_WEBSITE_ID = ${JSON.stringify(CRISP_ID)};
+          window.CRISP_WEBSITE_ID = ${JSON.stringify(config.crisp.id)};
           (function() {
             var d = document;
             var s = d.createElement("script");

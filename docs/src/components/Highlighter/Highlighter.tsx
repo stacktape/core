@@ -1,5 +1,5 @@
 import { typographyCss } from '@/styles/global';
-import { colors, fontFamilyMonospace } from '../../styles/variables';
+import { colors, fontFamilyMono } from '../../styles/variables';
 
 export function Highlighter({ type, icon, children }: { type: string; icon: any; children: ReactNode }) {
   const highlightColor = {
@@ -61,7 +61,7 @@ export function Highlighter({ type, icon, children }: { type: string; icon: any;
             }
           },
           code: {
-            fontFamily: fontFamilyMonospace,
+            fontFamily: fontFamilyMono,
             backgroundColor: colors.lightGray,
             padding: '2px 4px',
             fontSize: '0.8rem',

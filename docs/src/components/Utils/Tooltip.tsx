@@ -1,12 +1,12 @@
-/* eslint-disable @typescript-eslint/ban-ts-comment */
-import Tippy, { TippyProps } from '@tippyjs/react';
-import { ReactNode } from 'react';
+import type { TippyProps } from '@tippyjs/react';
+import type { ReactElement, ReactNode } from 'react';
+import Tippy from '@tippyjs/react';
 import { merge } from 'lodash';
-import { boxShadowDark, border, colors } from '../../styles/variables';
-import QuestionMark from '../../../icons/question-mark.svg';
-import 'tippy.js/dist/tippy.css';
 import Image from 'next/image';
 import { typographyCss } from '@/styles/global';
+import QuestionMark from '../../../icons/question-mark.svg';
+import { border, boxShadowDark, colors } from '../../styles/variables';
+import 'tippy.js/dist/tippy.css';
 
 export const tippyTooltipStyle: Css = {
   '.tippy-content': {
@@ -163,8 +163,7 @@ export function WithTooltip({
         </div>
       }
     >
-      {/* @ts-ignore */}
-      {children}
+      {children as ReactElement}
     </Tippy>
   );
 }

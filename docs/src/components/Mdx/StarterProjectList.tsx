@@ -1,12 +1,12 @@
-import allStarterProjects from '../../../../starter-projects-metadata.json';
-import { onMaxW650 } from '../../styles/responsive';
-import { Box } from '../Box/Box';
-import { colors } from '../../styles/variables';
-import { GridList } from '../Misc/GridList';
+import Image from 'next/image';
 import { BiChevronRight, BiLogoGithub } from 'react-icons/bi';
 import { LuArrowUpRight } from 'react-icons/lu';
-import Image from 'next/image';
+import allStarterProjects from '../../../../starter-projects-metadata.json';
+import { onMaxW650 } from '../../styles/responsive';
+import { colors } from '../../styles/variables';
+import { Box } from '../Box/Box';
 import { Button } from '../Button/Button';
+import { GridList } from '../Misc/GridList';
 import { Link } from './Link';
 
 function List({

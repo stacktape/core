@@ -1,7 +1,7 @@
-import { marked } from '../../../scripts/utils/marked-mdx-parser';
-import resources from '../../../.resources.json';
-import { Link } from './Link';
 import { typographyCss } from '@/styles/global';
+import resources from '../../../.resources.json';
+import { marked } from '../../../scripts/utils/marked-mdx-parser';
+import { Link } from './Link';
 
 export function ReferenceableParams({ resource }: { resource: string }) {
   const params = resources.find((r) => r.resourceType === resource);

@@ -17,11 +17,20 @@ export default antfu(
       '.stacktape',
       '__stacktape-dist/*',
       '__publish-folder/*',
-      '__binary-dist/*'
+      '__binary-dist/*',
+      'docs/next-env.d.ts'
     ],
     lessOpinionated: true,
     formatters: false,
-    react: true,
+    react: {
+      overrides: {
+        'react-dom/no-dangerously-set-innerhtml': ['off'],
+        'react-hooks-extra/no-direct-set-state-in-use-effect': ['off'],
+        'react-refresh/only-export-components': ['off'],
+        'react/no-array-index-key': ['off'],
+        'react-hooks/set-state-in-effect': ['off']
+      }
+    },
     yaml: true,
     plugins: {
       '@cspell': cspellPlugin

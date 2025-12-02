@@ -1,10 +1,10 @@
-import { onMaxW500 } from '@/styles/variables';
 import isAbsoluteUrl from 'is-absolute-url';
-import { ensureTrailingSlash } from '../../../scripts/utils/misc';
 import { merge } from 'lodash';
 import { useRouter } from 'next/router';
-import { startViewTransitionWithLoading, preloadPage } from '@/utils/view-transition';
 import { useRef } from 'react';
+import { onMaxW500 } from '@/styles/variables';
+import { preloadPage, startViewTransitionWithLoading } from '@/utils/view-transition';
+import { ensureTrailingSlash } from '../../../scripts/utils/misc';
 
 export function Link({ children, href, rootCss }: { children: any; href: string; rootCss?: Css }) {
   const router = useRouter();

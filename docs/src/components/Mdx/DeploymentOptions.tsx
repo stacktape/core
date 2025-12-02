@@ -1,6 +1,4 @@
-import { Box } from '../Box/Box';
-import { GridList } from '../Misc/GridList';
-import { onMaxW650 } from '../../styles/responsive';
+import type { ReactNode } from 'react';
 import {
   BiBookContent,
   BiBookOpen,
@@ -12,8 +10,10 @@ import {
   BiLogoGit,
   BiTerminal
 } from 'react-icons/bi';
+import { onMaxW650 } from '../../styles/responsive';
 import { colors } from '../../styles/variables';
-import { ReactNode } from 'react';
+import { Box } from '../Box/Box';
+import { GridList } from '../Misc/GridList';
 import { Link } from './Link';
 
 export function NavBox({ icon, text, url }: { icon: ReactNode; text: ReactNode; url: string }) {
